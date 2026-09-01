@@ -606,23 +606,23 @@ LOGOS = [
  ("icon5",  "문깡 잉글리시스쿨"),     ("icon6",  "YBM시사닷컴"),
  ("icon7",  "아발론교육"),           ("icon8",  "정철"),
  ("icon9",  "넥스트네트워크"),        ("icon10", "kt cs"),
- ("icon11", "스피크케어"),           ("icon12", "이설당"),
+ ("icon11", "스피크케어"),
  ("icon13", "바이오인프라"),         ("icon14", "카누다"),
  ("icon15", "웰컴론"),              ("icon17", "축산물안전관리인증원"),
  ("icon18", "엠피온"),              ("icon19", "홍국F&B"),
- ("icon20", "마켓컬리"),            ("icon21", "도움과나눔"),
+ ("icon21", "도움과나눔"),
 ]
 
 
 # 업종별 고객사 — 로고가 있는 곳과 제안서에만 있던 곳을 합친 목록
 CLIENTS = [
  ("통신·IT", ["KT olleh", "LG U+", "SK네트웍스", "kt cs", "넥스트네트워크",
-             "LG상사", "아이알링크", "엠피온"]),
+             "LG상사", "엠피온"]),
  ("교육", ["YBM시사닷컴", "정철", "아발론교육", "문깡 잉글리시스쿨", "스피크케어",
-          "이설당", "멀티캠퍼스", "스터디맥스", "틴타임즈", "아이보린", "고려대학교"]),
+          "멀티캠퍼스", "스터디맥스", "틴타임즈", "아이보린", "고려대학교"]),
  ("공공·기관", ["울산광역시 교육연구정보원", "축산물안전관리인증원", "의왕도시공사",
               "한국기계산업진흥회", "행복커넥트", "공직메일"]),
- ("제조·유통·서비스", ["삼성SDI 서비스센터", "마켓컬리", "홍국F&B", "카누다",
+ ("제조·유통·서비스", ["삼성SDI 서비스센터", "홍국F&B", "카누다",
                    "바이오인프라", "씨에스렌탈", "다온홈시스", "웰컴론", "도움과나눔"]),
 ]
 
@@ -661,11 +661,11 @@ def page_cases():
   </table>
 </div>
 <p class="note">※ 위 구성 내역은 예시입니다. 실제 사례로 교체 예정입니다.</p>'''
-    return (head("구축 사례 | 60여 곳의 컨택센터 | 지오테스",
-                 "2006년부터 60여 곳의 컨택센터를 구축했습니다. 업종과 규모, 도입 구성으로 정리했습니다.",
+    return (head("구축 사례 | 120여 곳의 컨택센터 | 지오테스",
+                 "2006년부터 120여 곳의 컨택센터를 구축했습니다. 업종과 규모, 도입 구성으로 정리했습니다.",
                  f"{SITE}/cases/")
       + header()
-      + hero("Cases", "60여 곳이<br>이렇게 쓰고 있습니다",
+      + hero("Cases", "120여 곳이<br>이렇게 쓰고 있습니다",
              "통신사부터 교육, 유통, 공공기관까지.<br>전화가 멈추면 안 되는 곳들과 일해 왔습니다.",
              '<a href="/">홈</a> · 구축사례')
       + sec("Clients", "이런 곳들과 일했습니다", logo_grid())
@@ -707,8 +707,7 @@ def page_about():
   <table class="t">
     <thead><tr><th>구분</th><th>내용</th></tr></thead>
     <tbody>
-      <tr><th>개발법인</th><td class="typ">㈜지오테스솔루션 (2008년 9월 10일)</td></tr>
-      <tr><th>판매법인</th><td class="typ">㈜지오테스 (2015년 1월 1일)</td></tr>
+      <tr><th>법인명</th><td class="typ">㈜지오테스솔루션 (2008년 9월 10일)</td></tr>
       <tr><th>사업 시작</th><td class="typ">2006년</td></tr>
       <tr><th>대표이사</th><td class="typ">신명남</td></tr>
       <tr><th>사업자등록번호</th><td class="typ">144-81-03835</td></tr>
@@ -774,7 +773,7 @@ def hist_html():
 
 def page_demo():
     import mocks
-    order = ["consult", "recording", "dashboard", "ai_summary", "ivr_tree", "stats"]
+    order = ["consult", "recording", "dashboard", "ai_summary", "ivr_tree", "stats", "stt"]
     blocks = ""
     for n, key in enumerate(order):
         title, lead, fn = mocks.ALL[key]
@@ -804,7 +803,7 @@ def page_demo():
 <div class="answer" style="max-width:820px;margin:0 auto">
   <span class="lab">직접 눌러보고 싶으시면</span>
   <p>
-    아래 화면은 실제 구성을 옮겨 그린 것입니다. 다만 <b>진짜 시스템을 눌러보고 싶으시면</b>
+    아래 화면 중 일부는 실제 화면이고, 일부는 구성을 재현한 것입니다. <b>진짜 시스템을 눌러보고 싶으시면</b>
     체험용 계정을 열어 두었습니다. 신청이나 결제 없이 바로 들어가실 수 있습니다.
   </p>
   <div class="table-scroll" style="margin-top:16px">
@@ -850,10 +849,9 @@ def page_contact():
 </div>
 <p class="note" style="text-align:center">보내주신 내용은 상담 목적으로만 쓰이며, 처리 후 보관 기간이 지나면 지웁니다.</p>'''
     info = '''<div class="cards3">
-      <div class="card"><h3>고객센터</h3><p class="cd">''' + TEL + '''<br>평일 09:00 – 18:00</p></div>
-      <div class="card"><h3>영업 문의</h3><p class="cd">070-7615-0119<br>02-6974-0888</p></div>
-      <div class="card"><h3>기술 지원</h3><p class="cd">070-7615-0927<br>help@ziotes.com</p></div>
-    </div>'''
+      <div class="card"><h3>고객센터</h3><p class="cd">''' + TEL + '''<br><a href="mailto:help@ziotes.com">help@ziotes.com</a><br>평일 09:00 – 18:00</p></div>
+    </div>
+    <p class="lead-txt" style="text-align:center;margin-top:22px"><b class="hl">문의도, 장애가 나도 연락할 곳은 여기 하나입니다.</b></p>'''
     return (head("상담 문의 | 지오테스",
                  "콜센터 구축 상담은 무료입니다. 현황을 보고 필요한 구성만 담아 제안해 드립니다.",
                  f"{SITE}/contact/")
@@ -894,7 +892,7 @@ def main():
       + f'</ul></a>' for i in INDUSTRIES)
     write(os.path.join(DIST, "industries", "index.html"),
           hub("Industries", "업종마다<br>필요한 것이 다릅니다",
-              "60여 곳을 구축하며 쌓인 업종별 기본 구성이 있습니다.", ind_cards,
+              "120여 곳을 구축하며 쌓인 업종별 기본 구성이 있습니다.", ind_cards,
               f"{SITE}/industries/", "업종별 콜센터 구축 | 지오테스",
               "병원, 공공, 금융, 교육, 쇼핑몰, 제조, 유통, 법무, 심리상담, 분양, 렌탈."), 1)
     for i in INDUSTRIES:

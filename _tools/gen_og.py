@@ -58,8 +58,8 @@ def main():
     d.text((80, 510), "2006년부터 20년", font=font(30), fill=WHITE)
     x = 80 + d.textlength("2006년부터 20년", font=font(30)) + 22
     d.text((x, 512), "·", font=font(28), fill=GREY)
-    d.text((x + 20, 510), "60여 곳 구축", font=font(30), fill=WHITE)
-    x2 = x + 20 + d.textlength("60여 곳 구축", font=font(30)) + 22
+    d.text((x + 20, 510), "120여 곳 구축", font=font(30), fill=WHITE)
+    x2 = x + 20 + d.textlength("120여 곳 구축", font=font(30)) + 22
     d.text((x2, 512), "·", font=font(28), fill=GREY)
     d.text((x2 + 20, 510), "1555-5528", font=font(30), fill=MINT)
 

@@ -163,7 +163,7 @@ function page(array $d) {
 
 <header class="site">
   <div class="wrap">
-    <a href="{$pfx}" class="logo">지오<b>테스</b></a>
+    <a href="{$pfx}" class="logo logo-img"><img src="{$pfx}assets/logo.png" alt="지오테스 Ziotes"></a>
     <a href="tel:{$d['telr']}" class="nav-call">{$d['tel']}</a>
   </div>
 </header>

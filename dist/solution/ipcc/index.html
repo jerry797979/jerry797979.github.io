@@ -25,7 +25,7 @@
 <body>
 <header>
   <div class="wrap nav">
-    <a href="../../" class="logo">지오<b>테스</b></a>
+    <a href="../../" class="logo logo-img"><img src="../../assets/logo.png" alt="지오테스 Ziotes"></a>
     <nav class="nav-links">
       <div class="has-sub">
         <a href="../../solution/">솔루션</a>
@@ -52,7 +52,7 @@
 <div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="drawer-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
-      <span class="logo">지오<b>테스</b></span>
+      <span class="logo logo-img"><img src="../../assets/logo.png" alt="지오테스 Ziotes"></span>
       <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
     </div>
     <div class="dgroup"><b>솔루션</b><a href="../../solution/aicc/">AI 컨택센터</a><a href="../../solution/ipcc/">콜센터 솔루션</a><a href="../../solution/crm/">고객관리 CRM</a><a href="../../solution/ivr/">ARS·IVR</a><a href="../../solution/recording/">통화 녹취</a><a href="../../solution/chat/">통합 채팅상담</a><a href="../../solution/voip/">기업 인터넷전화</a><a href="../../solution/extra/">부가서비스</a><a href="../../solution/marketing/">온라인 마케팅</a></div>
@@ -131,17 +131,8 @@
     </div>
     <div style="max-width:820px;margin:0 auto"><div class="mock">
   <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span><b>실시간 현황판</b><span class="right">지금 이 순간</span></div>
-  <div class="mock-body">
-    <div class="mock-sum">
-      <div><small><span class="pin">1</span>대기 중인 전화</small><b style="color:#a32020">2</b></div>
-      <div><small>통화 중</small><b style="color:var(--mint-ink)">4</b></div>
-      <div><small>대기 상담원</small><b>3</b></div>
-      <div><small>오늘 받은 전화</small><b>218</b></div>
-      <div><small><span class="pin">2</span>놓친 전화</small><b style="color:#a32020">6</b></div>
-    </div>
-    <div class="mock-h"><span class="pin">3</span>상담원 현황</div>
-    <div class="mock-seats"><div class="mock-seat busy"><b>이서연</b><span class="mk talk">통화중</span><small>02:14</small></div><div class="mock-seat busy"><b>박준영</b><span class="mk talk">통화중</span><small>00:48</small></div><div class="mock-seat"><b>김민수</b><span class="mk wait">대기</span><small>3분째</small></div><div class="mock-seat"><b>정민지</b><span class="mk wait">대기</span><small>1분째</small></div><div class="mock-seat"><b>최유진</b><span class="mk rest">휴식</span><small>—</small></div><div class="mock-seat busy"><b>한상우</b><span class="mk talk">통화중</span><small>05:32</small></div><div class="mock-seat"><b>오지훈</b><span class="mk wait">대기</span><small>방금</small></div><div class="mock-seat busy"><b>서예린</b><span class="mk talk">통화중</span><small>01:07</small></div><div class="mock-seat busy"><b>강나윤</b><span class="mk talk">통화중</span><small>03:56</small></div><div class="mock-seat"><b>윤태호</b><span class="mk rest">후처리</span><small>00:22</small></div><div class="mock-seat"><b>임하늘</b><span class="mk wait">대기</span><small>2분째</small></div><div class="mock-seat busy"><b>조은비</b><span class="mk talk">통화중</span><small>00:19</small></div></div></div>
-</div><p class="mock-note">화면 예시입니다. 표시 항목과 배치는 조직에 맞게 조정합니다.</p>
+  <div class="mock-body"><img src="../../assets/screens/ipcc.png" alt="지오테스 콜센터 실시간 현황판 실제 화면" style="width:100%;height:auto;display:block;border-radius:8px"></div>
+</div><p class="mock-note">실제 사용 화면입니다. 표시 항목과 배치는 조직에 맞게 조정합니다.</p>
 <ol class="mock-legend"><li><span class="pin">1</span><div><b>지금 몇 명이 기다리고 있는지</b><p>대기 전화가 쌓이는 순간이 바로 보입니다. <b>이 숫자가 올라가면 그 시간대에 사람이 부족하다는 뜻입니다.</b></p></div></li><li><span class="pin">2</span><div><b>오늘 몇 통을 놓쳤는지</b><p>받은 전화만 세면 잘 돌아가는 것처럼 보입니다. 놓친 전화를 같이 봐야 실제 상태가 나옵니다.</p></div></li><li><span class="pin">3</span><div><b>누가 통화 중이고 누가 대기인지</b><p>관리자가 자리를 돌아다니며 확인하지 않아도 됩니다. 재택으로 일해도 사무실에서 볼 때와 똑같이 보입니다.</p></div></li></ol>
 <div class="mock-vs">
   <div><h5>이 화면이 없으면</h5><p>전화가 밀리는지 아닌지를 감으로 압니다. "오늘 좀 바빴다" 말고는 남는 기록이 없습니다.</p></div>

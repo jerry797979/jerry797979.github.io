@@ -498,7 +498,7 @@ def header(active=""):
     return f'''
 <header>
   <div class="wrap nav">
-    <a href="/" class="logo">지오<b>테스</b></a>
+    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
     <nav class="nav-links">
       <div class="has-sub">
         <a href="/solution/">솔루션</a>
@@ -525,7 +525,7 @@ def header(active=""):
 <div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="drawer-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
-      <span class="logo">지오<b>테스</b></span>
+      <span class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></span>
       <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
     </div>
     <div class="dgroup"><b>솔루션</b>{links}</div>

@@ -25,7 +25,7 @@
 <body>
 <header>
   <div class="wrap nav">
-    <a href="../../" class="logo">지오<b>테스</b></a>
+    <a href="../../" class="logo logo-img"><img src="../../assets/logo.png" alt="지오테스 Ziotes"></a>
     <nav class="nav-links">
       <div class="has-sub">
         <a href="../../solution/">솔루션</a>
@@ -52,7 +52,7 @@
 <div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="drawer-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
-      <span class="logo">지오<b>테스</b></span>
+      <span class="logo logo-img"><img src="../../assets/logo.png" alt="지오테스 Ziotes"></span>
       <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
     </div>
     <div class="dgroup"><b>솔루션</b><a href="../../solution/aicc/">AI 컨택센터</a><a href="../../solution/ipcc/">콜센터 솔루션</a><a href="../../solution/crm/">고객관리 CRM</a><a href="../../solution/ivr/">ARS·IVR</a><a href="../../solution/recording/">통화 녹취</a><a href="../../solution/chat/">통합 채팅상담</a><a href="../../solution/voip/">기업 인터넷전화</a><a href="../../solution/extra/">부가서비스</a><a href="../../solution/marketing/">온라인 마케팅</a></div>
@@ -131,22 +131,8 @@
     </div>
     <div style="max-width:820px;margin:0 auto"><div class="mock">
   <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span><b>통화 녹취</b><span class="right">기간·상담원·번호로 검색</span></div>
-  <div class="mock-body">
-    <div class="mock-sum c4">
-      <div><small>기간 내 통화</small><b>1,284</b><i>최근 7일</i></div>
-      <div><small>부재중</small><b style="color:#a32020">41</b><i>전체의 3.2%</i></div>
-      <div><small>평균 통화</small><b>3:42</b><i>지난주 대비 -8초</i></div>
-      <div><small>보관 중</small><b>18.4GB</b><i>보관 기간 3년</i></div>
-    </div>
-    <div class="mock-filter">
-      <span class="pin">1</span><span class="on">최근 7일</span><span>상담원 전체</span><span>수신·발신</span>
-      <span>통화 상태</span><span>고객번호 검색</span>
-    </div>
-    <table>
-      <thead><tr><th>일시</th><th>구분</th><th>고객번호</th><th>상담원</th><th>통화시간</th><th>상태</th><th>듣기</th></tr></thead>
-      <tbody><tr><td>08-16 14:22</td><td>수신</td><td>010-2847-****</td><td>이서연</td><td class="num">04:12</td><td><span class="mk done">완료</span></td><td><span class="pin">3</span><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 14:05</td><td>수신</td><td>010-3388-****</td><td>강나윤</td><td class="num">02:51</td><td><span class="mk done">완료</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 13:58</td><td>발신</td><td>02-512-****</td><td>박준영</td><td class="num">01:35</td><td><span class="mk done">완료</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 13:40</td><td>수신</td><td>010-9931-****</td><td>—</td><td class="num">00:00</td><td><span class="pin">2</span><span class="mk miss">부재중</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 13:12</td><td>수신</td><td>051-244-****</td><td>정민지</td><td class="num">06:03</td><td><span class="mk done">완료</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 12:47</td><td>발신</td><td>010-7712-****</td><td>한상우</td><td class="num">03:28</td><td><span class="mk done">완료</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 11:31</td><td>수신</td><td>010-5502-****</td><td>—</td><td class="num">00:00</td><td><span class="pin">2</span><span class="mk miss">부재중</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr><tr><td>08-16 11:07</td><td>수신</td><td>031-771-****</td><td>김민수</td><td class="num">07:48</td><td><span class="mk done">완료</span></td><td><span class="play"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></td></tr></tbody>
-    </table></div>
-</div><p class="mock-note">화면 예시입니다. 보관 위치는 AWS 클라우드가 기본이며 고객사 서버에 직접 둘 수도 있습니다.</p>
+  <div class="mock-body"><img src="../../assets/screens/recording.png" alt="지오테스 통화 녹취 목록 실제 화면" style="width:100%;height:auto;display:block;border-radius:8px"></div>
+</div><p class="mock-note">실제 사용 화면입니다. 보관 위치는 AWS 클라우드가 기본이며 고객사 서버에 직접 둘 수도 있습니다.</p>
 <ol class="mock-legend"><li><span class="pin">1</span><div><b>찾는 조건을 걸어 좁힙니다</b><p>기간, 상담원, 수신·발신, 통화 상태, 고객 번호로 걸러냅니다. <b>파일 이름을 뒤지지 않아도 됩니다.</b> 녹음보다 검색이 실제로는 더 중요합니다.</p></div></li><li><span class="pin">2</span><div><b>놓친 전화도 목록에 남습니다</b><p>부재중으로 표시되어 <b>지난달에 몇 통을 놓쳤는지 셀 수 있습니다.</b> 이 숫자가 있어야 회선을 늘릴지 사람을 늘릴지 정할 수 있습니다.</p></div></li><li><span class="pin">3</span><div><b>바로 듣습니다</b><p>프로그램을 설치하지 않고 브라우저에서 재생하고 내려받습니다. 들을 수 있는 범위는 직급과 담당에 따라 나눕니다.</p></div></li></ol>
 <div class="mock-vs">
   <div><h5>이 화면이 없으면</h5><p>녹음은 되는데 그 통화를 찾을 수 없습니다. "언제쯤 통화한 것 같은데"로 시작해서 결국 포기하게 됩니다.</p></div>

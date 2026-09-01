@@ -47,38 +47,8 @@ def build(title, right, body, legend, before, after, note=None):
 # ---------------------------------------------------------------- 상담 화면
 
 def consult():
-    body = f'''
-    <div class="mock-incoming">
-      <span class="ic">{PHONE}</span>
-      <div><b>{pin(1)}010-2847-**** · 김민수 님</b><small>세 번째 통화 · 마지막 상담 2026-08-02</small></div>
-      <span class="mk talk" style="margin-left:auto">{pin(4)}통화 중 00:42</span>
-    </div>
-    <div class="mock-split">
-      <div style="display:grid;gap:12px;align-content:start">
-        <div class="mock-card">
-          <h5>{pin(2)}고객 정보</h5>
-          <div class="mock-row"><span>등급</span><span>정기</span></div>
-          <div class="mock-row"><span>가입일</span><span>2023-04-11</span></div>
-          <div class="mock-row"><span>담당</span><span>2팀 이서연</span></div>
-          <div class="mock-row"><span>누적 상담</span><span>3건</span></div>
-          <div class="mock-row"><span>미처리</span><span>1건</span></div>
-        </div>
-        <div class="mock-card">
-          <h5>{pin(5)}진행 중인 건</h5>
-          <div class="mock-row"><span>주문번호</span><span>A-20826</span></div>
-          <div class="mock-row"><span>상태</span><span>배송 중</span></div>
-          <div class="mock-row"><span>도착 예정</span><span>8월 18일</span></div>
-        </div>
-      </div>
-      <div class="mock-card">
-        <h5>{pin(3)}상담 이력</h5>
-        <div class="mock-log">
-          <div><b>배송 지연 문의</b><p>도착 예정일 안내, 쿠폰 발송 처리</p><time>2026-08-02 · 박준영</time></div>
-          <div><b>주소 변경 요청</b><p>배송지 수정 완료</p><time>2026-06-18 · 이서연</time></div>
-          <div><b>가입 문의</b><p>요금제 안내</p><time>2023-04-11 · 김민수</time></div>
-        </div>
-      </div>
-    </div>'''
+    body = ('<img src="/assets/screens/crm.png" alt="지오테스 고객관리 CRM 상담 화면 실제 화면" '
+            'style="width:100%;height:auto;display:block;border-radius:8px">')
     return build(
         "상담 화면", "전화가 울리는 순간", body,
         [("전화가 울리면 고객이 먼저 뜹니다",
@@ -100,45 +70,14 @@ def consult():
         "그 사이 고객은 기다리고, 담당자가 자리에 없으면 아무도 답을 못 합니다.",
         "받는 순간 누구인지, 무슨 일로 걸었을지가 화면에 있습니다. "
         "통화 한 건마다 몇십 초씩 줄고, 그게 하루 수백 통이면 사람 한 명 몫이 됩니다.",
-        "화면 예시입니다. 표시 항목은 업무에 맞게 추가하거나 뺄 수 있습니다.")
+        "실제 사용 화면입니다. 표시 항목은 업무에 맞게 추가하거나 뺄 수 있습니다.")
 
 
 # ---------------------------------------------------------------- 녹취 검색
 
 def recording():
-    rows = [
-        ("08-16 14:22", "수신", "010-2847-****", "이서연", "04:12", "done", "완료"),
-        ("08-16 14:05", "수신", "010-3388-****", "강나윤", "02:51", "done", "완료"),
-        ("08-16 13:58", "발신", "02-512-****", "박준영", "01:35", "done", "완료"),
-        ("08-16 13:40", "수신", "010-9931-****", "—", "00:00", "miss", "부재중"),
-        ("08-16 13:12", "수신", "051-244-****", "정민지", "06:03", "done", "완료"),
-        ("08-16 12:47", "발신", "010-7712-****", "한상우", "03:28", "done", "완료"),
-        ("08-16 11:31", "수신", "010-5502-****", "—", "00:00", "miss", "부재중"),
-        ("08-16 11:07", "수신", "031-771-****", "김민수", "07:48", "done", "완료"),
-    ]
-    trs = ""
-    for n, (d, k, num, a, t, c, s) in enumerate(rows):
-        mark = pin(2) if c == "miss" else ""
-        play = f'<span class="play">{PLAY}</span>'
-        if n == 0:
-            play = pin(3) + play
-        trs += (f'<tr><td>{d}</td><td>{k}</td><td>{num}</td><td>{a}</td><td class="num">{t}</td>'
-                f'<td>{mark}<span class="mk {c}">{s}</span></td><td>{play}</td></tr>')
-    body = f'''
-    <div class="mock-sum c4">
-      <div><small>기간 내 통화</small><b>1,284</b><i>최근 7일</i></div>
-      <div><small>부재중</small><b style="color:#a32020">41</b><i>전체의 3.2%</i></div>
-      <div><small>평균 통화</small><b>3:42</b><i>지난주 대비 -8초</i></div>
-      <div><small>보관 중</small><b>18.4GB</b><i>보관 기간 3년</i></div>
-    </div>
-    <div class="mock-filter">
-      {pin(1)}<span class="on">최근 7일</span><span>상담원 전체</span><span>수신·발신</span>
-      <span>통화 상태</span><span>고객번호 검색</span>
-    </div>
-    <table>
-      <thead><tr><th>일시</th><th>구분</th><th>고객번호</th><th>상담원</th><th>통화시간</th><th>상태</th><th>듣기</th></tr></thead>
-      <tbody>{trs}</tbody>
-    </table>'''
+    body = ('<img src="/assets/screens/recording.png" alt="지오테스 통화 녹취 목록 실제 화면" '
+            'style="width:100%;height:auto;display:block;border-radius:8px">')
     return build(
         "통화 녹취", "기간·상담원·번호로 검색", body,
         [("찾는 조건을 걸어 좁힙니다",
@@ -154,32 +93,14 @@ def recording():
         "\"언제쯤 통화한 것 같은데\"로 시작해서 결국 포기하게 됩니다.",
         "조건 몇 개로 그 통화가 나옵니다. "
         "말로 정한 수량과 단가를 확인할 수 있고, 놓친 전화가 몇 통인지도 숫자로 보입니다.",
-        "화면 예시입니다. 보관 위치는 AWS 클라우드가 기본이며 고객사 서버에 직접 둘 수도 있습니다.")
+        "실제 사용 화면입니다. 보관 위치는 AWS 클라우드가 기본이며 고객사 서버에 직접 둘 수도 있습니다.")
 
 
 # ---------------------------------------------------------------- 전광판
 
 def dashboard():
-    seats = [("이서연", "talk", "통화중", "02:14"), ("박준영", "talk", "통화중", "00:48"),
-             ("김민수", "wait", "대기", "3분째"),   ("정민지", "wait", "대기", "1분째"),
-             ("최유진", "rest", "휴식", "—"),       ("한상우", "talk", "통화중", "05:32"),
-             ("오지훈", "wait", "대기", "방금"),     ("서예린", "talk", "통화중", "01:07"),
-             ("강나윤", "talk", "통화중", "03:56"), ("윤태호", "rest", "후처리", "00:22"),
-             ("임하늘", "wait", "대기", "2분째"),   ("조은비", "talk", "통화중", "00:19")]
-    cls = {"talk": " busy", "wait": "", "rest": ""}
-    tiles = "".join(
-        f'<div class="mock-seat{cls[c]}"><b>{n}</b><span class="mk {c}">{s}</span><small>{t}</small></div>'
-        for n, c, s, t in seats)
-    body = f'''
-    <div class="mock-sum">
-      <div><small>{pin(1)}대기 중인 전화</small><b style="color:#a32020">2</b></div>
-      <div><small>통화 중</small><b style="color:var(--mint-ink)">4</b></div>
-      <div><small>대기 상담원</small><b>3</b></div>
-      <div><small>오늘 받은 전화</small><b>218</b></div>
-      <div><small>{pin(2)}놓친 전화</small><b style="color:#a32020">6</b></div>
-    </div>
-    <div class="mock-h">{pin(3)}상담원 현황</div>
-    <div class="mock-seats">{tiles}</div>'''
+    body = ('<img src="/assets/screens/ipcc.png" alt="지오테스 콜센터 실시간 현황판 실제 화면" '
+            'style="width:100%;height:auto;display:block;border-radius:8px">')
     return build(
         "실시간 현황판", "지금 이 순간", body,
         [("지금 몇 명이 기다리고 있는지",
@@ -195,30 +116,14 @@ def dashboard():
         "\"오늘 좀 바빴다\" 말고는 남는 기록이 없습니다.",
         "몇 시에 몇 통이 밀렸는지가 숫자로 남습니다. "
         "사람을 더 뽑을지, 자동 응대를 넣을지 판단할 근거가 생깁니다.",
-        "화면 예시입니다. 표시 항목과 배치는 조직에 맞게 조정합니다.")
+        "실제 사용 화면입니다. 표시 항목과 배치는 조직에 맞게 조정합니다.")
 
 
 # ---------------------------------------------------------------- 통계
 
 def stats():
-    # 값이 없으면 막대는 장식일 뿐입니다. 숫자를 붙이고, 가장 몰리는 날만 진하게 둡니다.
-    bars = [("월", 46, 186), ("화", 62, 248), ("수", 58, 232), ("목", 71, 284),
-            ("금", 88, 352), ("토", 34, 136), ("일", 18, 72)]
-    top = max(v for _, v, _ in bars)
-    b = "".join(
-        f'<div class="{"peak" if h == top else ""}"><em>{n}</em>'
-        f'<i class="{"peak" if h == top else ""}" style="height:{h}%"></i>'
-        f'<small>{d}</small></div>'
-        for d, h, n in bars)
-    body = f'''
-    <div class="mock-sum c4">
-      <div><small>이번 주 통화</small><b>1,284</b></div>
-      <div><small>{pin(1)}평균 응답</small><b>8초</b></div>
-      <div><small>{pin(2)}첫 통화 종결</small><b>71%</b></div>
-      <div><small>놓친 전화</small><b>3.2%</b></div>
-    </div>
-    <div class="mock-h">{pin(3)}요일별 통화량</div>
-    <div class="mock-bars">{b}</div>'''
+    body = ('<img src="/assets/screens/demo-stats.png" alt="지오테스 상담원별 통계 실제 화면" '
+            'style="width:100%;height:auto;display:block;border-radius:8px">')
     return build(
         "통계", "요일별 통화량", body,
         [("전화를 받기까지 몇 초 걸렸는지",
@@ -234,7 +139,7 @@ def stats():
         "무엇을 고쳐야 할지 정할 근거가 없어서 대개 사람을 늘리는 쪽으로 갑니다.",
         "어느 시간대에 무엇이 몰리는지 나옵니다. "
         "사람을 늘리지 않고 처리량을 올릴 방법이 보이기 시작합니다.",
-        "화면 예시입니다. 수치는 예시이며 실제 값은 운영 데이터로 채워집니다.")
+        "실제 사용 화면입니다. 수치는 데모 계정 기준이며 실제 값은 운영 데이터로 채워집니다.")
 
 
 # ---------------------------------------------------------------- AI 통화요약
@@ -307,6 +212,22 @@ def ivr_tree():
         "화면 예시입니다. 단계 수에는 제한이 없습니다.")
 
 
+# ---------------------------------------------------------------- AI STT 음성인식
+
+def stt():
+    body = ('<img src="/assets/screens/demo-stt.png" alt="지오테스 AI STT 음성인식 실제 화면" '
+            'style="width:100%;height:auto;display:block;border-radius:8px">')
+    return build(
+        "AI STT", "화자 구분 자동 변환", body,
+        [("통화가 끝나는 즉시 텍스트로",
+          "녹취를 다시 듣지 않아도 무슨 대화였는지 눈으로 훑을 수 있습니다."),
+         ("고객과 상담원 발화가 구분됩니다",
+          "누가 무슨 말을 했는지가 화자별로 나뉘어 남습니다. <b>필요한 부분만 찾아 읽을 수 있습니다.</b>")],
+        "통화 내용을 확인하려면 녹음 파일을 처음부터 다시 들어야 합니다.",
+        "고객과 상담원 발화가 구분된 텍스트로 남아 필요한 부분만 눈으로 훑을 수 있습니다.",
+        "실제 사용 화면입니다. 화자별로 자동 구분되어 통화가 끝나는 즉시 텍스트로 남습니다.")
+
+
 ALL = {
     "consult": ("상담 화면", "전화가 울리는 순간 고객이 먼저 뜹니다", consult),
     "recording": ("통화 녹취", "필요한 통화를 조건으로 찾습니다", recording),
@@ -314,4 +235,5 @@ ALL = {
     "stats": ("통계", "무엇을 줄일지 정하려면 먼저 봐야 합니다", stats),
     "ai_summary": ("AI 통화요약", "통화를 다시 듣지 않아도 됩니다", ai_summary),
     "ivr_tree": ("ARS 시나리오", "시간대에 따라 다른 안내가 나갑니다", ivr_tree),
+    "stt": ("AI STT 음성인식", "통화 내용이 텍스트로 그대로 남습니다", stt),
 }

@@ -386,7 +386,7 @@ def render(g):
 
 <header class="site">
   <div class="wrap">
-    <a href="/" class="logo">지오<b>테스</b></a>
+    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
     <a href="tel:{TEL_RAW}" class="nav-call">{TEL}</a>
   </div>
 </header>
@@ -466,7 +466,7 @@ def render_index():
 <body>
 <header class="site">
   <div class="wrap">
-    <a href="/" class="logo">지오<b>테스</b></a>
+    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
     <a href="tel:{TEL_RAW}" class="nav-call">{TEL}</a>
   </div>
 </header>
@@ -599,7 +599,7 @@ def render_glossary():
 <body>
 <header class="site">
   <div class="wrap">
-    <a href="/" class="logo">지오<b>테스</b></a>
+    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
     <a href="tel:{TEL_RAW}" class="nav-call">{TEL}</a>
   </div>
 </header>
