@@ -345,7 +345,8 @@ def block(kind, val):
     return ""
 
 
-def render(g):
+def render(g, base="guide", base_name="가이드"):
+    """base 를 바꾸면 같은 서식으로 다른 섹션(예: 정보 /posts/)도 찍어낼 수 있습니다."""
     faq_ld = ",".join(
         '{"@type":"Question","name":%s,"acceptedAnswer":{"@type":"Answer","text":%s}}'
         % (jstr(q), jstr(a)) for q, a in g["faq"])
@@ -365,7 +366,7 @@ def render(g):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{e(g["title"])} | 지오테스</title>
 <meta name="description" content="{e(g["desc"])}">
-<link rel="canonical" href="{SITE}/guide/{g["slug"]}/">
+<link rel="canonical" href="{SITE}/{base}/{g["slug"]}/">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{e(g["title"])}">
 <meta property="og:description" content="{e(g["desc"])}">
@@ -393,7 +394,7 @@ def render(g):
 
 <div class="post-hero">
   <div class="wrap">
-    <p class="crumb"><a href="/">홈</a> · <a href="/guide/">가이드</a> · {e(g["cat"])}</p>
+    <p class="crumb"><a href="/">홈</a> · <a href="/{base}/">{base_name}</a> · {e(g["cat"])}</p>
     <span class="eyebrow">{e(g["cat"])}</span>
     <h1>{g["h1"]}</h1>
     <p class="meta">{g["sub"]}</p>

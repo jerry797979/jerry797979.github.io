@@ -509,6 +509,7 @@ def header(active=""):
       <a href="/demo/">화면 예시</a>
       <a href="/pricing/">요금</a>
       <a href="/cases/">구축사례</a>
+      <a href="/posts/">정보</a>
       <a href="/about/">회사소개</a>
     </nav>
     <div style="display:flex;align-items:center;gap:10px">
@@ -529,7 +530,7 @@ def header(active=""):
       <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
     </div>
     <div class="dgroup"><b>솔루션</b>{links}</div>
-    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
     <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
   </div>
 </div>'''
