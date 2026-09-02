@@ -121,9 +121,35 @@ cp dist/_config.example.php dist/_config.php
 `dist/` 폴더를 그대로 올리면 됩니다.
 
 **Cloudflare Pages** — 빌드 명령 없음, 출력 디렉터리 `dist`
-**GitHub Pages** — 저장소 설정에서 Pages 소스를 지정
-  ※ `username.github.io/저장소이름/` 형태로 배포하면 `/assets/...` 같은
-     절대 경로가 깨집니다. 커스텀 도메인을 붙이거나 Cloudflare Pages를 쓰세요.
+**GitHub Pages** — 저장소 설정에서 Pages 소스를 `GitHub Actions` 로 지정하면
+`.github/workflows/pages.yml` 이 `dist/` 를 알아서 올립니다.
+
+사이트 안의 링크는 페이지 깊이에 맞는 상대경로로 자동 변환되므로
+(`gen_solution.py` 의 `relativize`), `아이디.github.io/저장소이름/` 같은
+하위 주소로 올려도 화면은 깨지지 않습니다.
+
+---
+
+## 다른 계정에 그대로 올리려면
+
+1. 이 저장소를 **Fork** 하거나 내려받아 본인 계정에 새 저장소로 올립니다.
+2. 저장소 **Settings → Pages → Source** 를 `GitHub Actions` 로 바꿉니다.
+3. `main` 브랜치에 푸시하면 자동으로 배포됩니다.
+
+주소를 `아이디.github.io/` (하위 경로 없이)로 쓰려면 저장소 이름을
+**`아이디.github.io`** 로 지어야 합니다. GitHub 규칙입니다.
+
+옮긴 뒤 바꿔야 하는 값 두 가지 — 둘 다 `_tools/gen_solution.py` 맨 위에 있습니다.
+
+| 값 | 무엇 | 바꾼 뒤 |
+|---|---|---|
+| `SITE` | 검색엔진에 알리는 정식 주소 | `python _tools/gen_solution.py` 등 생성기 재실행 |
+| `OG_BASE` | 카톡·문자로 링크 보낼 때 뜨는 썸네일 주소 | 〃 |
+
+> ⚠️ `dist/_lead.php`(상담 접수), `dist/_leads.php`(신청 목록), `dist/_router.php`
+> (지역 페이지)는 **PHP가 도는 서버에서만 동작**합니다. GitHub Pages는 PHP를
+> 실행하지 못해 상담 신청이 저장되지 않습니다. 상담폼을 쓰려면 PHP 호스팅이나
+> Cloudflare Pages(Functions)로 옮겨야 합니다.
 
 ---
 
