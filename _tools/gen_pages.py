@@ -471,7 +471,7 @@ def page_pricing():
     </tbody>
   </table>
 </div>
-<p class="note">※ 쓰지 않는 기능은 빼고 산정합니다.</p>
+<p class="note" style="text-align:center">※ 쓰지 않는 기능은 빼고 산정합니다.</p>
 
 <h3 style="font-size:18px;font-weight:800;margin:34px 0 12px">금액이 어느 정도인지 감을 잡으시려면</h3>
 <div class="table-scroll">
@@ -484,7 +484,7 @@ def page_pricing():
     </tbody>
   </table>
 </div>
-<p class="note">
+<p class="note" style="text-align:center">
   설치비가 포함된 금액이며 부가세는 별도입니다. <b>실제 진행된 견적을 예시로 옮긴 것</b>이라
   구성과 규모에 따라 달라집니다. 회선 이용료와 통화료는 별도이며, 쓰시는 회선 조건에 따라 산정합니다.
   <br>기존에 쓰시던 고객관리 프로그램이 있으면 그대로 두고 전화 기능만 붙일 수 있습니다.
@@ -506,7 +506,7 @@ def page_pricing():
     </tbody>
   </table>
 </div>
-<p class="note">
+<p class="note" style="text-align:center">
   좌석이 늘면 좌석 비용은 어디서든 늘어납니다. 갈리는 것은 <b>그 위에 붙는 기능 값</b>입니다.
   기능을 하나씩 옵션으로 파는 방식이라면 쓰면 쓸수록 매달 나가는 금액이 올라갑니다.
   지오테스는 아래 12가지 기능을 <b>추가 비용 없이</b> 드립니다.
