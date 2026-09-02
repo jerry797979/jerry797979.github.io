@@ -14,6 +14,60 @@
   var BASE = me.src.replace(/assets\/lead\.js.*$/, "");
   var ENDPOINT = BASE + "_lead.php";
 
+  /* 전화번호 자동 하이픈 — 02(서울)와 그 외를 나눠 끊는다. */
+  function 하이픈(v) {
+    var d = ("" + v).replace(/\D/g, "").slice(0, 11);
+    if (d.indexOf("02") === 0) {
+      if (d.length < 3) return d;
+      if (d.length < 6) return d.replace(/(\d{2})(\d+)/, "$1-$2");
+      if (d.length < 10) return d.replace(/(\d{2})(\d{3,4})(\d+)/, "$1-$2-$3");
+      return d.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+    if (d.length < 4) return d;
+    if (d.length < 8) return d.replace(/(\d{3})(\d+)/, "$1-$2");
+    if (d.length < 11) return d.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+    return d.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+  }
+
+  /* 보내기 전에 검사한다. 문제가 있으면 {칸, 말}, 없으면 null.
+     2026-09-02: 회사명에 "333", 연락처에 "234-32" 같은 값을 넣어도 그냥 서버로 갔고
+     손님은 무엇이 잘못됐는지 알 수 없었다. 어느 칸이 왜 틀렸는지 짚어 준다. */
+  function 검사(data) {
+    var 회사 = (data.company || "").trim();
+    if (!회사) return { 칸: "company", 말: "회사명을 입력해 주세요." };
+    if (/^\d+$/.test(회사)) return { 칸: "company", 말: "회사명을 정확히 입력해 주세요. 숫자만으로는 안 됩니다." };
+
+    var 이름 = (data.name || "").trim();
+    if (!이름) return { 칸: "name", 말: "담당자 성함을 입력해 주세요." };
+    if (/\d/.test(이름)) return { 칸: "name", 말: "담당자 이름에는 숫자를 넣을 수 없습니다. (예: 홍길동)" };
+    if (!/^[가-힣a-zA-Z][가-힣a-zA-Z ().·]*$/.test(이름)) return { 칸: "name", 말: "담당자 이름은 한글 또는 영문으로 입력해 주세요. (예: 홍길동)" };
+    if (이름.replace(/[^가-힣a-zA-Z]/g, "").length < 2) return { 칸: "name", 말: "이름이 너무 짧습니다. 두 글자 이상 입력해 주세요. (예: 홍길동)" };
+
+    var 숫자 = (data.tel || "").replace(/\D/g, "");
+    if (!숫자) return { 칸: "tel", 말: "연락처를 입력해 주세요." };
+    if (숫자.charAt(0) !== "0") return { 칸: "tel", 말: "연락처는 0으로 시작해야 합니다. 지역번호나 010을 함께 입력해 주세요. (예: 010-1234-5678)" };
+    if (숫자.length < 9) return { 칸: "tel", 말: "연락처 자릿수가 모자랍니다. 지역번호나 010을 포함해 9자리 이상 입력해 주세요. (예: 010-1234-5678)" };
+    if (숫자.length > 11) return { 칸: "tel", 말: "연락처가 너무 깁니다. 하이픈을 빼고 11자리까지 입력해 주세요. (예: 010-1234-5678)" };
+    if (/^(\d)+$/.test(숫자)) return { 칸: "tel", 말: "연락 가능한 번호를 입력해 주세요. (예: 010-1234-5678)" };
+
+    if (!data.agree) return { 칸: "agree", 말: "개인정보 수집·이용에 동의해 주세요." };
+    return null;
+  }
+
+  /* 문제가 난 칸을 빨갛게 짚고 커서를 옮긴다. 다시 쓰기 시작하면 표시를 지운다. */
+  function 짚기(form, 칸) {
+    var el = form.querySelector('[name="' + 칸 + '"]');
+    if (!el) return;
+    if (el.type !== "checkbox") {
+      el.style.borderColor = "#d63a3a";
+      el.addEventListener("input", function 지우기() {
+        el.style.borderColor = "";
+        el.removeEventListener("input", 지우기);
+      });
+    }
+    try { el.focus(); } catch (e) {}
+  }
+
   function hidden(form, name, value) {
     var el = form.querySelector('input[name="' + name + '"]');
     if (!el) {
@@ -41,6 +95,11 @@
     hidden(form, "t", String(Math.floor(Date.now() / 1000)));
     hidden(form, "page", location.pathname + location.search);
 
+    var 전화칸 = form.querySelector('input[type="tel"]');
+    if (전화칸) {
+      전화칸.addEventListener("input", function () { 전화칸.value = 하이픈(전화칸.value); });
+    }
+
     var msg = form.querySelector(".msg");
     if (!msg) {
       msg = document.createElement("p");
@@ -65,12 +124,10 @@
       var agreeBox = form.querySelector('input[type="checkbox"]');
       if (agreeBox) data.agree = agreeBox.checked ? "1" : "";
 
-      if (!data.name || !data.tel) {
-        show(msg, "err", "담당자와 연락처를 적어 주세요.");
-        return;
-      }
-      if (!data.agree) {
-        show(msg, "err", "개인정보 수집·이용에 동의해 주세요.");
+      var 문제 = 검사(data);
+      if (문제) {
+        show(msg, "err", 문제.말);
+        짚기(form, 문제.칸);
         return;
       }
 
