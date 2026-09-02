@@ -641,7 +641,6 @@ def logo_grid():
                    f'<div class="chips-ink">{chips}</div></div>')
 
     return (f'<div class="logos">{figs}</div>'
-            f'<p class="note">로고는 각 사의 상표입니다.</p>'
             f'<div class="client-list">{groups}</div>'
             f'<p class="note">지면에 옮긴 {total}곳 외에도 구축한 곳이 더 있습니다. '
             f'업종이 같은 곳의 사례가 궁금하시면 상담 시 말씀해 주세요.</p>')
@@ -848,10 +847,12 @@ def page_contact():
   </form>
 </div>
 <p class="note" style="text-align:center">보내주신 내용은 상담 목적으로만 쓰이며, 처리 후 보관 기간이 지나면 지웁니다.</p>'''
-    info = '''<div class="cards3">
-      <div class="card"><h3>고객센터</h3><p class="cd">''' + TEL + '''<br><a href="mailto:help@ziotes.com">help@ziotes.com</a><br>평일 09:00 – 18:00</p></div>
-    </div>
-    <p class="lead-txt" style="text-align:center;margin-top:22px"><b class="hl">문의도, 장애가 나도 연락할 곳은 여기 하나입니다.</b></p>'''
+    info = '''<div class="contact-one">
+      <span class="contact-lab">고객센터</span>
+      <a class="contact-tel" href="tel:''' + TEL_RAW + '''">''' + TEL + '''</a>
+      <p class="contact-meta"><a href="mailto:help@ziotes.com">help@ziotes.com</a><span class="dot-sep">·</span>평일 09:00 – 18:00</p>
+      <p class="contact-note">문의도, 장애가 나도 연락할 곳은 여기 하나입니다.</p>
+    </div>'''
     return (head("상담 문의 | 지오테스",
                  "콜센터 구축 상담은 무료입니다. 현황을 보고 필요한 구성만 담아 제안해 드립니다.",
                  f"{SITE}/contact/")
