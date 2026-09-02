@@ -77,8 +77,42 @@
     try { 버튼.focus(); } catch (e) {}
   }
 
+  /* 고객사 로고판이 화면에 들어오면 한 칸씩 차례로 떠오르게 한다.
+     들어오기 전에는 CSS 가 숨겨 두고, 여기서 .in 을 붙여 살린다. */
+  function 로고판살리기() {
+    var 판 = document.querySelectorAll(".logos");
+    if (!판.length) return;
+
+    var 켜기 = function (el) {
+      var 칸 = el.querySelectorAll("figure");
+      for (var i = 0; i < 칸.length; i++) 칸[i].style.animationDelay = (i * 45) + "ms";
+      el.classList.add("in");
+    };
+
+    // 관찰 기능이 없거나 창 크기를 못 읽는 환경에서는 그냥 바로 켠다
+    if (!("IntersectionObserver" in window) || !window.innerHeight) {
+      for (var i = 0; i < 판.length; i++) 켜기(판[i]);
+      return;
+    }
+    var 관찰 = new IntersectionObserver(function (목록) {
+      목록.forEach(function (e) {
+        if (e.isIntersecting) { 켜기(e.target); 관찰.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    for (var j = 0; j < 판.length; j++) 관찰.observe(판[j]);
+
+    // 혹시 관찰이 한 번도 안 걸리면 3초 뒤에는 그냥 보여 준다
+    setTimeout(function () {
+      for (var k = 0; k < 판.length; k++) {
+        if (!판[k].classList.contains("in")) { 켜기(판[k]); 관찰.unobserve(판[k]); }
+      }
+    }, 3000);
+  }
+
   function init() {
-    if (전화되는기기()) return;   // 휴대폰은 손대지 않습니다
+    로고판살리기();
+
+    if (전화되는기기()) return;   // 휴대폰 전화 버튼은 손대지 않습니다
 
     document.addEventListener("click", function (ev) {
       var a = ev.target.closest ? ev.target.closest('a[href^="tel:"]') : null;

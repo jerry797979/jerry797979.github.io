@@ -382,10 +382,26 @@ table.t tr:last-child td,table.t tr:last-child th{border-bottom:none}
 /* ---------- 고객사 로고 ---------- */
 /* 칸 구분선은 칸마다 그린다 — 로고 수가 줄 끝을 못 채워도 빈칸이 회색으로 남지 않는다 */
 .logos{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:#fff;border:1px solid var(--slate-200);border-radius:20px;overflow:hidden}
-.logos figure{background:#fff;margin:0;height:104px;display:grid;place-items:center;padding:18px 16px;transition:background .16s;box-shadow:1px 0 0 0 var(--slate-200),0 1px 0 0 var(--slate-200)}
-.logos figure:hover{background:var(--slate-50)}
-.logos img{max-width:100%;max-height:46px;width:auto;height:auto;object-fit:contain;filter:grayscale(1);opacity:.72;transition:filter .2s,opacity .2s}
-.logos figure:hover img{filter:none;opacity:1}
+/* 로고는 처음부터 원래 색으로 보여 줍니다.
+   흑백으로 두면 "거래가 끝난 곳"처럼 읽혀서 오히려 손해입니다. */
+.logos figure{position:relative;background:#fff;margin:0;height:104px;display:grid;place-items:center;padding:18px 16px;
+  box-shadow:1px 0 0 0 var(--slate-200),0 1px 0 0 var(--slate-200);
+  transition:transform .22s cubic-bezier(.2,.7,.3,1),box-shadow .22s,z-index 0s}
+.logos figure:hover{z-index:2;transform:translateY(-4px);
+  box-shadow:0 16px 30px -12px rgba(17,12,31,.22),0 0 0 1px var(--slate-200)}
+.logos img{max-width:100%;max-height:46px;width:auto;height:auto;object-fit:contain;
+  transition:transform .22s cubic-bezier(.2,.7,.3,1)}
+.logos figure:hover img{transform:scale(1.09)}
+
+/* 화면에 들어올 때 한 칸씩 차례로 떠오릅니다. 스크립트가 .in 을 붙이면 재생됩니다.
+   투명도는 건드리지 않습니다 — 애니메이션이 멈추는 환경에서 로고가 숨어 버리기 때문입니다.
+   움직임만 주므로 최악의 경우에도 "가만히 있는 로고"가 됩니다. */
+@keyframes 로고떠오르기{from{transform:translateY(14px)}to{transform:none}}
+.logos.in figure{animation:로고떠오르기 .5s cubic-bezier(.2,.7,.3,1) backwards}
+@media(prefers-reduced-motion:reduce){
+  .logos.in figure{animation:none}
+  .logos figure:hover,.logos figure:hover img{transition:none;transform:none}
+}
 .logos figcaption{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:900px){.logos{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:680px){.logos{grid-template-columns:repeat(3,1fr)}.logos figure{height:86px;padding:14px 12px}}
