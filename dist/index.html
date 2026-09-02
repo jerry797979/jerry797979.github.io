@@ -11,7 +11,7 @@
 <meta property="og:description" content="교환기부터 AI까지 한 회사가 구축해 드립니다. 2006년부터 20년, 120여 곳 구축.">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:site_name" content="지오테스">
-<meta property="og:image" content="https://jerry797979.github.io/bitwave/assets/og.png">
+<meta property="og:image" content="https://jerry797979.github.io/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -65,8 +65,8 @@
       <a href="demo/">화면 예시</a>
       <a href="pricing/">요금</a>
       <a href="cases/">구축사례</a>
-      <a href="posts/">정보</a>
       <a href="about/">회사소개</a>
+      <a href="posts/">정보</a>
     </nav>
 
     <div style="display:flex;align-items:center;gap:10px">
@@ -119,7 +119,7 @@
 </div>
 
 <!-- 히어로 -->
-<div class="hero-top hero-photo">
+<div class="hero-top hero-photo" id="hero">
   <div class="wrap">
     <div class="launch-wrap">
       <span class="launch">
@@ -147,6 +147,16 @@
   </div>
 </div>
 
+<script>
+/* 배경 사진을 접속할 때마다 바꿉니다. 시안 1·2·3·5 중 하나가 걸립니다.
+   1번은 밝은 사진이라 글씨를 어둡게 하는 light 를 같이 붙입니다. */
+(function(){
+  var 후보 = [["bg1","light"], ["bg2"], ["bg3"], ["bg5"]];
+  var 고른것 = 후보[Math.floor(Math.random() * 후보.length)];
+  var el = document.getElementById("hero");
+  if (el) for (var i = 0; i < 고른것.length; i++) el.classList.add(고른것[i]);
+})();
+</script>
 <!-- 신뢰 3종 -->
 <section style="padding:52px 0 0">
   <div class="wrap">
