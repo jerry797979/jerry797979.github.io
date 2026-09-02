@@ -531,7 +531,7 @@ def page_pricing():
 <div class="cards2">
   <div class="card">
     <span class="svc-tag">영업 자동화</span>
-    <h3>거는 일을 시스템이 대신합니다</h3>
+    <h3>발신하는 일을 시스템이 대신합니다</h3>
     <ul class="svc-list">
       <li><b>오토콜</b> — 명단에 대량으로 자동 발신</li>
       <li><b>클릭투콜</b> — 화면의 번호를 눌러 즉시 발신 (API·엑셀 연동)</li>
@@ -594,7 +594,7 @@ def page_pricing():
              "규모와 구성에 따라 달라지지만, 항목 자체는 단순합니다.", '<a href="/">홈</a> · 요금')
       + sec("Structure", "네 가지 항목", body, narrow=True)
       + sec("Compare", "3년 뒤 총액이 갈리는 지점", split, bg=True, narrow=True)
-      + sec("Included", "12가지 기능이 값 없이 들어갑니다", free12)
+      + sec("Included", "12가지 기능이 무상으로 제공됩니다", free12)
       + faq_block(faq) + FOOTER)
 
 

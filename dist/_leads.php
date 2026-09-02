@@ -8,6 +8,14 @@
  * 열쇠값은 길고 추측하기 어려운 값으로 정하세요.
  */
 
+/* PHP 7.4 호환 — str_starts_with 는 PHP 8.0부터 있습니다.
+   낮은 버전에서 이 함수를 부르면 화면이 통째로 죽어(500) 버리므로 직접 채워 둡니다. */
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+
 $cfg = is_file(__DIR__ . '/_config.php') ? require __DIR__ . '/_config.php' : [];
 $key = (string)($cfg['admin_key'] ?? '');
 $dir = $cfg['store_dir'] ?? null;

@@ -19,7 +19,7 @@
 import os, sys, html
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gen_solution import SITE, OG_BASE, TEL, TEL_RAW
+from gen_solution import SITE, OG_BASE, TEL, TEL_RAW, header
 from gen_guide import render, write, e
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -132,6 +132,10 @@ def render_index():
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>정보 · 콜센터와 기업통신 가이드 | 지오테스</title>
 <meta name="description" content="{desc}">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
 <link rel="canonical" href="{SITE}/{BASE}/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="정보 · 콜센터와 기업통신 가이드 | 지오테스">
@@ -147,12 +151,7 @@ def render_index():
 <link rel="stylesheet" href="/assets/nova-post.css">
 </head>
 <body>
-<header class="site">
-  <div class="wrap">
-    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
-    <a href="tel:{TEL_RAW}" class="nav-call">{TEL}</a>
-  </div>
-</header>
+{header()}
 <section class="post-hero">
   <div class="wrap">
     <p class="crumb"><a href="/">홈</a> · {BASE_NAME}</p>
@@ -171,6 +170,14 @@ def render_index():
     © 2006 ZioTEs Solution Inc. All Rights Reserved.</p>
   </div>
 </footer>
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
 </body>
 </html>'''
 

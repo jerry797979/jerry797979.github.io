@@ -9,6 +9,14 @@
  * 저장 위치는 _leads/ 이며 웹에서 직접 열리지 않도록 막아 두었습니다.
  */
 
+/* PHP 7.4 호환 — str_starts_with 는 PHP 8.0부터 있습니다.
+   낮은 버전에서 이 함수를 부르면 화면이 통째로 죽어(500) 버리므로 직접 채워 둡니다. */
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 

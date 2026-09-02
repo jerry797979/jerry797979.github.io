@@ -145,13 +145,24 @@
           if (res.ok) {
             form.reset();
             hidden(form, "t", String(Math.floor(Date.now() / 1000)));
-            show(msg, "ok", res.message || "접수되었습니다. 확인 후 연락드리겠습니다.");
+            show(msg, "", "");
+            띄우기("ok", "접수되었습니다",
+              (res.message || "확인 후 담당자가 연락드리겠습니다.") +
+              "<br>급하시면 바로 전화 주셔도 됩니다." +
+              '<a class="pop-tel" href="tel:15555528">1555-5528</a>');
           } else {
-            show(msg, "err", res.message || "접수하지 못했습니다. 전화로 연락 주시면 바로 도와드리겠습니다.");
+            show(msg, "err", res.message || "접수하지 못했습니다.");
+            띄우기("err", "접수하지 못했습니다",
+              (res.message || "잠시 후 다시 시도해 주세요.") +
+              "<br>계속 안 되시면 전화로 알려주세요." +
+              '<a class="pop-tel" href="tel:15555528">1555-5528</a>');
           }
         })
         .catch(function () {
-          show(msg, "err", "접수하지 못했습니다. 1555-5528로 연락 주시면 바로 도와드리겠습니다.");
+          show(msg, "err", "접수하지 못했습니다.");
+          띄우기("err", "접수하지 못했습니다",
+            "인터넷 연결이 끊겼거나 서버에 닿지 못했습니다.<br>전화로 알려주시면 바로 도와드리겠습니다." +
+            '<a class="pop-tel" href="tel:15555528">1555-5528</a>');
         })
         .then(function () {
           form.dataset.sending = "";
@@ -163,6 +174,41 @@
   function show(el, kind, text) {
     el.className = "msg" + (kind ? " " + kind : "");
     el.textContent = text;
+  }
+
+  /* 접수 결과를 화면 가운데 팝업으로 띄운다.
+     버튼 아래 작은 글씨는 스크롤 위치에 따라 안 보여서 놓치는 분이 있었다. */
+  var 팝업;
+  function 팝업만들기() {
+    if (팝업) return 팝업;
+    팝업 = document.createElement("div");
+    팝업.className = "pop";
+    팝업.innerHTML = '<div class="pop-box" role="alertdialog" aria-modal="true"></div>';
+    document.body.appendChild(팝업);
+    return 팝업;
+  }
+
+  function 띄우기(kind, 제목, 내용) {
+    var p = 팝업만들기();
+    var ok = kind === "ok";
+    var 아이콘 = ok
+      ? '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+      : '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+    p.querySelector(".pop-box").innerHTML =
+      '<div class="pop-ico ' + (ok ? "ok" : "err") + '">' + 아이콘 + "</div>" +
+      "<h3></h3><p></p>" +
+      '<button type="button" class="btn btn-brand">확인</button>';
+    p.querySelector("h3").textContent = 제목;
+    p.querySelector("p").innerHTML = 내용;
+    p.classList.add("on");
+
+    var 닫기 = function () { p.classList.remove("on"); };
+    p.querySelector("button").onclick = 닫기;
+    p.onclick = function (e) { if (e.target === p) 닫기(); };
+    document.addEventListener("keydown", function esc(e) {
+      if (e.key === "Escape") { 닫기(); document.removeEventListener("keydown", esc); }
+    });
+    try { p.querySelector("button").focus(); } catch (e) {}
   }
 
   if (document.readyState === "loading") {
