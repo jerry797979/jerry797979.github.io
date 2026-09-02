@@ -84,9 +84,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdro
 /* ---------- hero ---------- */
 .hero-top{padding:44px 0 8px}
 /* 홈 히어로 — 사진 배경 위에 흰 글씨 (이 클래스는 홈에서만 씁니다) */
-.hero-photo{position:relative;padding:64px 0 56px;background-image:linear-gradient(rgba(11,8,24,.74),rgba(11,8,24,.84)),url(hero-bg.webp);background-size:cover;background-position:center;background-repeat:no-repeat}
+.hero-photo{position:relative;padding:64px 0 56px;background-image:linear-gradient(rgba(14,11,30,.42),rgba(14,11,30,.55)),url(hero-bg.webp);background-size:cover;background-position:center;background-repeat:no-repeat}
 .hero-photo .hero-center h1{color:#fff}
-.hero-photo .hero-center .sub{color:rgba(255,255,255,.82)}
+.hero-photo .hero-center .sub{color:rgba(255,255,255,.9)}
 .hero-photo .hero-center .sub b{color:#fff}
 .hero-photo .launch{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);box-shadow:none;backdrop-filter:blur(6px)}
 .hero-photo .launch span.t{color:rgba(255,255,255,.9)}
