@@ -500,9 +500,10 @@ def header(active=""):
     links = "".join(
         f'<a href="/solution/{p["slug"]}/">{p["nav"]}</a>' for p in PAGES)
     return f'''
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
 <header>
   <div class="wrap nav">
-    <a href="/" class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></a>
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
     <nav class="nav-links">
       <div class="has-sub">
         <a href="/solution/">솔루션</a>
@@ -530,7 +531,7 @@ def header(active=""):
 <div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="drawer-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
-      <span class="logo logo-img"><img src="/assets/logo.png" alt="지오테스 Ziotes"></span>
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
       <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
     </div>
     <div class="dgroup"><b>솔루션</b>{links}</div>
@@ -584,6 +585,7 @@ FOOTER = f'''
 </div>
 
 <script src="/assets/lead.js" defer></script>
+<script src="/assets/site.js" defer></script>
 </body>
 </html>
 '''

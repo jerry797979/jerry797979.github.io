@@ -53,7 +53,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdro
 .logo{font-weight:800;font-size:20px;letter-spacing:-.02em}
 .logo b{color:var(--brand)}
 .logo-img{display:flex;align-items:center}
-.logo-img img{height:34px;width:auto;display:block}
+.logo-img img{height:46px;width:auto;display:block}
 .nav-links{display:flex;gap:26px}
 .nav-links a{font-size:15px;font-weight:600;color:var(--slate-600)}
 .nav-links a:hover{color:var(--brand)}
@@ -544,3 +544,6 @@ footer .info{font-size:12.5px;color:#64748b}
 .pm-body th,.pm-body td{border:1px solid var(--slate-200);padding:9px 11px;text-align:left;vertical-align:top}
 .pm-body th{background:var(--slate-50);font-weight:700;white-space:nowrap;width:36%}
 .pm-foot{padding:12px 24px 22px;text-align:right}
+
+.pop-box p.pop-num{margin-top:14px;font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
+.pop-box p.pop-sub{margin-top:6px;color:var(--slate-500);font-size:14.5px}
