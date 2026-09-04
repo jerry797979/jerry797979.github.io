@@ -143,6 +143,9 @@
         .then(function (r) { return r.json().catch(function () { return { ok: false, message: "잠시 후 다시 시도해 주세요." }; }); })
         .then(function (res) {
           if (res.ok) {
+            // 어느 블로그 글을 보고 들어와 접수까지 갔는지 CRM 에 알려줍니다.
+            // t.js 가 안 붙어 있어도 폼은 그대로 돌아갑니다.
+            try { if (window.kwConv) window.kwConv("상담신청"); } catch (e) {}
             form.reset();
             hidden(form, "t", String(Math.floor(Date.now() / 1000)));
             show(msg, "", "");

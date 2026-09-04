@@ -128,3 +128,18 @@
     init();
   }
 })();
+
+/* ------------------------------------------------------------------
+   블로그 홍보 유입 집계 (파워잉글리쉬 CRM)
+   블로그 글에서 링크를 타고 들어온 방문만 셉니다. 사람을 알아보는 정보는
+   보내지 않습니다. 상담 접수까지 이어졌는지는 lead.js 에서 알려줍니다.
+   이 한 줄이 페이지마다 따로 붙지 않게 site.js 에 모아 둡니다.
+------------------------------------------------------------------ */
+(function () {
+  try {
+    var s = document.createElement("script");
+    s.src = "https://keyword-crm.marketwave99.workers.dev/t.js";
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
