@@ -18,7 +18,7 @@ OUT = os.path.join(ROOT, "dist", "solution")
 SITE = "https://ziotes.com"
 # 카카오톡·문자로 링크를 보낼 때 쓰이는 이미지 주소.
 # 실제로 열리는 주소여야 썸네일이 뜹니다. 거래처 서버로 옮긴 뒤에는 SITE 로 바꾸세요.
-OG_BASE = "https://jerry797979.github.io"
+OG_BASE = "https://ziotes.com"
 TEL = "1555-5528"
 TEL_RAW = "15555528"
 
