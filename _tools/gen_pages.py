@@ -355,7 +355,6 @@ def hero(eyebrow, h1, sub, crumb):
     return f'''
 <div class="hero-top">
   <div class="wrap">
-    <p style="font-size:13px;color:var(--slate-400);text-align:center">{crumb}</p>
     <div class="hero-center compact">
       <span class="eyebrow">{eyebrow}</span>
       <h1 style="margin-top:16px">{h1}</h1>
