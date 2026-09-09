@@ -821,9 +821,9 @@ def page_demo():
 
     demo_box = '''
 <div class="answer" style="max-width:820px;margin:0 auto">
-  <span class="lab">직접 눌러보고 싶으시면</span>
+  <span class="lab">데모체험하기</span>
   <p>
-    아래 화면 중 일부는 실제 화면이고, 일부는 구성을 재현한 것입니다. <b>진짜 시스템을 눌러보고 싶으시면</b>
+    아래 화면 중 일부는 실제 화면이고, 일부는 구성을 재현한 것입니다. <b>실제 CRM을 체험하고 싶으시면</b>
     체험용 계정을 열어 두었습니다. 신청이나 결제 없이 바로 들어가실 수 있습니다.
   </p>
   <div class="table-scroll" style="margin-top:16px">
@@ -878,7 +878,7 @@ def page_contact():
                  "콜센터 구축 상담은 무료입니다. 현황을 보고 필요한 구성만 담아 제안해 드립니다.",
                  f"{SITE}/contact/")
       + header()
-      + hero("Contact", "무엇이 불편하신지만<br>알려주세요",
+      + hero("Contact", "무엇이 필요하신지만<br>알려주세요",
              "현황을 먼저 보고 필요한 구성만 담아 제안해 드립니다. 상담은 무료입니다.",
              '<a href="/">홈</a> · 상담문의')
       + sec("Channels", "연락처", info)

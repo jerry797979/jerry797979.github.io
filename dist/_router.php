@@ -107,7 +107,7 @@ const OPEN_SVC = [
 const CLOSE = [
     '전화가 몇 통인지, 그중 몇 통을 놓쳤는지부터 확인해 보시는 편이 좋습니다.',
     '지금 쓰시는 환경을 먼저 보고 필요한 것만 골라 제안해 드립니다.',
-    '무엇이 불편한지만 알려주시면 나머지는 저희가 정리해 드립니다.',
+    '무엇이 필요한지만 알려주시면 나머지는 저희가 정리해 드립니다.',
 ];
 
 // ---------------------------------------------------------------- 틀
@@ -206,9 +206,17 @@ function page(array $d) {
 <footer>
   <div class="wrap">
     <div class="flogo">지오<b>테스</b></div>
-    ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
-    경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호 · 고객센터 {$d['tel']}<br>
-    © 2006 ZioTEs Solution Inc.
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 {$d['tel']} · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
   </div>
 </footer>
 
@@ -371,7 +379,7 @@ function page_dong_hub($prov, $city, $dong, $pfx) {
     $body = '<h2>' . esc($dong['ko']) . '에서 문의하실 수 있는 항목</h2>'
           . '<p>' . esc($city['ko'] . ' ' . $dong['ko']) . ' 지역에서 전화 시스템을 알아보신다면 아래 항목 중에서 고르시면 됩니다. '
           . '무엇이 필요한지 모르시겠다면 지금 쓰시는 환경만 알려주셔도 됩니다. '
-          . '전화를 몇 분이 받고 계신지, 무엇이 불편하신지만 들으면 나머지는 저희가 정리해 드립니다.</p>'
+          . '전화를 몇 분이 받고 계신지, 무엇이 필요하신지만 들으면 나머지는 저희가 정리해 드립니다.</p>'
           . link_grid($links)
 
           . '<h2>공사 없이 시작합니다</h2>'

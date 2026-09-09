@@ -43,7 +43,7 @@ def main():
     d.text((80 + lw, 74), "테스", font=font(40), fill=BRAND)
 
     # 제목
-    d.text((80, 190), "전화번호부터 AI까지", font=font(66), fill=WHITE)
+    d.text((80, 190), "번호 개통부터 AI까지", font=font(66), fill=WHITE)
     d.text((80, 278), "한 회사가 구축해 드립니다", font=font(66), fill=WHITE)
 
     # 밑줄 (초록)
