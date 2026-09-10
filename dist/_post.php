@@ -115,8 +115,12 @@ if (!is_array($in)) {
     done(false, 'JSON 형식이 아닙니다.', 400);
 }
 
+/* 글 없이 스타일·스크립트만 보내는 경우도 있습니다(모양만 고칠 때).
+   그때는 slug·html 을 요구하지 않습니다. */
+$글있음 = isset($in['slug']) || isset($in['html']);
+
 $slug = trim((string) ($in['slug'] ?? ''));
-if (!preg_match('/^[a-z0-9][a-z0-9-]{2,63}$/', $slug)) {
+if ($글있음 && !preg_match('/^[a-z0-9][a-z0-9-]{2,63}$/', $slug)) {
     done(false, 'slug 는 영문 소문자·숫자·하이픈으로 3~64자여야 합니다.', 400);
 }
 
@@ -132,8 +136,8 @@ function check_page(string $what, $v): string {
     return $v;
 }
 
-$html  = check_page('html', $in['html'] ?? null);
-$index = check_page('index', $in['index'] ?? null);
+$html  = $글있음 ? check_page('html', $in['html'] ?? null) : null;
+$index = isset($in['index']) ? check_page('index', $in['index']) : null;
 
 $sitemap = null;
 if (isset($in['sitemap']) && $in['sitemap'] !== '') {
@@ -142,6 +146,27 @@ if (isset($in['sitemap']) && $in['sitemap'] !== '') {
     }
     $sitemap = $in['sitemap'];
 }
+/* assets — 이미 있는 파일을 같은 이름으로 바꾸는 것만 받습니다.
+   새 이름을 허용하면 이 통로로 아무 스크립트나 심을 수 있게 됩니다. */
+$assets = [];
+if (isset($in['assets'])) {
+    if (!is_array($in['assets'])) {
+        done(false, 'assets 는 {"assets/파일이름": "내용"} 형태여야 합니다.', 400);
+    }
+    foreach ($in['assets'] as $rel => $body) {
+        if (!is_string($rel) || !preg_match('#^assets/[A-Za-z0-9._-]+\.(css|js)$#', $rel)) {
+            done(false, "assets 경로를 받을 수 없습니다. assets/이름.css 또는 .js 만 됩니다.", 400);
+        }
+        if (!is_string($body) || $body === '') {
+            done(false, "assets '" . $rel . "' 의 내용이 비어 있습니다.", 400);
+        }
+        if (!is_file(__DIR__ . '/' . $rel)) {
+            done(false, "assets '" . $rel . "' 는 서버에 없는 파일입니다. 이미 있는 파일만 바꿀 수 있습니다.", 400);
+        }
+        $assets[$rel] = $body;
+    }
+}
+
 
 // ---------------------------------------------------------------- 쓰기
 
@@ -180,28 +205,39 @@ function put(string $path, string $data): bool {
 
 $쓴것 = [];
 
-if (!put(__DIR__ . '/posts/' . $slug . '/index.html', $html)) {
-    log_line("실패\t{$slug}\t글 파일을 쓰지 못함");
-    done(false, '글 파일을 쓰지 못했습니다. dist/posts 폴더의 쓰기 권한을 확인해 주세요.', 500);
+if ($html !== null) {
+    if (!put(__DIR__ . '/posts/' . $slug . '/index.html', $html)) {
+        log_line("실패	{$slug}	글 파일을 쓰지 못함");
+        done(false, '글 파일을 쓰지 못했습니다. dist/posts 폴더의 쓰기 권한을 확인해 주세요.', 500);
+    }
+    $쓴것[] = "posts/{$slug}/index.html";
 }
-$쓴것[] = "posts/{$slug}/index.html";
 
-/* 목록과 사이트맵은 글이 이미 들어간 뒤라 실패해도 글은 살아 있습니다.
+/* 목록·사이트맵·assets 는 글이 이미 들어간 뒤라 실패해도 글은 살아 있습니다.
    그래서 통째로 실패로 돌리지 않고 무엇이 안 됐는지 알려 줍니다. */
 $못쓴것 = [];
-if (put(__DIR__ . '/posts/index.html', $index)) $쓴것[] = 'posts/index.html';
-else $못쓴것[] = 'posts/index.html';
+if ($index !== null) {
+    if (put(__DIR__ . '/posts/index.html', $index)) $쓴것[] = 'posts/index.html';
+    else $못쓴것[] = 'posts/index.html';
+}
 
 if ($sitemap !== null) {
     if (put(__DIR__ . '/sitemap.xml', $sitemap)) $쓴것[] = 'sitemap.xml';
     else $못쓴것[] = 'sitemap.xml';
 }
 
+foreach ($assets as $rel => $body) {
+    if (put(__DIR__ . '/' . $rel, $body)) $쓴것[] = $rel;
+    else $못쓴것[] = $rel;
+}
+
 log_line("성공\t{$slug}\t" . implode(',', $쓴것) . ($못쓴것 ? "\t실패:" . implode(',', $못쓴것) : ''));
 
-done(true, $못쓴것 ? '글은 올라갔지만 일부 파일을 쓰지 못했습니다.' : '올렸습니다.', 200, [
-    'slug'    => $slug,
-    'url'     => '/posts/' . $slug . '/',
-    'written' => $쓴것,
-    'failed'  => $못쓴것,
-]);
+$결과 = ['written' => $쓴것, 'failed' => $못쓴것];
+if ($html !== null) {
+    // 글을 보낸 경우에만 주소를 알려 준다. 스타일만 보냈을 때 /posts// 가 찍히면
+    // 받는 쪽에서 그 주소가 생긴 줄 알고 열어 보게 된다.
+    $결과['slug'] = $slug;
+    $결과['url'] = '/posts/' . $slug . '/';
+}
+done(true, $못쓴것 ? '올렸지만 일부 파일을 쓰지 못했습니다.' : '올렸습니다.', 200, $결과);

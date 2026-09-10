@@ -411,13 +411,40 @@ def render(g, base="guide", base_name="가이드"):
     <h2>자주 묻는 것</h2>
     <div class="faq">{faqs}</div>
 
+
+    <div class="lead-wrap" id="lead">
+      <form class="lead">
+        <h3>무료 상담 신청</h3>
+        <p class="ls">평일 09:00 – 18:00 · {TEL}</p>
+        <label for="a-company">회사명</label>
+        <input type="text" id="a-company" name="company" placeholder="㈜지오테스" required>
+        <label for="a-name">담당자</label>
+        <input type="text" id="a-name" name="name" placeholder="홍길동" required>
+        <label for="a-tel">연락처</label>
+        <input type="tel" id="a-tel" name="tel" placeholder="010-0000-0000" required>
+        <label for="a-email">이메일 <span class="opt">(선택)</span></label>
+        <input type="email" id="a-email" name="email" placeholder="hong@ziotes.com">
+        <label for="a-size">상담 인원</label>
+        <select id="a-size" name="size">
+          <option>5석 이하</option><option>6 – 20석</option><option>21 – 50석</option>
+          <option>51석 이상</option><option>아직 모르겠습니다</option>
+        </select>
+        <label for="a-memo">문의 내용</label>
+        <textarea id="a-memo" name="memo" placeholder="지금 쓰시는 시스템이나 불편한 점을 적어주세요."></textarea>
+        <div class="agree">
+          <input type="checkbox" id="a-agree" name="agree" value="1" required>
+          <label for="a-agree" style="margin:0;font-weight:500">상담을 위한 개인정보 수집·이용에 동의합니다</label>
+        </div>
+        <button type="submit" class="btn btn-brand">상담 신청하기</button>
+      </form>
+    </div>
     <div class="cta">
       <div class="dot"></div>
       <h2>어디부터 손대야 할지 모르시겠다면</h2>
       <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
       <div class="btns">
         <a href="tel:{TEL_RAW}" class="btn btn-white">{TEL}</a>
-        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+        <a href="#lead" class="btn btn-line">무료 상담신청</a>
       </div>
     </div>
   </article>
@@ -448,6 +475,7 @@ def render(g, base="guide", base_name="가이드"):
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
   </a>
 </div>
+<script src="/assets/lead.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>
@@ -520,6 +548,7 @@ def render_index():
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
   </a>
 </div>
+<script src="/assets/lead.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>
@@ -656,13 +685,40 @@ def render_glossary():
       </p>
     </div>
     {secs}
+
+    <div class="lead-wrap" id="lead">
+      <form class="lead">
+        <h3>무료 상담 신청</h3>
+        <p class="ls">평일 09:00 – 18:00 · {TEL}</p>
+        <label for="a-company">회사명</label>
+        <input type="text" id="a-company" name="company" placeholder="㈜지오테스" required>
+        <label for="a-name">담당자</label>
+        <input type="text" id="a-name" name="name" placeholder="홍길동" required>
+        <label for="a-tel">연락처</label>
+        <input type="tel" id="a-tel" name="tel" placeholder="010-0000-0000" required>
+        <label for="a-email">이메일 <span class="opt">(선택)</span></label>
+        <input type="email" id="a-email" name="email" placeholder="hong@ziotes.com">
+        <label for="a-size">상담 인원</label>
+        <select id="a-size" name="size">
+          <option>5석 이하</option><option>6 – 20석</option><option>21 – 50석</option>
+          <option>51석 이상</option><option>아직 모르겠습니다</option>
+        </select>
+        <label for="a-memo">문의 내용</label>
+        <textarea id="a-memo" name="memo" placeholder="지금 쓰시는 시스템이나 불편한 점을 적어주세요."></textarea>
+        <div class="agree">
+          <input type="checkbox" id="a-agree" name="agree" value="1" required>
+          <label for="a-agree" style="margin:0;font-weight:500">상담을 위한 개인정보 수집·이용에 동의합니다</label>
+        </div>
+        <button type="submit" class="btn btn-brand">상담 신청하기</button>
+      </form>
+    </div>
     <div class="cta">
       <div class="dot"></div>
       <h2>용어보다 지금 상황이 궁금하시면</h2>
       <p>지금 쓰시는 전화 환경을 보고 무엇이 필요한지부터 알려드립니다. 상담은 무료입니다.</p>
       <div class="btns">
         <a href="tel:{TEL_RAW}" class="btn btn-white">{TEL}</a>
-        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+        <a href="#lead" class="btn btn-line">무료 상담신청</a>
       </div>
     </div>
   </article>
@@ -691,6 +747,7 @@ def render_glossary():
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
   </a>
 </div>
+<script src="/assets/lead.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

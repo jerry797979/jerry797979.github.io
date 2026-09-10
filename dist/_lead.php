@@ -91,6 +91,7 @@ $company = $get('company', 100);
 $name    = $get('name', 50);
 $tel     = $get('tel', 30);
 $size    = $get('size', 40);
+$email   = $get('email', 120);
 $memo    = $get('memo', 2000);
 $agree   = $get('agree', 10);
 $page    = $get('page', 200);
@@ -98,6 +99,10 @@ $page    = $get('page', 200);
 if ($name === '' || $tel === '')       done(false, '담당자와 연락처를 적어 주세요.', 422);
 if (!preg_match('/^[0-9+\-\s()]{8,30}$/', $tel)) done(false, '연락처를 다시 확인해 주세요.', 422);
 if ($agree === '')                     done(false, '개인정보 수집·이용에 동의해 주세요.', 422);
+// 이메일은 선택 항목이라 비어 있으면 그냥 넘어간다. 적었는데 형식이 틀린 것만 잡는다.
+if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    done(false, '이메일 주소를 다시 확인해 주세요.', 422);
+}
 
 // ---------------------------------------------------------------- 같은 IP 제한
 
@@ -125,6 +130,7 @@ $row = [
     'company' => $company,
     'name'    => $name,
     'tel'     => $tel,
+    'email'   => $email,
     'size'    => $size,
     'memo'    => $memo,
     'page'    => $page,
@@ -145,6 +151,7 @@ $lines = [
     '회사   ' . ($company ?: '-'),
     '담당자 ' . $name,
     '연락처 ' . $tel,
+    '이메일 ' . ($email ?: '-'),
     '규모   ' . ($size ?: '-'),
     '내용   ' . ($memo ?: '-'),
     '',

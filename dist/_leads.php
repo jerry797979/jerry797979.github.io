@@ -57,17 +57,23 @@ $tr = '';
 foreach (array_slice($rows, 0, 300) as $r) {
     $memo = trim((string)($r['memo'] ?? ''));
     $tel  = preg_replace('/[^0-9]/', '', (string)($r['tel'] ?? ''));
+    // 이메일은 선택 항목이라 빈 칸이 많다. 있을 때만 메일 링크로 건다.
+    $mail = trim((string)($r['email'] ?? ''));
+    $mailTd = $mail !== ''
+        ? '<a href="mailto:' . $esc($mail) . '">' . $esc($mail) . '</a>'
+        : '<span class="dim">-</span>';
     $tr .= '<tr>'
          . '<td class="dim">' . $esc($r['at'] ?? '') . '</td>'
          . '<td>' . $esc($r['company'] ?? '-') . '</td>'
          . '<td><b>' . $esc($r['name'] ?? '') . '</b></td>'
          . '<td><a href="tel:' . $esc($tel) . '">' . $esc($r['tel'] ?? '') . '</a></td>'
+         . '<td>' . $mailTd . '</td>'
          . '<td>' . $esc($r['size'] ?? '-') . '</td>'
          . '<td class="memo">' . ($memo !== '' ? nl2br($esc($memo)) : '<span class="dim">-</span>') . '</td>'
          . '<td class="dim">' . $esc($r['page'] ?? '') . '</td>'
          . '</tr>';
 }
-if ($tr === '') $tr = '<tr><td colspan="7" class="dim" style="text-align:center;padding:40px">아직 들어온 신청이 없습니다.</td></tr>';
+if ($tr === '') $tr = '<tr><td colspan="8" class="dim" style="text-align:center;padding:40px">아직 들어온 신청이 없습니다.</td></tr>';
 
 $total = count($rows);
 ?><!DOCTYPE html>
@@ -109,7 +115,7 @@ td a{color:#6d4aff;font-weight:700;text-decoration:none}
   </div>
   <div class="box">
     <table>
-      <thead><tr><th>접수 시각</th><th>회사</th><th>담당자</th><th>연락처</th><th>규모</th><th>문의 내용</th><th>들어온 경로</th></tr></thead>
+      <thead><tr><th>접수 시각</th><th>회사</th><th>담당자</th><th>연락처</th><th>이메일</th><th>규모</th><th>문의 내용</th><th>들어온 경로</th></tr></thead>
       <tbody><?= $tr ?></tbody>
     </table>
   </div>

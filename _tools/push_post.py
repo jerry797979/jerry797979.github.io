@@ -4,6 +4,7 @@
 
   python _tools/push_post.py call-center-outsourcing-vs-inhouse
   python _tools/push_post.py --all          이미 만들어진 글 전부
+  python _tools/push_post.py --assets       스타일·스크립트만 보내기
   python _tools/push_post.py --list         서버에 올라와 있는 글 확인
 
 무엇을 하는가
@@ -81,6 +82,26 @@ def 부르기(method: str, body=None):
         return {"ok": False, "message": "서버에 닿지 못했습니다 — %s" % e.reason}
 
 
+# 글 모양이 바뀌면 스타일·스크립트가 같이 가야 합니다.
+# 서버는 '이미 있는 파일을 같은 이름으로 바꾸는 것'만 받습니다.
+ASSETS = ["assets/nova.css", "assets/nova-post.css",
+          "assets/site.js", "assets/lead.js"]
+
+
+def 스타일보내기() -> bool:
+    몸통 = {"assets": {p: 읽기(*p.split("/")) for p in ASSETS}}
+    답 = 부르기("POST", 몸통)
+    if 답.get("ok"):
+        print("올림  스타일·스크립트 %d개" % len(답.get("written", [])))
+        for p in 답.get("written", []):
+            print("      " + p)
+        if 답.get("failed"):
+            print("      못 쓴 것:", ", ".join(답["failed"]))
+        return True
+    print("실패  " + 답.get("message", "알 수 없는 오류"))
+    return False
+
+
 def 보내기(slug: str) -> bool:
     몸통 = {
         "slug": slug,
@@ -117,6 +138,9 @@ def main():
 
     if 인자[0] == "--list":
         return 목록()
+
+    if 인자[0] == "--assets":
+        sys.exit(0 if 스타일보내기() else 1)
 
     if 인자[0] == "--all":
         d = os.path.join(DIST, "posts")

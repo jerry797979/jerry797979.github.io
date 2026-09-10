@@ -858,6 +858,7 @@ def page_contact():
     <label for="c-company">회사명</label><input type="text" id="c-company" name="company" required>
     <label for="c-name">담당자</label><input type="text" id="c-name" name="name" required>
     <label for="c-tel">연락처</label><input type="tel" id="c-tel" name="tel" required>
+    <label for="c-email">이메일 <span class="opt">(선택)</span></label><input type="email" id="c-email" name="email">
     <label for="c-size">상담 인원</label>
     <select id="c-size" name="size"><option>5석 이하</option><option>6 – 20석</option><option>21 – 50석</option><option>51석 이상</option><option>아직 모르겠습니다</option></select>
     <label for="c-memo">문의 내용</label><textarea id="c-memo" name="memo"></textarea>

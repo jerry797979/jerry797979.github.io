@@ -192,6 +192,10 @@
   }
 
   function 띄우기(kind, 제목, 내용) {
+    // 신청 폼 팝업이 열려 있으면 먼저 닫는다 — 결과가 그 뒤에 가려 보이지 않는다
+    Array.prototype.forEach.call(document.querySelectorAll(".pop.on"), function (el) {
+      el.classList.remove("on");
+    });
     var p = 팝업만들기();
     var ok = kind === "ok";
     var 아이콘 = ok
@@ -223,4 +227,8 @@
   function init() {
     Array.prototype.forEach.call(document.querySelectorAll("form.lead"), setup);
   }
+
+  /* 페이지가 뜬 뒤에 만들어 넣은 폼(상담 신청 팝업)도 붙일 수 있게 내어 둔다.
+     site.js 가 팝업을 열 때 이 함수를 부른다. */
+  window.상담폼붙이기 = setup;
 })();

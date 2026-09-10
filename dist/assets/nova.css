@@ -563,3 +563,25 @@ footer .info{font-size:12.5px;color:#64748b}
 
 .pop-box p.pop-num{margin-top:14px;font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
 .pop-box p.pop-sub{margin-top:6px;color:var(--slate-500);font-size:14.5px}
+
+/* 폼이 들어가는 팝업 — 기본 팝업보다 넓고, 화면이 짧으면 안쪽이 스크롤됩니다 */
+.pop-box.wide{max-width:460px;padding:28px 26px 24px;text-align:left;max-height:88vh;overflow-y:auto}
+.pop-box.wide h3{text-align:center}
+.pop-box.wide .btn{margin-top:0}
+.pop-x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:26px;line-height:1;color:var(--slate-400);cursor:pointer}
+.pop-x:hover{color:var(--ink)}
+.pop-box{position:relative}
+
+/* 팝업 안에서는 칸 사이를 좁혀 '상담 신청하기' 버튼까지 한 화면에 들어오게 한다.
+   버튼이 스크롤 아래에 있으면 다 적고도 못 보내는 사람이 생긴다. */
+.pop-box.wide .lead .ls{margin:4px 0 14px}
+.pop-box.wide .lead label{margin-bottom:4px;font-size:12.5px}
+.pop-box.wide .lead input,.pop-box.wide .lead select,.pop-box.wide .lead textarea{padding:10px 13px;margin-bottom:9px;font-size:14.5px}
+.pop-box.wide .lead textarea{min-height:64px}
+.pop-box.wide .lead .agree{margin-bottom:12px}
+@media (max-height:760px){
+  .pop-box.wide .lead h3{font-size:18px}
+  .pop-box.wide .lead textarea{min-height:52px}
+  .pop-box.wide .lead input,.pop-box.wide .lead select,.pop-box.wide .lead textarea{padding:8px 12px;margin-bottom:7px}
+}
+.lead .opt{color:var(--slate-400);font-weight:500}
