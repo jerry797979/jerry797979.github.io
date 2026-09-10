@@ -17,3 +17,5 @@ dist/_leads/.rate
 # AI로 뽑은 배경 원본(수십MB). 웹에 쓰는 것은 dist/assets 의 webp 입니다.
 _ziotes_이미지수정/
 _tools/.post_key
+_tools/daily_post.log
+_tools/daily_post.stdout.log
