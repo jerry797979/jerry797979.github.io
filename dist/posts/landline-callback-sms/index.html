@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>유선전화콜백문자, 부재중 전화를 놓치지 않는 연동 방식 | 지오테스</title>
+<meta name="description" content="유선전화콜백문자는 통화 종료나 부재중 상황에서 자동으로 안내를 남기는 기능입니다. 지오테스는 IP교환기와 CRM을 직접 개발해 별도 부가 프로그램 없이 유선전화와 연동합니다. 상담 문의 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/landline-callback-sms/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="유선전화콜백문자, 부재중 전화를 놓치지 않는 연동 방식">
+<meta property="og:description" content="유선전화콜백문자는 통화 종료나 부재중 상황에서 자동으로 안내를 남기는 기능입니다. 지오테스는 IP교환기와 CRM을 직접 개발해 별도 부가 프로그램 없이 유선전화와 연동합니다. 상담 문의 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"기존에 사용하던 사무실 유선전화 번호 그대로 콜백문자를 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"사용 중인 일반 유선전화 번호나 대표번호를 그대로 유지하면서 연동할 수 있습니다. 통신 3사 번호 이동 및 회선 연동 절차를 거쳐 기존 번호로 걸려온 전화에 대해 콜백문자가 발송되도록 구성합니다."}},{"@type":"Question","name":"콜백문자 기능을 쓰려면 별도의 외부 문자 발송 솔루션을 결제해야 하나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스 구축 환경에서는 통화 후 자동 문자·알림톡, 부재중 자동 알림이 기본 제공 12가지 항목에 포함되어 있습니다. 따라서 별도의 외부 발송 프로그램을 따로 구입해 붙이지 않아도 교환기 및 CRM 안에서 직접 처리됩니다."}},{"@type":"Question","name":"사내에서 이미 쓰고 있는 자체 CRM 프로그램이 있어도 연동이 가능한가요?","acceptedAnswer":{"@type":"Answer","text":"가능합니다. 기존에 사용 중인 사내 CRM이나 고객 전산이 있다면 시스템을 교체할 필요 없이 전화 및 발송 기능만 연동하는 방식으로 구축할 수 있습니다. 필요에 따라 DB API나 콜백 API 연동을 선택해 붙일 수 있습니다."}},{"@type":"Question","name":"지오테스 시스템 도입 시 계약 약정 기간과 위약금이 있나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 약정 기간을 두지 않으며 위약금도 없습니다. 서비스 규모의 변경이나 해지가 필요할 때 위약금 부담 없이 자유롭게 조정하실 수 있습니다."}},{"@type":"Question","name":"유선전화 콜백문자 구축에 드는 초기 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"임대형 2좌석을 기준으로 처음 한 번 300,000원, 매달 100,000원입니다. 설치비가 포함된 금액이며 부가세는 별도입니다. 좌석이 늘어나면 좌석당 비용만 추가되며 회선 이용료와 통화료는 별도입니다."}},{"@type":"Question","name":"통신사 인터넷 회선 장애가 생기면 전화와 콜백문자가 모두 멈추나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 365일 24시간 이중화 체계를 갖추고 있어 장애 시 백업 서버로 자동 전환됩니다. 또한 통신 회선을 두 곳 이상 분산해 열어 두면 특정 통신사에 장애가 발생해도 통화와 알림 발송이 이어집니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 고객관리 CRM</p>
+    <span class="eyebrow">고객관리 CRM</span>
+    <h1>유선전화콜백문자 연동,<br>전화 시스템 안에서 처리하는 방법</h1>
+    <p class="meta">부재중 전화와 통화 종료 후 발송을 따로 사지 않고<br>IP교환기와 CRM 일체형 환경에서 해결합니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">사무실 일반 유선전화로 걸려온 전화에 콜백문자를 자동으로 보내려면 어떻게 해야 하나요?</span>
+      <p><b>사무실 유선전화의 신호를 받는 <span class='hl'>IP교환기(IP-PBX)와 상담 CRM</span>이 직접 연결</b>되어 있어야 합니다. 통화가 연결되지 않고 끊겼을 때 부재중 상태를 감지하여 고객 휴대폰 번호로 즉각 알림을 남기거나, 상담 종료 직후 계좌번호·주소 같은 필수 정보를 <b>자동 발송하는 체계</b>를 갖추는 방식입니다. 지오테스는 별도 외산 솔루션을 덧붙이지 않고 <span class='hl'>구축 기본 기능</span> 안에서 이를 구현합니다.</p>
+    </div>
+    <h2>사무실 전화를 비웠을 때 고객이 남긴 번호는 어디로 가는가</h2><p>점심시간이나 외근, 다른 통화로 인해 사무실 유선전화가 울리다 끊기면 담당자는 발신자 번호조차 제때 확인하기 어렵습니다. 개인 휴대폰이라면 부재중 내역을 보고 다시 전화를 걸 수 있지만, 유선 단말기는 자리를 지키지 않으면 누가 어떤 용건으로 걸었는지 알 수 없습니다. 결국 문의를 남기려던 상대방은 다른 곳을 찾아 떠나게 됩니다.</p><p>이 문제를 풀기 위해 스마트폰 전용 발신 앱을 쓰거나 대표번호 착신전환을 걸어 두기도 합니다. 하지만 여러 직원이 번갈아 전화를 받는 환경에서는 누가 콜백을 처리했는지 중복 확인이 되지 않아 혼선이 생깁니다. <a class='inlink' href='/posts/free-callback-sms/'>유선전화콜백문자</a> 처리는 개인 휴대폰 앱에 기댈 것이 아니라, 회사 전화망과 고객 관리 소프트웨어가 맞물려 돌아가는 환경에서 시작해야 합니다.</p><div class="callout"><p>고객이 전화를 걸었다가 끊어지는 순간, 교환기 시스템이 통화 실패 신호를 감지하고 고객의 번호로 지정된 안내 문자를 즉시 전송하는 구조가 갖춰져야 누수가 사라집니다.</p></div><h2>휴대폰 전송 앱과 IP교환기 기반 콜백문자의 차이</h2><p>시중에서 유선전화콜백문자를 다룰 때 흔히 쓰는 방식은 유선전화를 특정 스마트폰으로 착신전환해 두고, 해당 스마트폰에서 문자 메시지를 발송하는 구조입니다. 이 방식은 개통이 간편해 보이지만 전화가 몰리거나 담당자가 자리를 비우면 작동이 불안정해집니다. 회선이 둘 이상인 환경에서는 분산 처리가 되지 않고, 누가 문자를 받고 누구와 상담 중인지 기록이 흩어집니다.</p><p>지오테스가 제공하는 방식은 <a class='inlink' href='/solution/ipcc/'>IP교환기(IP-PBX)</a>가 직접 발신 이력을 관리하는 형태입니다. 전화가 인입되는 통신 서버 레벨에서 부재중과 통화 완료를 명확히 구분하여 데이터를 남깁니다. 유선 번호로 들어온 통화 기록은 실시간으로 정리되며, 고객에게 발송되는 알림과 문자는 사내 <a class='inlink' href='/solution/crm/'>상담 CRM</a>에 그대로 누적됩니다.</p><ul><li>스마트폰 연동 방식: 단말기 전원 꺼짐이나 통신 상태에 따라 발송 실패 발생 가능, 상담 기록 통합 관리 불가</li><li>IP교환기 연동 방식: 서버가 통화 상태를 직접 판단하여 자동 발송, 전산 화면에 부재중 번호와 발송 내역 실시간 동기화</li></ul><h2>통화 종료 후 자동 발송과 부재중 알림이 함께 작동하는 구조</h2><p>유선전화콜백문자는 단순히 전화를 받지 못했을 때 사과 문자를 보내는 데서 끝나지 않습니다. 상담을 마친 직후 고객에게 상담원 직통 번호, 입금 계좌, 사업장 위치, 서비스 신청 링크 등을 자동으로 전달하는 업무까지 묶여야 실질적인 시간 단축이 이루어집니다. 직원이 통화가 끝날 때마다 일일이 번호를 복사해 메시지를 입력하는 일은 상담 집중도를 떨어뜨립니다.</p><p>지오테스 시스템에서는 통화 후 자동 문자 및 알림톡, 부재중 자동 알림 기능이 추가 비용 없는 기본 항목으로 묶여 제공됩니다. 전화가 정상적으로 종료되면 미리 지정한 문구가 고객에게 곧바로 전송되고, 대기 상태에서 끊긴 전화는 시스템이 '부재중'으로 분류하여 관리 화면 현황판에 알림을 띄움과 동시에 고객에게 콜백 접수 문자를 보냅니다.</p><p>여기에 필수 안내 자동 재생, 통화 종료 추적, 착신번호별 브랜드 구분 기능까지 함께 맞물려 작동합니다. 통화 인입부터 종료, 후속 안내까지 이어지는 전체 흐름을 단일 환경에서 다룹니다.</p><h2>자체 개발 교환기와 다중 회선으로 장애를 방어하는 원리</h2><p>지오테스는 2006년 법인 설립 이후 컨택센터 구축과 인터넷전화 한 분야만 지속해 왔습니다. 2008년에는 자체 녹취 시스템을 만들었고, 2013년에는 필리핀 클락에 콜센터를 직접 설립해 운영해 보면서 실제 전화 업무 현장에서 무엇이 걸림돌이 되는지 확인했습니다. 2026년부터는 AI 컨택센터를 제공하기 시작하며 기술을 확장해 나가고 있습니다.</p><p>이러한 개발 이력을 바탕으로 지오테스는 IP교환기와 상담 애플리케이션을 외부에서 사 오지 않고 직접 개발합니다. 동시에 <a class='inlink' href='/solution/voip/'>기업 인터넷전화</a> 회선까지 함께 공급합니다. KT, LG유플러스, SK브로드밴드 통신 3사와 모두 제휴 관계를 맺고 있어, 사업장 환경에 가장 알맞은 통신 조건을 선택할 수 있습니다.</p><p>안정성을 위해 365일 24시간 이중화 체계를 유지하며, 장애 발생 시 백업 서버로 자동 전환됩니다. 회선 또한 통신사 두 곳 이상에 나누어 열어 두면 한 통신망에 이상이 발생해도 끊김 없이 유선전화 수신과 콜백 업무를 지속할 수 있습니다. 지오테스는 지금까지 제조, 유통, 금융, 공공, 병원, 쇼핑몰, 교육 등 120여 곳에 시스템을 구축해 왔습니다.</p><h2>약정 없이 도입하는 유선전화 콜백 시스템의 비용 구성</h2><p>시스템을 바꾸거나 도입할 때 많은 기업이 불필요한 의무 약정과 위약금 때문에 결정을 망설입니다. 지오테스는 약정 기간을 두지 않으며 위약금도 없습니다. 또한 통신 비용을 이야기할 때 '몇 퍼센트 절감' 같은 막연한 표현을 쓰지 않습니다. 사업장마다 사용 중인 회선 수와 통화 패턴이 다르기 때문에, 기존 명세서를 바탕으로 항목별로 무엇이 사라지고 무엇이 남는지 명확하게 계산해 안내합니다.</p><p>비용 구조는 시스템 구축(1회), 회선 이용료(월), 유지보수(별도 계약), 부가서비스(선택)의 네 항목으로 나뉩니다. 임대형을 기준으로 할 때 2좌석 구성은 처음 한 번 300,000원, 매달 100,000원으로 시작합니다. 여기에는 설치비가 포함되어 있으며 부가세는 별도입니다. 좌석을 늘려야 할 때는 좌석당 비용만 추가되고, 회선 이용료와 실제 발생한 통화료는 별도로 청구됩니다.</p><div class="table-scroll"><table><thead><tr><th>구분</th><th>비용 기준</th><th>비고</th></tr></thead><tbody><tr><th>임대형 기본(2좌석)</th><td>처음 1회 300,000원 / 월 100,000원</td><td>설치비 포함, 부가세 별도</td></tr><tr><th>좌석 증설</th><td>좌석당 비용 추가</td><td>필요 좌석 수에 따라 확장</td></tr><tr><th>회선 및 통화료</th><td>통신사 이용료 별도 청구</td><td>통신 3사 중 최적 조건 선택</td></tr><tr><th>계약 조건</th><td>약정 기간 없음, 위약금 없음</td><td>언제든 변경 가능</td></tr></tbody></table></div><p>도입 시 상담 CRM, 통화 녹취, 통계, 실시간 현황판, 스크린 팝업이 기본 구축에 포함되어 추가 구매가 필요 없습니다. 자세한 안내와 견적 검토는 <a class='inlink' href='/contact/'>상담 문의</a>를 통해 확인하실 수 있습니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>기존에 사용하던 사무실 유선전화 번호 그대로 콜백문자를 쓸 수 있나요?</summary><div class="a">사용 중인 일반 유선전화 번호나 대표번호를 그대로 유지하면서 연동할 수 있습니다. 통신 3사 번호 이동 및 회선 연동 절차를 거쳐 기존 번호로 걸려온 전화에 대해 콜백문자가 발송되도록 구성합니다.</div></details><details><summary>콜백문자 기능을 쓰려면 별도의 외부 문자 발송 솔루션을 결제해야 하나요?</summary><div class="a">지오테스 구축 환경에서는 통화 후 자동 문자·알림톡, 부재중 자동 알림이 기본 제공 12가지 항목에 포함되어 있습니다. 따라서 별도의 외부 발송 프로그램을 따로 구입해 붙이지 않아도 교환기 및 CRM 안에서 직접 처리됩니다.</div></details><details><summary>사내에서 이미 쓰고 있는 자체 CRM 프로그램이 있어도 연동이 가능한가요?</summary><div class="a">가능합니다. 기존에 사용 중인 사내 CRM이나 고객 전산이 있다면 시스템을 교체할 필요 없이 전화 및 발송 기능만 연동하는 방식으로 구축할 수 있습니다. 필요에 따라 DB API나 콜백 API 연동을 선택해 붙일 수 있습니다.</div></details><details><summary>지오테스 시스템 도입 시 계약 약정 기간과 위약금이 있나요?</summary><div class="a">지오테스는 약정 기간을 두지 않으며 위약금도 없습니다. 서비스 규모의 변경이나 해지가 필요할 때 위약금 부담 없이 자유롭게 조정하실 수 있습니다.</div></details><details><summary>유선전화 콜백문자 구축에 드는 초기 비용은 얼마인가요?</summary><div class="a">임대형 2좌석을 기준으로 처음 한 번 300,000원, 매달 100,000원입니다. 설치비가 포함된 금액이며 부가세는 별도입니다. 좌석이 늘어나면 좌석당 비용만 추가되며 회선 이용료와 통화료는 별도입니다.</div></details><details><summary>통신사 인터넷 회선 장애가 생기면 전화와 콜백문자가 모두 멈추나요?</summary><div class="a">지오테스는 365일 24시간 이중화 체계를 갖추고 있어 장애 시 백업 서버로 자동 전환됩니다. 또한 통신 회선을 두 곳 이상 분산해 열어 두면 특정 통신사에 장애가 발생해도 통화와 알림 발송이 이어집니다.</div></details></div>
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">상담 신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

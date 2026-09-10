@@ -2,3 +2,17 @@
 09-10 14:29 발행 파일 생성: smile-call-center-solution (2026-09-10)
 09-10 14:29 sitemap 재생성
 09-10 14:29 발행 전 검사 통과 (3쪽)
+09-10 14:29 저장소에 커밋·푸시 완료
+09-10 14:29 전송 완료 2개 / 실패 0개
+09-10 14:29 CRM 완료 보고: free-callback-sms
+09-10 14:29 CRM 완료 보고: smile-call-center-solution
+09-10 14:29 완료: ['free-callback-sms', 'smile-call-center-solution']
+09-10 14:34   [생성] 유선전화콜백문자
+09-10 14:34     1회차 통과 — landline-callback-sms (4304자)
+09-10 14:34   [생성] 무료콜백
+09-10 14:34     1회차 통과 — free-callback-system (4924자)
+09-10 14:34 자동 생성 2개 보충: landline-callback-sms, free-callback-system
+09-10 14:34 발행 파일 생성: free-callback-system (2026-09-10)
+09-10 14:34 발행 파일 생성: landline-callback-sms (2026-09-10)
+09-10 14:34 sitemap 재생성
+09-10 14:34 발행 전 검사 통과 (5쪽)
