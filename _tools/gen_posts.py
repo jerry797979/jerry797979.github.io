@@ -16,7 +16,7 @@
 - 각 글 맨 위에 답변 박스를 둡니다. AI 검색이 그 문단을 인용해 갑니다.
 - 남의 글을 옮기지 않습니다. 구조만 참고하고 문장은 새로 씁니다.
 """
-import os, sys, html
+import os, sys, io, html
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_solution import SITE, OG_BASE, TEL, TEL_RAW, header
@@ -33,6 +33,7 @@ BASE_NAME = "정보"     # 빵부스러기·메뉴에 쓰는 이름
 POSTS = [
 {
  "slug": "call-center-outsourcing-vs-inhouse",
+ "kw": "콜센터 아웃소싱",
  "cat": "콜센터 운영",
  "title": "콜센터, 직접 운영과 아웃소싱 중 무엇이 나은가",
  "desc": "전화 응대를 직접 할지 맡길지 고민하는 분들을 위해 두 방식의 비용 구조와 갈리는 지점을 정리했습니다. 통화량과 문의 내용에 따라 답이 달라집니다.",
@@ -192,7 +193,46 @@ def render_index():
 </html>'''
 
 
+# ---------------------------------------------------------------- 자동 발행용 입구
+# daily_post.py 가 부르는 이름입니다. 콜비즈(gen_posts.build_html/build_index)와
+# 이름을 맞춰 두었습니다 — 두 사이트의 발행 절차를 같은 모양으로 두기 위함입니다.
+
+def build_html(p):
+    """원고 하나를 완성된 글 페이지 HTML 로 찍는다."""
+    return render(p, base=BASE, base_name=BASE_NAME)
+
+
+def build_index():
+    """지금 POSTS 에 들어 있는 것으로 목록 페이지를 찍는다.
+
+    daily_post.py 는 발행 직전에 gen_posts.POSTS 를 늘려 놓고 이걸 부른다."""
+    return render_index()
+
+
+def 대기열붙이기():
+    """이미 발행된 자동 생성 글을 POSTS 에 붙인다.
+
+    손으로 python _tools/gen_posts.py 를 돌릴 때도 자동 발행분이 목록에서
+    빠지지 않게 하려는 것이다. 아직 발행 안 한 대기분은 붙이지 않는다."""
+    import json
+    발행됨 = set()
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "published_slugs.txt")
+    if os.path.isfile(p):
+        발행됨 = {l.strip() for l in io.open(p, encoding="utf-8") if l.strip()}
+    if not 발행됨:
+        return
+    try:
+        from backlog import BACKLOG
+    except Exception:
+        return
+    있는것 = {x["slug"] for x in POSTS}
+    for x in BACKLOG:
+        if x["slug"] in 발행됨 and x["slug"] not in 있는것:
+            POSTS.append(x)
+
+
 def main():
+    대기열붙이기()
     print("정보 포스트 생성")
     write(os.path.join(OUT, "index.html"), render_index(), 1)
     for p in POSTS:
