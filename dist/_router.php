@@ -197,7 +197,7 @@ function page(array $d) {
       <p>지금 쓰시는 전화 환경을 보고 필요한 것만 골라 알려드립니다.</p>
       <div class="btns">
         <a href="tel:{$d['telr']}" class="btn btn-white">{$d['tel']}</a>
-        <a href="{$pfx}contact/" class="btn btn-line">상담 신청</a>
+        <a href="{$pfx}contact/" class="btn btn-line">무료 상담신청</a>
       </div>
     </div>
   </article>

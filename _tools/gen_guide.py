@@ -417,7 +417,7 @@ def render(g, base="guide", base_name="가이드"):
       <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
       <div class="btns">
         <a href="tel:{TEL_RAW}" class="btn btn-white">{TEL}</a>
-        <a href="/contact/" class="btn btn-line">상담 신청</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
       </div>
     </div>
   </article>
@@ -662,7 +662,7 @@ def render_glossary():
       <p>지금 쓰시는 전화 환경을 보고 무엇이 필요한지부터 알려드립니다. 상담은 무료입니다.</p>
       <div class="btns">
         <a href="tel:{TEL_RAW}" class="btn btn-white">{TEL}</a>
-        <a href="/contact/" class="btn btn-line">상담 신청</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
       </div>
     </div>
   </article>
