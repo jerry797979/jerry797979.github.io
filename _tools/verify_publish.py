@@ -96,6 +96,10 @@ def validate(only=None):
             for m2 in re.findall(r"\d+\s*%", t):
                 probs.append("%s — 퍼센트 표기 '%s' (회사 방침상 쓰지 않음)" % (slug, m2))
 
+        # 금액 — 지오테스 글에는 요금을 쓰지 않는다 (CRM 지오테스 규칙)
+        for m3 in sorted(set(re.findall(r"\d[\d,]*\s*(?:만원|원)", t))):
+            probs.append("%s — 금액 '%s' (글에는 요금을 쓰지 않음)" % (slug, m3))
+
         for 번호 in set(re.findall(r"\b1\d{3}-\d{4}\b", t)) - {TEL}:
             probs.append("%s — 상담번호를 '%s' 로 적음 (정답 %s)" % (slug, 번호, TEL))
 

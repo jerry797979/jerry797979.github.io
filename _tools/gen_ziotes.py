@@ -83,12 +83,13 @@ FACTS = """[회사]
 - AI 통화요약, 콜백 API 연동, DB API 연동, 실시간 API 연동
 - AI 응대, 보이는 ARS
 
-[요금 — 이 숫자 외에는 절대 쓰지 말 것]
+[요금 — ★금액은 절대 쓰지 않는다]
 - 비용은 네 항목: 시스템 구축(1회), 회선 이용료(월), 유지보수(별도 계약), 부가서비스(선택)
-- 임대형 2좌석 기준: 처음 한 번 300,000원, 매달 100,000원
-- 설치비가 포함된 금액이고 부가세는 별도
 - 좌석을 늘리면 좌석당 비용만 추가된다
 - 회선 이용료와 통화료는 별도
+- ★원·만원 같은 금액을 한 글자도 쓰지 않는다. 표에도, FAQ 에도 쓰지 않는다.
+  비용을 물으면 "상담 인원·회선 수·필요한 기능에 따라 달라서, 지금 쓰시는 구성을 보고
+  산정해 드린다"고 쓴다. 금액이 궁금하면 1555-5528 로 상담하라고 안내한다.
 - ★절감률을 몇 퍼센트라고 말하지 않는다. 지금 무엇을 쓰는지에 따라 완전히 달라지기 때문.
   퍼센트를 쓰지 말고, "항목별로 무엇이 없어지고 무엇이 남는지 계산해 알려준다"고 쓴다.
 
@@ -103,8 +104,10 @@ FACTS = """[회사]
 # 본문에서 "숫자+단위"를 전부 뽑아 이 표와 대조합니다. 벗어나면 재생성합니다.
 # 빈 집합은 "그 단위로는 확정된 숫자가 하나도 없다" = 그 단위를 쓰면 무조건 반려.
 ALLOWED = {
-    "원":     {"300000", "100000"},   # 임대형 2좌석 기준
-    "만원":   {"30", "10"},           # 같은 금액을 만원 단위로 쓸 때
+    # ★금액은 아예 금지. CRM 지오테스 규칙: "요금·할인율은 쓰지 말 것".
+    # 2026-09-11: 요금 페이지 금액(300,000원/100,000원)을 허용했다가 7편에 금액이 나갔다.
+    "원":     set(),
+    "만원":   set(),
     "%":      set(),                  # ★퍼센트는 아예 금지 — 회사 방침
     "년":     {"2006", "2007", "2008", "2009", "2011", "2013", "2015",
                "2016", "2018", "2019", "2022", "2026", "3", "20"},
@@ -198,7 +201,7 @@ def taken_slugs():
 BLOCK_KINDS = {"p", "h3", "callout", "list", "table"}
 
 
-def check(d, keyword, avoid_titles=()):
+def check(d, keyword, avoid_titles=(), keep_slug=None):
     """통과하면 [] 를, 문제가 있으면 사유 목록을 돌려줍니다."""
     bad = []
     body = flat(d)
@@ -207,7 +210,7 @@ def check(d, keyword, avoid_titles=()):
     # 구조
     if not re.match(r"^[a-z0-9][a-z0-9-]{2,39}$", d.get("slug", "")):
         bad.append("slug 형식이 잘못됨(영소문자·숫자·하이픈 3~40자)")
-    elif d["slug"] in taken_slugs():
+    elif d["slug"] in taken_slugs() and d["slug"] != keep_slug:
         bad.append("slug '%s' 는 이미 쓰고 있음 — 다른 슬러그로" % d["slug"])
 
     if d.get("cat") not in CATS:
@@ -294,7 +297,7 @@ ANGLES = [
     ("실수",     "이미 쓰는 곳들이 흔히 저지르는 실수와 그 대가를 짚는 글. "
                  "실패 장면을 먼저 보여 주고 피하는 방법으로 넘어간다."),
     ("비용",     "돈 이야기만으로 끌고 가는 글. 눈에 보이는 값과 숨은 값을 나눠 "
-                 "3년 총액으로 따지는 법을 알려 준다. 퍼센트는 쓰지 않는다."),
+                 "3년 총액으로 따지는 법을 알려 준다. 금액과 퍼센트는 쓰지 않는다."),
     ("업종별",   "업종에 따라 답이 어떻게 갈리는지 보여 주는 글. "
                  "병원·학원·쇼핑몰·제조처럼 구체적인 현장을 놓고 설명한다."),
     ("절차",     "처음부터 끝까지 순서대로 밟아 주는 글. "
@@ -376,7 +379,8 @@ def prompt_for(keyword, links, retry_notes=None, angle=None, avoid_titles=()):
 검색 키워드 "{keyword}" 로 들어온 담당자가 읽고 바로 판단할 수 있는 글을 쓴다.
 
 [반드시 지킬 것]
-1. 아래 확정 사실에 없는 숫자(금액·기간·건수·인원)는 절대 쓰지 마라. 지어낸 금액은 광고법 문제가 된다.
+1. 금액(원·만원)은 어떤 경우에도 쓰지 마라. 본문·표·FAQ 모두. 비용 질문에는 "구성을 보고 산정한다"로 답한다.
+   아래 확정 사실에 없는 숫자(기간·건수·인원)도 쓰지 마라.
 2. ★퍼센트(%)를 아예 쓰지 마라. 지오테스는 "절감률을 몇 퍼센트라고 말하지 않는다"를
    요금 페이지에 명시한 회사다. "30% 절감" 같은 문장은 회사 방침에 정면으로 어긋난다.
 3. "전국콜비즈"를 언급하지 마라. 그쪽은 대표번호 개통 사이트이고 여기는 콜센터 구축이다.
@@ -452,7 +456,8 @@ def renders(post):
     return h
 
 
-def build(keyword, vol=0, tries=TRIES, quiet=False, angle=None, avoid_titles=()):
+def build(keyword, vol=0, tries=TRIES, quiet=False, angle=None, avoid_titles=(),
+          keep_slug=None):
     """검증까지 통과한 원고를 돌려준다. 못 만들면 None."""
     links = known_links()
     notes = None
@@ -468,7 +473,9 @@ def build(keyword, vol=0, tries=TRIES, quiet=False, angle=None, avoid_titles=())
             time.sleep(2)
             continue
 
-        bad = check(raw, keyword, avoid_titles)
+        if keep_slug:
+            raw["slug"] = keep_slug      # 다시 쓰기 — 주소는 그대로 둔다
+        bad = check(raw, keyword, avoid_titles, keep_slug)
         if not bad:
             post = to_post(raw, keyword, vol)
             try:
@@ -570,6 +577,20 @@ def main():
     args = sys.argv[1:]
     if not args:
         print(__doc__.strip())
+        return
+    if args[0] == "--rewrite":
+        # 이미 나간 글을 같은 주소·같은 키워드로 다시 쓴다 (규칙이 바뀌었을 때)
+        실패 = []
+        for slug in args[1:]:
+            옛것 = json.load(io.open(os.path.join(OUT, slug + ".json"), encoding="utf-8"))
+            print("[다시 쓰기] %s (%s)" % (slug, 옛것["kw"]))
+            post = build(옛것["kw"], vol=옛것.get("vol", 0), keep_slug=slug)
+            if not post:
+                실패.append(slug)
+                continue
+            save(post)
+        print("\n%d편 중 %d편 다시 씀%s" % (len(args) - 1, len(args) - 1 - len(실패),
+              (" / 실패: " + ", ".join(실패)) if 실패 else ""))
         return
     if args[0] == "--fill":
         autofill(int(args[1]) if len(args) > 1 else 2)
