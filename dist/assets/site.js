@@ -111,7 +111,6 @@
 
   function init() {
     로고판살리기();
-    신청버튼();
 
     if (전화되는기기()) return;   // 휴대폰 전화 버튼은 손대지 않습니다
 
@@ -120,66 +119,6 @@
       if (!a) return;
       ev.preventDefault();
       번호보이기(a.getAttribute("href").replace(/^tel:/, ""));
-    });
-  }
-
-  /* '무료 상담신청' 버튼 — 상담 페이지로 보내지 않고 그 자리에서 팝업으로 받는다.
-     글을 읽다 마음이 생긴 사람을 다른 페이지로 보내면 거기서 그만두는 일이 많다.
-     팝업은 처음 누를 때 한 번만 만들고 그다음부터는 다시 쓴다. */
-  var 신청팝업;
-
-  function 신청팝업만들기() {
-    if (신청팝업) return 신청팝업;
-
-    신청팝업 = document.createElement("div");
-    신청팝업.className = "pop";
-    신청팝업.innerHTML =
-      '<div class="pop-box wide" role="dialog" aria-modal="true" aria-label="무료 상담 신청">' +
-      '<button type="button" class="pop-x" aria-label="닫기">&times;</button>' +
-      '<form class="lead">' +
-      "<h3>무료 상담 신청</h3>" +
-      '<p class="ls">평일 09:00 – 18:00 · 1555-5528</p>' +
-      '<label for="m-company">회사명</label><input type="text" id="m-company" name="company" required>' +
-      '<label for="m-name">담당자</label><input type="text" id="m-name" name="name" required>' +
-      '<label for="m-tel">연락처</label><input type="tel" id="m-tel" name="tel" required>' +
-      '<label for="m-size">상담 인원</label>' +
-      '<select id="m-size" name="size"><option>5석 이하</option><option>6 – 20석</option>' +
-      "<option>21 – 50석</option><option>51석 이상</option><option>아직 모르겠습니다</option></select>" +
-      '<label for="m-memo">문의 내용</label>' +
-      '<textarea id="m-memo" name="memo" placeholder="지금 쓰시는 시스템이나 불편한 점을 적어주세요."></textarea>' +
-      '<div class="agree"><input type="checkbox" id="m-agree" name="agree" value="1" required>' +
-      '<label for="m-agree" style="margin:0;font-weight:500">상담을 위한 개인정보 수집·이용에 동의합니다</label></div>' +
-      '<button type="submit" class="btn btn-brand">상담 신청하기</button>' +
-      "</form></div>";
-    document.body.appendChild(신청팝업);
-
-    var 닫기 = function () { 신청팝업.classList.remove("on"); };
-    신청팝업.querySelector(".pop-x").onclick = 닫기;
-    신청팝업.onclick = function (e) { if (e.target === 신청팝업) 닫기(); };
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && 신청팝업.classList.contains("on")) 닫기();
-    });
-
-    // 폼을 붙인다. lead.js 가 없는 페이지면 팝업을 만들지 않는다(아래에서 걸러냄).
-    window.상담폼붙이기(신청팝업.querySelector("form.lead"));
-    return 신청팝업;
-  }
-
-  function 신청받기() {
-    var p = 신청팝업만들기();
-    p.classList.add("on");
-    try { p.querySelector("#m-company").focus(); } catch (e) {}
-  }
-
-  function 신청버튼() {
-    document.addEventListener("click", function (ev) {
-      var a = ev.target.closest ? ev.target.closest('a.btn[href$="/contact/"]') : null;
-      if (!a) return;
-      // lead.js 가 안 붙은 페이지에서는 그냥 상담 페이지로 보낸다.
-      // 팝업만 열리고 보내기가 안 되는 것이 제일 나쁘다.
-      if (typeof window.상담폼붙이기 !== "function") return;
-      ev.preventDefault();
-      신청받기();
     });
   }
 
