@@ -5,3 +5,5 @@ landline-callback-sms
 harang-callback-service
 callback-plus
 callback-sms-system-guide
+free-callback-mistakes
+free-callback-sms-mistakes
