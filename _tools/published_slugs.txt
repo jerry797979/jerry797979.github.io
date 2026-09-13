@@ -7,3 +7,5 @@ callback-plus
 callback-sms-system-guide
 free-callback-mistakes
 free-callback-sms-mistakes
+landline-callback-sms-mistakes
+smile-call-center-mistakes
