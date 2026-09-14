@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜백문자씨 도입 전후 자주 겪는 실수와 놓치는 운영 손실 | 지오테스</title>
+<meta name="description" content="콜백문자씨 같은 자동 발송 서비스를 쓰며 겪는 대표적인 연동 실패와 운영 실수를 짚어봅니다. 교환기 및 상담 CRM 결합 여부에 따른 차이를 확인하고 지오테스(1555-5528)에서 점검받으세요.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/callback-munjassi-mistakes/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜백문자씨 도입 전후 자주 겪는 실수와 놓치는 운영 손실">
+<meta property="og:description" content="콜백문자씨 같은 자동 발송 서비스를 쓰며 겪는 대표적인 연동 실패와 운영 실수를 짚어봅니다. 교환기 및 상담 CRM 결합 여부에 따른 차이를 확인하고 지오테스(1555-5528)에서 점검받으세요.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜백문자씨 같은 외부 발송 서비스를 쓰는 도중 지오테스로 전환할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네, 가능합니다. 기존에 쓰시던 대표번호를 그대로 유지하면서 지오테스의 IP 교환기와 CRM 연동 시스템으로 전환할 수 있습니다. 기존에 겪으셨던 통화 누락이나 수동 관리 문제를 진단한 뒤 단계적으로 이관을 도와드립니다."}},{"@type":"Question","name":"도입할 때 들어가는 비용은 어떻게 산정되나요?","acceptedAnswer":{"@type":"Answer","text":"비용은 1회 시스템 구축비, 월 회선 이용료, 별도 계약인 유지보수, 선택 항목인 부가서비스 네 가지로 구성됩니다. 상담 인원, 회선 수, 필요한 기능에 따라 다르므로 지금 쓰시는 구성을 보고 산정해 드립니다. 고객센터 1555-5528로 문의하시면 상세히 확인해 드립니다."}},{"@type":"Question","name":"지오테스 시스템을 쓰면 비용이 얼마나 절감되나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 절감률을 몇 퍼센트라고 일률적으로 말씀드리지 않습니다. 현재 사업장에서 어떤 요금제와 별도 부가서비스를 쓰고 계시는지에 따라 달라지기 때문입니다. 현재 지출 내역을 알려주시면 무엇이 없어지고 무엇이 남는지 항목별로 계산해 안내합니다."}},{"@type":"Question","name":"기존에 사용 중인 자체 CRM이 있는데 전화 기능만 붙일 수도 있나요?","acceptedAnswer":{"@type":"Answer","text":"네, 가능합니다. 지오테스가 제공하는 기본 상담 CRM을 쓰셔도 되고, 이미 사내에서 구축해 사용 중인 전용 CRM이나 ERP가 있다면 시스템을 교체할 필요 없이 API 연동을 통해 전화 발발신과 녹취, 문자 연동 기능만 얹어 드립니다."}},{"@type":"Question","name":"통화 후 자동 문자는 추가 비용을 따로 내야 합니까?","acceptedAnswer":{"@type":"Answer","text":"아닙니다. 지오테스 구축 시 통화 후 자동 문자 및 알림톡 발송 기능, 부재중 자동 알림, 오토콜, 클릭투콜, 착신번호별 브랜드 구분, 녹취 등 12가지 업무 자동화 기능은 별도 추가 비용 없이 기본으로 함께 제공됩니다. 단, 회선 통화료와 문자 발송 통신료는 별도입니다."}},{"@type":"Question","name":"약정 기간이나 도중 해지 시 위약금이 있나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 서비스에 대한 약정 기간을 강제하지 않으며 해지 위약금도 없습니다. 기술력과 시스템 안정성을 바탕으로 운영되므로 기업 환경의 변화에 따라 필요한 기간만큼 유연하게 이용하실 수 있습니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 운영</p>
+    <span class="eyebrow">콜센터 운영</span>
+    <h1>콜백문자씨 도입 후 흔히 겪는 실수와<br>그 뒤에 남는 운영 실패의 대가</h1>
+    <p class="meta">단순 발송 앱 하나만 믿고 시작했다가 상담 이력과 통화 관리가 끊어지는 이유를 짚고<br>처음부터 교환기와 CRM이 엮인 환경으로 손실을 막는 방법을 전합니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜백문자씨를 도입했는데 통화 누락이나 고객 불만이 계속 생기는 실수는 왜 발생하나요?</span>
+      <p><b>콜백문자씨</b> 같은 문자 발송 도구만 단독으로 쓰면 <b>통화 녹취, 상담 CRM, 교환기 시스템</b>과 신호가 분리되어 실수가 반복됩니다. 통화 직후 문자는 나가더라도 <span class='hl'>누가 통화했고 어떤 상담을 남겼는지 시스템에 기록되지 않아</span> 고객에게 중복 발송되거나 부재중 콜백이 엉키는 현상이 벌어집니다. 지오테스는 <b>직접 개발한 IP 교환기</b>를 통해 발송과 상담 관리를 하나로 묶어 이 문제를 원천 해결합니다.</p>
+    </div>
+    <h2>스마트폰 발송 앱 하나에 의존하다가 상담 관리가 쪼개지는 실수</h2><p>많은 사업장이 전화 응대 후 알림을 보내기 위해 <strong>콜백문자씨</strong> 같은 문자 자동 발송 도구를 설치합니다. 통화가 끝나면 자동으로 홍보 문구나 매장 위치가 전송되니 초기에는 편리하다고 여깁니다. 그러나 실제 업무가 늘어나는 순간 심각한 운영 실수가 드러납니다. 상담원이 쓰는 유선 전화기나 PC 프로그램과 스마트폰 발송 앱이 완전히 따로 움직이기 때문입니다.</p><p>고객과 통화한 내용, 이전 문의 이력, 담당자가 누구였는지는 상담 화면에 남아 있어야 정상적인 응대가 가능합니다. 하지만 전화망과 문자 발송기가 단절되어 있으면 문자는 발송되었는데 고객이 다시 전화를 걸어왔을 때 아무도 방금 전 통화 사실을 모르는 장면이 벌어집니다. 고객은 방금 문자를 받고 전화했다고 말하지만, 상담원은 수화기를 들고 이전 상담을 전혀 찾지 못해 당황하게 됩니다.</p><p>지오테스는 2006년부터 컨택센터 구축과 인터넷전화 한 분야만 파고들며 <a class='inlink' href='/solution/ipcc/'>IP-PBX 교환기</a>와 상담 프로그램을 직접 개발해 공급해 왔습니다. 통화가 끝난 즉시 시스템 안에서 번호와 매칭된 안내가 나가고, 고객의 재인입 시 이전 상담 이력이 스크린 팝업으로 즉시 떠야만 이런 기초적인 운영 누락을 끊어낼 수 있습니다.</p><h2>부재중 전화와 통화 종료 구분이 안 되어 고객 불만을 키우는 문제</h2><p>단순 문자 발송 툴을 운영할 때 담당자들이 가장 빈번하게 저지르는 실수는 <strong>통화 성공과 부재중 통화의 발송 조건을 제대로 통제하지 못하는 것</strong>입니다. 통화가 길어져 상세한 안내를 끝마쳤는데도 형식적인 기본 안내 문자가 나가거나, 반대로 통화 연결이 되지 않아 끊어졌는데 상담을 완료했다는 감사 문자가 나가는 어처구니없는 상황이 발생합니다.</p><ul><li><strong>상담 완료 건과 부재중 건의 문구 혼선</strong>: 고객이 전화를 받지 못했거나 대기 중 끊었는데도 상담 감사 문자가 발송되는 오작동</li><li><strong>중복 수신 거부 관리 누락</strong>: 하루에 여러 번 통화한 고객에게 매 통화마다 동일한 콜백 문자가 반복 발송되어 스팸 항의 유발</li><li><strong>상담사별 발송 번호 혼선</strong>: 대표번호로 들어온 호를 처리한 뒤 상담원 개인 폰 번호로 문자가 나가 사생활 노출 및 개인 연락 누적</li></ul><p>이러한 실패는 통화 교환 장비에서 내려주는 정확한 통화 종료 신호(Call End Status)를 문자 발송 서버가 읽지 못하기 때문에 일어납니다. 지오테스의 <a class='inlink' href='/solution/recording/'>전화 녹취 및 교환 시스템</a>은 통화 성공 여부, 통화 지속 시간, 착신 번호를 정확하게 판별하여 부재중 자동 알림과 통화 후 자동 문자를 명확히 분리해 내보냅니다.</p><h2>문자만 남고 녹취와 상담 이력은 증발하여 분쟁에 휘말리는 대가</h2><p>콜백 문자 서비스에만 의존하는 기업이 가장 뼈아프게 치르는 대가는 바로 <strong>고객과의 분쟁 발생 시 근거 자료가 없다</strong>는 점입니다. '문자로 안내받은 내용과 통화로 들은 설명이 다르다'며 항의가 들어왔을 때, 발송된 문자 내역만 있고 당시 녹취 데이터나 CRM 상담 메모가 연결되어 있지 않으면 회사는 일방적으로 책임을 떠안게 됩니다.</p><div class="callout"><p>문자는 발송 근거일 뿐 통화 합의 내용의 전부가 아닙니다. 녹취 파일과 상담 기록이 해당 고객 번호와 결합되어 한 화면에서 조회되지 않으면 고객 불만이 접수되었을 때 사실관계를 규명할 방법이 사라집니다.</p></div><p>지오테스는 남의 솔루션을 떼어다 파는 것이 아니라 2008년 자체 개발한 녹취 시스템을 교환기와 함께 납품합니다. 고객 번호 하나를 검색하면 발송된 문자 내역, 당시 통화 녹취 청취, 담당 상담원이 적어 둔 CRM 메모가 한 줄로 정렬됩니다. 쓰던 CRM이 이미 있는 사업장이라면 그대로 두고 전화와 녹취 기능만 붙여 주는 유연한 연동 방식을 사용합니다.</p><h2>단순 발송 방식과 올바른 컨택센터 연동 방식의 구조적 차이</h2><p>콜백 발송만을 목표로 외부 도구를 어설프게 덧붙이는 것과, 교환기 레벨에서 통화 흐름과 문자를 하나로 제어하는 환경은 운영 안정성에서 현격한 차이를 보입니다. 실패를 겪는 조직은 대부분 전화망과 발송망을 분리해 두는 실수를 범합니다.</p><div class="table-scroll"><table><thead><tr><th>구분</th><th>단순 콜백문자 도구 단독 사용</th><th>지오테스 통합 시스템 구축</th></tr></thead><tbody><tr><th>발송 제어</th><td>스마트폰 단말 또는 별도 발송기에 의존</td><td>자체 개발 IP-PBX 교환기 신호로 정밀 제어</td></tr><tr><th>이력 관리</th><td>문자 발송 여부만 별도 관리</td><td>상담 CRM, 녹취 데이터, 통계가 즉시 연동</td></tr><tr><th>회선 안정성</th><td>단일 회선이나 개인 폰 장애 시 전면 중단</td><td>통신 3사 제휴 및 24시간 이중화 서버 자동 전환</td></tr><tr><th>추가 제공</th><td>건당 발송 기능에 국한</td><td>오토콜, 통화종료 추적, 블랙리스트 등 기본 포함</td></tr></tbody></table></div><p>이러한 차이를 모르고 무작정 저렴한 단독형 도구만 찾다가는, 결국 몇 달 지나지 않아 통화 누락과 고객 항의를 견디지 못하고 시스템을 완전히 갈아엎는 이중 손실을 치르게 됩니다. <a class='inlink' href='/pricing/'>요금 안내</a>에서 확인하실 수 있듯 지오테스는 불필요한 거품을 걷어내고 상담에 꼭 필요한 기능을 묶음으로 제공합니다.</p><h2>통신 회선과 교환기를 한 곳에서 묶어 장애 위험을 차단하는 방법</h2><p>문자 발송 프로그램 따로, 인터넷전화 회선 따로, 교환기 따로 계약해서 쓰다 보면 장애가 났을 때 책임을 서로 떠넘기는 핑퐁 현상이 벌어집니다. 문자가 안 나갔을 때 통신사 망 문제인지, 발송 소프트웨어 오류인지, 내부 네트워크 문제인지 파악하지 못해 반나절 이상 응대 업무가 마비되는 실수가 반복됩니다.</p><p>지오테스는 인터넷전화 회선 공급과 교환기 개발, 상담 애플리케이션 구축을 한 손으로 직접 수행합니다. KT, LG유플러스, SK브로드밴드 통신 3사와 모두 제휴되어 있어 사업장 환경에 가장 적합한 회선을 선택해 열어 드립니다. 한 통신사에 묶이지 않고 두 곳 이상의 회선을 열어 두면 한쪽에 망 장애가 생겨도 통화와 알림 발송이 끊어지지 않고 이어집니다.</p><p>또한 365일 24시간 이중화 구성을 통해 주 서버에 이상이 생기면 백업 서버로 즉시 자동 전환됩니다. 약정 기간이나 해지 위약금을 두지 않는 것도 시스템의 실질적인 안정성과 직접 개발 기술력에 대한 확신이 있기 때문입니다. 지금 쓰는 발송 구조가 불안정하다면 <a class='inlink' href='/contact/'>상담 문의</a>를 통해 시스템 진단을 받아보시는 것이 안전합니다.</p><h2>도입 전 확인해야 할 체크리스트와 손실 없는 전환 절차</h2><p>이미 콜백 도구를 도입해 실수를 겪고 있거나 신규 구축을 저울질하고 있다면, 단순 발송 스펙을 넘어 업무 흐름 전체를 지탱할 수 있는지 검토해야 합니다. 지오테스는 120여 곳 이상의 제조, 유통, 금융, 병원, 쇼핑몰 구축 경험을 바탕으로 불필요한 실패 비용을 막아 드립니다.</p><ul><li><strong>신호 동기화 여부</strong>: 통화 성공, 부재중, 통화 대기 끊김에 따라 문자가 다르게 나갈 수 있는가</li><li><strong>상담 화면 연동 여부</strong>: 문자를 받은 고객이 회신 전화를 걸어왔을 때 이전 내역이 스크린 팝업되는가</li><li><strong>비용 구조의 투명성</strong>: 불필요한 위약금이나 숨은 약정 없이 필요한 좌석 수대로 유연하게 확장 가능한가</li><li><strong>부가 기능 기본 제공</strong>: 오토콜, 블랙리스트 관리, 필수 안내 자동 재생 등이 별도 청구 없이 포함되어 있는가</li></ul><p>지오테스는 몇 퍼센트 절감이라는 막연한 숫자를 내세우지 않습니다. 현재 운영 중인 통화량, 좌석 수, 문자 발송 건수를 검토하여 기존 구성에서 무엇이 빠지고 무엇이 남는지 항목별로 투명하게 계산해 드립니다. 전문 컨설턴트와의 유선 상담(1555-5528)을 통해 사업장에 맞는 최적의 구성을 점검해 보시기 바랍니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜백문자씨 같은 외부 발송 서비스를 쓰는 도중 지오테스로 전환할 수 있나요?</summary><div class="a">네, 가능합니다. 기존에 쓰시던 대표번호를 그대로 유지하면서 지오테스의 IP 교환기와 CRM 연동 시스템으로 전환할 수 있습니다. 기존에 겪으셨던 통화 누락이나 수동 관리 문제를 진단한 뒤 단계적으로 이관을 도와드립니다.</div></details><details><summary>도입할 때 들어가는 비용은 어떻게 산정되나요?</summary><div class="a">비용은 1회 시스템 구축비, 월 회선 이용료, 별도 계약인 유지보수, 선택 항목인 부가서비스 네 가지로 구성됩니다. 상담 인원, 회선 수, 필요한 기능에 따라 다르므로 지금 쓰시는 구성을 보고 산정해 드립니다. 고객센터 1555-5528로 문의하시면 상세히 확인해 드립니다.</div></details><details><summary>지오테스 시스템을 쓰면 비용이 얼마나 절감되나요?</summary><div class="a">지오테스는 절감률을 몇 퍼센트라고 일률적으로 말씀드리지 않습니다. 현재 사업장에서 어떤 요금제와 별도 부가서비스를 쓰고 계시는지에 따라 달라지기 때문입니다. 현재 지출 내역을 알려주시면 무엇이 없어지고 무엇이 남는지 항목별로 계산해 안내합니다.</div></details><details><summary>기존에 사용 중인 자체 CRM이 있는데 전화 기능만 붙일 수도 있나요?</summary><div class="a">네, 가능합니다. 지오테스가 제공하는 기본 상담 CRM을 쓰셔도 되고, 이미 사내에서 구축해 사용 중인 전용 CRM이나 ERP가 있다면 시스템을 교체할 필요 없이 API 연동을 통해 전화 발발신과 녹취, 문자 연동 기능만 얹어 드립니다.</div></details><details><summary>통화 후 자동 문자는 추가 비용을 따로 내야 합니까?</summary><div class="a">아닙니다. 지오테스 구축 시 통화 후 자동 문자 및 알림톡 발송 기능, 부재중 자동 알림, 오토콜, 클릭투콜, 착신번호별 브랜드 구분, 녹취 등 12가지 업무 자동화 기능은 별도 추가 비용 없이 기본으로 함께 제공됩니다. 단, 회선 통화료와 문자 발송 통신료는 별도입니다.</div></details><details><summary>약정 기간이나 도중 해지 시 위약금이 있나요?</summary><div class="a">지오테스는 서비스에 대한 약정 기간을 강제하지 않으며 해지 위약금도 없습니다. 기술력과 시스템 안정성을 바탕으로 운영되므로 기업 환경의 변화에 따라 필요한 기간만큼 유연하게 이용하실 수 있습니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

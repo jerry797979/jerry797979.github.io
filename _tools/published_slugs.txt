@@ -9,3 +9,5 @@ free-callback-mistakes
 free-callback-sms-mistakes
 landline-callback-sms-mistakes
 smile-call-center-mistakes
+callback-munjassi-mistakes
+callback-plus-mistakes
