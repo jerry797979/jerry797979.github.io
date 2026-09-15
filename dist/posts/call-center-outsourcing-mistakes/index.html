@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜센터 아웃소싱 흔한 실패 원인과 시스템 통제권 | 지오테스</title>
+<meta name="description" content="콜센터 아웃소싱 도입 후 데이터 누락과 품질 하락을 겪는 기업이 많습니다. 인력 위탁에만 의존하다 통제권을 잃는 실수를 짚고 인프라를 직접 쥐는 해법을 전합니다. 구축 상담 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/call-center-outsourcing-mistakes/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜센터 아웃소싱 흔한 실패 원인과 시스템 통제권">
+<meta property="og:description" content="콜센터 아웃소싱 도입 후 데이터 누락과 품질 하락을 겪는 기업이 많습니다. 인력 위탁에만 의존하다 통제권을 잃는 실수를 짚고 인프라를 직접 쥐는 해법을 전합니다. 구축 상담 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜센터 아웃소싱을 할 때 시스템까지 대행사에 맡기면 왜 위험한가요?","acceptedAnswer":{"@type":"Answer","text":"상담 녹취, 고객 통화 이력, 통계 데이터가 모두 외주 업체의 시스템에 귀속되기 때문입니다. 업체를 변경하거나 계약을 종료할 때 과거 데이터가 유실되어 상담 품질 유지가 불가능해집니다."}},{"@type":"Question","name":"아웃소싱 인력만 쓰고 시스템은 지오테스로 구축할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"가능합니다. 본사에 교환기와 녹취 시스템을 갖추고 외주 상담원에게는 웹 기반 상담 프로그램 접속 권한만 열어주면 됩니다. 모든 데이터는 본사에 쌓이며 응대 현황도 실시간 통제됩니다."}},{"@type":"Question","name":"기존에 사용 중인 고객 관리 CRM이 있는데 연동이 가능한가요?","acceptedAnswer":{"@type":"Answer","text":"쓰시던 CRM을 그대로 두고 전화 기능만 붙이는 CTI 연동 방식을 지원합니다. 고객 전화가 걸려왔을 때 기존 CRM 창이 모니터에 바로 뜨도록 구성할 수 있습니다."}},{"@type":"Question","name":"콜센터 시스템 도입 비용은 어떻게 계산되나요?","acceptedAnswer":{"@type":"Answer","text":"비용은 시스템 구축 1회 비용, 월 회선 이용료, 유지보수, 선택 부가서비스 항목으로 구성됩니다. 상담 인원과 회선 수에 따라 달라지므로 현재 구성을 확인한 뒤 정확히 산정해 드립니다."}},{"@type":"Question","name":"아웃소싱 좌석이 늘어나거나 줄어들 때 계약 조건은 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 약정 기간과 위약금이 없습니다. 좌석을 늘리면 좌석당 비용만 추가되며 상담 인력의 변동에 따라 유연하게 시스템 규모를 조정할 수 있습니다."}},{"@type":"Question","name":"통화 장애가 났을 때 본사 업무 중단을 막는 장치가 있나요?","acceptedAnswer":{"@type":"Answer","text":"365일 24시간 이중화 구성을 통해 장애 발생 시 백업 서버로 자동 전환됩니다. 회선 역시 통신사 두 곳 이상에 열어두어 한쪽 망에 장애가 발생해도 통화가 끊기지 않고 이어집니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 운영</p>
+    <span class="eyebrow">콜센터 운영</span>
+    <h1>콜센터 아웃소싱의 흔한 실수,<br>통제권 없는 위탁은 데이터 단절을 부릅니다</h1>
+    <p class="meta">인력만 외주로 넘기면 통화 기록과 고객 흐름이 외부 업체에 묶입니다.<br>회사의 핵심 자산인 교환기와 녹취 인프라를 직접 통제해야 실패를 피합니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜센터 아웃소싱을 맡겼는데 통화 품질 관리가 안 되고 데이터가 쌓이지 않는 이유는 무엇인가요?</span>
+      <p><b>콜센터 아웃소싱 실패의 대부분은 시스템 통제권을 외주사에 통째로 넘겨버렸기 때문에 발생합니다.</b> 상담원 인력만 위탁해야 하는데 통화 녹취, 교환기, 상담 기록까지 대행사 인프라에 의존하면 <span class='hl'>현장 통화 내용을 확인하지 못하고 데이터가 단절</span>됩니다. <b>상담 시스템과 전화 회선은 본사가 직접 소유</b>하고, 외주 인력은 해당 시스템에 접속해 응대만 하도록 통제 구조를 세워야 합니다.</p>
+    </div>
+    <h2>상담원과 시스템을 한꺼번에 맡길 때 벌어지는 단절</h2><p>상담 업무를 외부에 넘기려는 기업이 가장 먼저 저지르는 실수는 상담 인력과 상담 시스템을 하나의 묶음으로 넘겨버리는 일입니다. 상담 대행업체가 자체 교환기와 프로그램을 쓰겠다고 제안하면 담당자는 손을 덜었다고 생각하기 쉽습니다. 그러나 이 순간부터 본사는 우리 고객이 어떤 말로 항의하고 어떤 단계에서 이탈하는지 실시간으로 들여다볼 수 있는 창구를 잃어버립니다.</p><p>외주사 월간 보고서에 적힌 통화 성공 건수나 단순 응대 건수만 받아보는 구조에서는 상담 품질이 왜 떨어지는지 원인을 짚어낼 수 없습니다. 고객 불만이 폭주해 사실관계를 확인하려 해도 통화 녹취 파일을 외주사에 매번 공문이나 이메일로 요청해 며칠 뒤에야 전달받는 상황이 벌어집니다. 이미 고객의 신뢰가 무너진 뒤입니다.</p><div class="callout"><p>인력은 외부에 위탁하더라도 교환기, 통화 녹취, 상담 통계 시스템은 반드시 본사의 자산으로 통제해야 합니다. 인프라를 남의 손에 쥐여주면 외주 업체를 바꾸려 할 때 지난 상담 데이터까지 모두 유실됩니다.</p></div><h2>업체를 바꾸려 할 때 통화 기록과 상담 이력이 묶인다</h2><p>응대 품질 저하나 소통 부재로 인해 다른 아웃소싱 업체로 전환하려 할 때 두 번째 치명적인 실수가 드러납니다. 이전 대행사의 시스템에만 쌓아둔 상담 메모, 통화 녹취, 고객별 접촉 이력을 온전하게 넘겨받지 못하는 상황입니다. 데이터베이스 구조가 다르고 대행사가 원본 데이터를 폐쇄적으로 관리하기 때문에 새 업체는 완전히 백지상태에서 상담을 시작해야 합니다.</p><p>이는 고스란히 재구축 비용과 재교육 시간의 낭비로 이어집니다. <a class='inlink' href='/posts/call-center-outsourcing-vs-inhouse/'>콜센터 아웃소싱과 자체 운영 비교</a>를 고민할 때 많은 기업이 인건비만 따지고 이러한 데이터 종속 리스크를 계산에서 빠뜨립니다. 핵심 자산인 고객 접점 데이터가 외부 업체에 볼모로 잡히는 꼴입니다.</p><ul><li><strong>이력 단절</strong>: 대행사를 변경하는 즉시 과거 수년간 축적된 녹취 파일과 상세 상담 메모 확인 불가</li><li><strong>표준 부재</strong>: 외주사마다 제각각인 상담 화면과 데이터 규격으로 인해 일관된 고객 분석 실패</li><li><strong>이전 부담</strong>: 시스템 소유권이 없어 업체를 바꾸고 싶어도 위약금이나 전환 공백 때문에 울며 겨자 먹기로 유지</li></ul><h2>장애 발생 시 책임 공방으로 멈추는 전화망</h2><p>전화 회선과 교환기 구성을 외주사에 전적으로 맡겨두면 통화 장애가 터졌을 때 즉각 대처할 수 없습니다. 전화가 끊기거나 통화 연결음이 먹통이 되었을 때, 외주 대행사는 통신사 망 문제라고 주장하고 통신사는 구내 장비 문제라고 떠넘기며 본사 담당자만 중간에서 발을 구르는 장면이 흔하게 발생합니다.</p><p>지오테스는 이러한 단절과 책임 공방을 원천 차단하기 위해 본사가 회선과 시스템을 쥐는 방식을 제안합니다. 지오테스는 2006년부터 통신 회선과 IP 교환기를 직접 다뤄왔으며, KT, LG유플러스, SK브로드밴드 통신 3사와 모두 제휴하여 조건에 맞는 회선을 직접 공급합니다. 통신사 두 곳 이상에 회선을 열어 두면 한쪽에 장애가 발생해도 통화가 끊기지 않고 이어지는 구조를 만듭니다.</p><div class="table-scroll"><table><thead><tr><th>구분</th><th>외주사 시스템 의존 방식</th><th>지오테스 시스템 자산화 방식</th></tr></thead><tbody><tr><th>시스템 소유권</th><td>외주 대행사 소유 (접근 제한)</td><td>본사 소유 (직접 통제)</td></tr><tr><th>녹취 및 상담 이력</th><td>업체 변경 시 폐기되거나 회수 불가</td><td>본사 서버에 영구 보관</td></tr><tr><th>장애 대응</th><td>대행사-통신사 간 책임 떠넘기기</td><td>365일 24시간 이중화 자동 전환</td></tr><tr><th>계약 구속력</th><td>연 단위 의무 약정 및 위약금 발생</td><td>약정 기간 없음, 위약금 없음</td></tr></tbody></table></div><h2>시스템을 직접 구축하고 인력만 외주에 열어주는 구조</h2><p>콜센터 아웃소싱의 실수를 피하는 가장 정확한 방법은 <a class='inlink' href='/solution/ipcc/'>구축형 컨택센터 솔루션</a>을 본사가 마련하고, 외주 상담원에게는 해당 시스템의 상담 화면만 접속 권한으로 부여하는 것입니다. 이렇게 하면 상담원이 외주사 소속이든 재택근무자이든 상관없이 모든 통화 녹취와 상담 메모는 본사의 <a class='inlink' href='/solution/crm/'>고객관리 CRM</a>에 실시간으로 기록됩니다.</p><p>지오테스는 IP 교환기(IP-PBX)와 상담 애플리케이션을 외부 솔루션 유통이 아닌 자체 기술로 직접 개발합니다. 2013년 필리핀 클락에 콜센터를 직접 설립해 운영해 본 경험이 있기에, 관리자가 어떤 통계와 현황판을 보아야 상담 품질을 통제할 수 있는지 시스템에 정확히 반영해 두었습니다.</p><p>본사 구축 시스템 안에는 스크린 팝업, 통화 녹취, 실시간 현황판이 기본 포함되어 있어 관리자가 실시간으로 외주 인력의 응대 흐름을 점검할 수 있습니다. 외주 상담원이 자리를 비우거나 응대 지연이 발생하는지 본사 관리 화면에서 즉각 파악되므로 위탁 운영 중에도 엄격한 품질 관리가 가능해집니다.</p><h2>추가 개발비 없이 제공되는 현장 관리 장치</h2><p>외주 운영 시 흔히 겪는 상담 분쟁과 안내 누락을 막기 위한 기능들도 따로 구매할 필요가 없습니다. 지오테스는 상담 품질과 고객 관리에 필요한 12가지 기능을 추가 비용 없이 함께 제공합니다. 필수 안내 문구 자동 재생, 악성 민원을 줄여주는 욕설 방지 안내, 통화 종료 추적 기능이 기본으로 작동하여 외주 인력의 개인 편차로 인한 사고를 미연에 방지합니다.</p><p>착신번호별 구분과 브랜드별 발신번호 관리를 통해 여러 브랜드를 동시에 외주 운영할 때도 상담원이 고객 유입 경로를 화면에서 즉시 확인하고 맞춤 응대를 펼칠 수 있습니다. 필요에 따라 <a class='inlink' href='/solution/aicc/'>AI 컨택센터 기능</a>이나 보이는 ARS를 선택해 추가함으로써 상담원의 단순 반복 업무를 분산시키는 고도화도 가능합니다.</p><p>약정 기간이 없고 위약금이 없기 때문에 사업 환경 변화에 따라 좌석 수를 자유롭게 조정할 수 있습니다. 인력 규모가 바뀌더라도 본사의 통화 시스템은 그대로 유지되므로, 아웃소싱 인력을 늘리거나 줄이더라도 좌석당 라이선스만 유연하게 맞추면 됩니다.</p><h2>도입 전 확인해야 할 통제권 점검 기준</h2><p>콜센터 아웃소싱 계약서에 도장을 찍기 전, 우리 회사가 상담 시스템의 주도권을 쥐고 있는지 다음 기준을 통해 점검해야 합니다. 이 질문들에 명확히 답할 수 없다면 머지않아 데이터 유실과 품질 저하라는 대가를 치르게 됩니다.</p><ul><li><strong>실시간 청취 및 통계</strong>: 외주사 관리자를 거치지 않고 본사 담당자가 지금 통화 중인 현황과 녹취를 직접 확인할 수 있는가</li><li><strong>녹취 파일 영구 소유</strong>: 계약이 종료되더라도 본사 저장소에 모든 고객과의 대화 기록이 온전히 남아있는가</li><li><strong>인프라 이중화</strong>: 365일 24시간 무중단 운영을 위한 백업 서버와 이원화된 통신 회선이 갖춰져 있는가</li><li><strong>확장 유연성</strong>: 외주 업체를 교체하더라도 기존 시스템과 CRM 환경을 그대로 이어갈 수 있는가</li></ul><p>지금 검토 중인 운영 방식의 비용과 구성이 궁금하시다면 <a class='inlink' href='/pricing/'>비용 산정 체계 안내</a>를 확인하시거나 고객센터(1555-5528)로 문의해 주십시오. 현재 상담 인원과 회선 수, 필요한 기능을 보고 불필요하게 낭비되는 항목을 가려내어 정확한 구성을 산정해 드립니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜센터 아웃소싱을 할 때 시스템까지 대행사에 맡기면 왜 위험한가요?</summary><div class="a">상담 녹취, 고객 통화 이력, 통계 데이터가 모두 외주 업체의 시스템에 귀속되기 때문입니다. 업체를 변경하거나 계약을 종료할 때 과거 데이터가 유실되어 상담 품질 유지가 불가능해집니다.</div></details><details><summary>아웃소싱 인력만 쓰고 시스템은 지오테스로 구축할 수 있나요?</summary><div class="a">가능합니다. 본사에 교환기와 녹취 시스템을 갖추고 외주 상담원에게는 웹 기반 상담 프로그램 접속 권한만 열어주면 됩니다. 모든 데이터는 본사에 쌓이며 응대 현황도 실시간 통제됩니다.</div></details><details><summary>기존에 사용 중인 고객 관리 CRM이 있는데 연동이 가능한가요?</summary><div class="a">쓰시던 CRM을 그대로 두고 전화 기능만 붙이는 CTI 연동 방식을 지원합니다. 고객 전화가 걸려왔을 때 기존 CRM 창이 모니터에 바로 뜨도록 구성할 수 있습니다.</div></details><details><summary>콜센터 시스템 도입 비용은 어떻게 계산되나요?</summary><div class="a">비용은 시스템 구축 1회 비용, 월 회선 이용료, 유지보수, 선택 부가서비스 항목으로 구성됩니다. 상담 인원과 회선 수에 따라 달라지므로 현재 구성을 확인한 뒤 정확히 산정해 드립니다.</div></details><details><summary>아웃소싱 좌석이 늘어나거나 줄어들 때 계약 조건은 어떻게 되나요?</summary><div class="a">지오테스는 약정 기간과 위약금이 없습니다. 좌석을 늘리면 좌석당 비용만 추가되며 상담 인력의 변동에 따라 유연하게 시스템 규모를 조정할 수 있습니다.</div></details><details><summary>통화 장애가 났을 때 본사 업무 중단을 막는 장치가 있나요?</summary><div class="a">365일 24시간 이중화 구성을 통해 장애 발생 시 백업 서버로 자동 전환됩니다. 회선 역시 통신사 두 곳 이상에 열어두어 한쪽 망에 장애가 발생해도 통화가 끊기지 않고 이어집니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
