@@ -13,3 +13,5 @@ callback-munjassi-mistakes
 callback-plus-mistakes
 call-center-outsourcing-mistakes
 harang-callback-service-mistakes
+free-callback-cost-structure
+free-callback-sms-cost
