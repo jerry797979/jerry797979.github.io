@@ -15,3 +15,5 @@ call-center-outsourcing-mistakes
 harang-callback-service-mistakes
 free-callback-cost-structure
 free-callback-sms-cost
+landline-callback-sms-total-cost
+smile-call-center-cost
