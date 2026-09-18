@@ -17,3 +17,5 @@ free-callback-cost-structure
 free-callback-sms-cost
 landline-callback-sms-total-cost
 smile-call-center-cost
+callback-munjassi-total-cost
+callback-plus-total-cost
