@@ -19,3 +19,5 @@ landline-callback-sms-total-cost
 smile-call-center-cost
 callback-munjassi-total-cost
 callback-plus-total-cost
+call-center-outsourcing-cost
+harang-callback-total-cost
