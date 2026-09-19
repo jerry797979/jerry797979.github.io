@@ -17,7 +17,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 CRM = "https://keyword-crm.marketwave99.workers.dev"
-KEY = "partner-436f9e16fb0dff6b01c0"
+def _read_key():
+    """CRM 거래처 열쇠는 저장소에 넣지 않는다 (공개 저장소라서 — 2026-09-19 보안 점검).
+    환경변수 CRM_PARTNER_KEY 또는 _tools/secrets.json 의 "crm_partner_key" 에서 읽는다.
+    secrets.json 은 .gitignore 에 있어 GitHub 에 안 올라간다."""
+    k = os.environ.get("CRM_PARTNER_KEY", "").strip()
+    if k:
+        return k
+    try:
+        with open(os.path.join(HERE, "secrets.json"), encoding="utf-8") as f:
+            return str(json.load(f).get("crm_partner_key", "")).strip()
+    except (OSError, ValueError):
+        return ""
+
+
+KEY = _read_key()
+if not KEY:
+    print("⚠ CRM 열쇠가 없습니다 — _tools/secrets.json 에 crm_partner_key 를 넣어 주세요", file=sys.stderr)
 # 2026-09-03: 콜비즈가 지오테스(4) 밑에서 독립 업체(6)로 떨어져 나갔는데 여기가 4로
 # 남아 있었다. geo-autopick 은 "company_id=4 AND group_id=2" 로 찾는데 그런 키워드는
 # 한 건도 없어서(그룹2는 전부 회사6) 588개를 두고도 "키워드가 없다"며 발행이 멈췄다.

@@ -19,3 +19,10 @@ _ziotes_이미지수정/
 _tools/.post_key
 _tools/daily_post.log
 _tools/daily_post.stdout.log
+
+# 비밀값 — 공개 저장소라 절대 올리지 않는다 (2026-09-19 보안 점검)
+_tools/secrets.json
+_tools/telegram.json
+.env
+.env.*
+*.pem
