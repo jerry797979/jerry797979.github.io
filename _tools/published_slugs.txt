@@ -21,3 +21,5 @@ callback-munjassi-total-cost
 callback-plus-total-cost
 call-center-outsourcing-cost
 harang-callback-total-cost
+free-callback-by-industry
+free-callback-sms-by-industry

@@ -273,6 +273,11 @@ def main():
                     log("CRM 완료 보고: %s" % slug)
             except Exception as ex:
                 log("CRM 보고 실패(무시) %s: %s" % (slug, ex))
+        try:
+            r = crm_sync.report_site_posts([p for p in todo if p["slug"] in 보냄])
+            log("CRM 홈페이지 현황 보고: %s" % r)
+        except Exception as ex:
+            log("CRM 홈페이지 현황 보고 실패(무시): %s" % ex)
 
     # 실제로 열리는지 확인 — 404를 다음 날까지 모르는 일이 없게
     dead = []

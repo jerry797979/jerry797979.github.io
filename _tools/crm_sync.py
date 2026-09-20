@@ -133,6 +133,18 @@ def report_done_by_slug(slug):
     return False   # CRM 대기열에 없으면 조용히 넘어감(이미 보고됨)
 
 
+def report_site_posts(posts):
+    """홈페이지에 올린 글을 CRM 홈페이지 현황에 남긴다 (2026-09-19).
+    report_done_by_slug 는 CRM 대기열에 있는 키워드만 보고해서, 쓰던 키워드를
+    다시 쓴 글은 CRM에 안 잡혔다. 이건 키워드와 상관없이 올린 글 전부를 보낸다.
+    posts: [{"slug", "title", "kw"}]"""
+    items = [{"url": "%s/posts/%s/" % (LIVE, p["slug"]), "title": p.get("title"),
+              "keyword": p.get("kw")} for p in posts]
+    if not items:
+        return None
+    return _call("/api/partner/site-post", {"items": items})
+
+
 def compare():
     lm = local_map()
     have, new = [], []

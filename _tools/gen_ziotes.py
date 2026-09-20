@@ -500,22 +500,78 @@ def save(post):
 
 
 # ── CRM 연동 ─────────────────────────────────────────
-def crm_keywords(need):
-    """CRM 대기열에서 아직 글이 없는 키워드를 need 개 가져온다"""
+# ── 비슷한 키워드 거르기 (2026-09-19) ────────────────────
+# 'LG유플러스전국대표번호'와 이미 쓴 '엘지전국대표번호'는 같은 글이 된다. 그대로 쓰면
+# 슬러그가 겹치고 4번 모두 반려돼 그날 한 편이 비었다. 통신사 부르는 말을 하나로 맞춰
+# 띄어쓰기 없이 비교하고, 같으면 CRM에 '비슷한 글 있음'으로 적어 다시 안 걸리게 한다.
+_같은말 = [("lgu플러스", "lg"), ("lgu+", "lg"), ("u+", "lg"), ("대표전화", "대표번호"), ("lg유플러스", "lg"), ("엘지유플러스", "lg"), ("유플러스", "lg"), ("엘지", "lg"),
+          ("에스케이티", "sk"), ("skt", "sk"), ("에스케이", "sk"), ("케이티", "kt")]
+
+
+def _키워드뼈대(kw):
+    k = re.sub(r"\s+", "", kw or "").lower()
+    for a, b in _같은말:
+        k = k.replace(a, b)
+    return k
+
+
+def _이미쓴뼈대():
+    """이미 쓴 글: 키워드 뼈대 -> slug"""
     import crm_sync
-    have, new = crm_sync.compare()
-    if len(new) < need:
+    뼈대 = {}
+    try:
+        for k, (slug, _t) in crm_sync.local_map().items():
+            뼈대.setdefault(_키워드뼈대(k), slug)
+    except Exception as e:
+        print("기존 글 목록 읽기 실패(무시): %s" % e)
+    if os.path.isdir(OUT):
+        for f in os.listdir(OUT):
+            if not f.endswith(".json"):
+                continue
+            try:
+                j = json.load(io.open(os.path.join(OUT, f), encoding="utf-8"))
+                if j.get("kw"):
+                    뼈대.setdefault(_키워드뼈대(j["kw"]), j.get("slug"))
+            except Exception:
+                pass
+    return 뼈대
+
+
+def crm_keywords(need, exclude=()):
+    """CRM 대기열에서 아직 글이 없는 키워드를 need 개 가져온다.
+    이미 쓴 글과 주제가 같은 키워드는 건너뛰고, exclude 에 든 키워드(오늘 이미 해 본 것)도 뺀다."""
+    import crm_sync
+    쓴것 = _이미쓴뼈대()
+    고른 = []
+    for 차례 in range(2):          # 걸러서 모자라면 자동 선별로 한 번 더 채운다
+        have, new = crm_sync.compare()
+        고른 = []
+        for kid, kw in new:
+            if kw in exclude:
+                continue
+            겹침 = 쓴것.get(_키워드뼈대(kw))
+            if 겹침:
+                print("  건너뜀 — '%s' 는 이미 쓴 글(%s)과 같은 주제" % (kw, 겹침))
+                try:
+                    crm_sync._call("/api/partner/geo-fail", {"id": kid, "msg": "비슷한 글 있음: %s" % 겹침})
+                except Exception as e:
+                    print("  CRM에 건너뜀 기록 실패(무시): %s" % e)
+                continue
+            고른.append((kid, kw))
+        if len(고른) >= need or 차례:
+            break
         try:
-            body = {"need": need - len(new), "company_id": crm_sync.COMPANY}
+            body = {"need": need - len(고른), "company_id": crm_sync.COMPANY}
+            # 그룹까지 줘야 이 사이트 키워드만 뽑힌다 (crm_sync.GROUP 참고)
             if getattr(crm_sync, "GROUP", None):
                 body["group"] = crm_sync.GROUP
             if AUTOPICK_LIKE:
                 body["like"] = AUTOPICK_LIKE
             crm_sync._call("/api/partner/geo-autopick", body)
-            have, new = crm_sync.compare()
-        except Exception as ex:
-            print("자동 선별 실패(무시): %s" % ex)
-    return new[:need]
+        except Exception as e:
+            print("자동 선별 실패(무시): %s" % e)
+            break
+    return 고른[:need]
 
 
 def _만들어저장(일감, made, need, quiet):
@@ -562,14 +618,31 @@ def autofill(need, quiet=False):
 
     _만들어저장(일감, made, need, quiet)
 
-    # 키워드는 있었는데 생성이 실패해 모자란 경우 — 쓰던 키워드로 한 번 더 메운다.
-    # 키워드가 없어서 못 쓰는 것과 글이 안 나와서 못 쓰는 것은 다른 일이다.
+    # 3) 키워드는 있었는데 생성이 실패해 모자란 경우
+    #    2026-09-04: 재활용 경로가 '키워드가 모자랄 때'만 열려 있어서 창고를 두고도 발행이 쉬었다.
+    #    2026-09-19: 쓰던 키워드로만 메우다 그것도 반려돼 한 편이 비었다. 새 키워드가 남아
+    #    있으면 새 키워드로 먼저 한 번 더 쓰고, 그래도 모자랄 때만 쓰던 키워드로 메운다.
+    해본것 = {kw for kw, _a, _t, _v in 일감}
     if len(made) < need:
-        쓴것 = {kw for kw, _, _, _ in 일감}
-        추가 = [x for x in reuse_keywords(need * 2) if x[0] not in 쓴것]
-        if 추가:
-            print("생성 실패분 %d개를 쓰던 키워드로 다시 메웁니다" % (need - len(made)))
-            _만들어저장(추가, made, need, quiet)
+        모자란수 = need - len(made)
+        새것 = []
+        try:
+            새것 = [(kw, None, (), 0) for _id, kw in crm_keywords(모자란수, exclude=해본것)]
+        except Exception as e:
+            print("새 키워드 다시 받기 실패(무시): %s" % e)
+        if 새것:
+            print("생성 실패로 %d개 모자랍니다 — 새 키워드 %d개로 한 번 더 씁니다" % (모자란수, len(새것)))
+            _만들어저장(새것, made, need, quiet)
+            해본것 |= {x[0] for x in 새것}
+    if len(made) < need:
+        모자란수 = need - len(made)
+        보충 = [x for x in reuse_keywords(모자란수 + len(해본것))
+                if x[0] not in 해본것][:모자란수]
+        if 보충:
+            print("그래도 %d개 모자랍니다 — 쓰던 키워드 %d개를 다른 각도로 메웁니다" % (모자란수, len(보충)))
+            _만들어저장(보충, made, need, quiet)
+        else:
+            print("메울 키워드가 없습니다 — 이미 모든 키워드에 각도별 글이 다 있습니다")
     return made
 
 
