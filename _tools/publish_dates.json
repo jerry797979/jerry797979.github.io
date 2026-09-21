@@ -23,5 +23,7 @@
   "call-center-outsourcing-cost": "2026-09-19",
   "harang-callback-total-cost": "2026-09-19",
   "free-callback-by-industry": "2026-09-20",
-  "free-callback-sms-by-industry": "2026-09-20"
+  "free-callback-sms-by-industry": "2026-09-20",
+  "landline-callback-sms-by-industry": "2026-09-21",
+  "smile-call-center-by-industry": "2026-09-21"
 }

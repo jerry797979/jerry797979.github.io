@@ -23,3 +23,5 @@ call-center-outsourcing-cost
 harang-callback-total-cost
 free-callback-by-industry
 free-callback-sms-by-industry
+landline-callback-sms-by-industry
+smile-call-center-by-industry
