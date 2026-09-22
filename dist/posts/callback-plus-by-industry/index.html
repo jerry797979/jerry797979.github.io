@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜백플러스 업종별 적용 차이, 병원·학원·쇼핑몰·제조는 답이 다르다 | 지오테스</title>
+<meta name="description" content="콜백플러스를 병원·학원·쇼핑몰·제조 현장에 넣으면 필요한 구성이 각각 달라진다. 업종별로 부재중 처리 방식, 발신번호, 회선 수, 연동 지점이 어떻게 갈리는지 정리했다. 상담은 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/callback-plus-by-industry/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜백플러스 업종별 적용 차이, 병원·학원·쇼핑몰·제조는 답이 다르다">
+<meta property="og:description" content="콜백플러스를 병원·학원·쇼핑몰·제조 현장에 넣으면 필요한 구성이 각각 달라진다. 업종별로 부재중 처리 방식, 발신번호, 회선 수, 연동 지점이 어떻게 갈리는지 정리했다. 상담은 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜백플러스 같은 콜백 기능은 업종마다 설정이 다른가요?","acceptedAnswer":{"@type":"Answer","text":"다릅니다. 병원은 회신 담당과 마감 기준, 학원은 이전 상담자 기준 배정, 쇼핑몰은 인입을 줄이는 자동 안내, 제조는 발주와 AS 갈래 분리가 먼저입니다. 기능 이름은 같아도 붙이는 자리가 달라집니다."}},{"@type":"Question","name":"병원인데 진료 시간 외에 들어온 전화는 어떻게 처리되나요?","acceptedAnswer":{"@type":"Answer","text":"인입 즉시 자동 안내 문자가 나가고 회신 대기 건으로 남습니다. 다음 진료 시작 때 데스크 화면에 처리해야 할 목록으로 뜨고, 회신이 끝나야 목록에서 빠집니다. 착신번호가 여럿이면 번호별로 나눠 볼 수 있습니다."}},{"@type":"Question","name":"학원에서 상담했던 선생님에게 다시 연결되게 할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"가능합니다. 걸려 온 번호로 이전 상담 이력과 담당자를 찾아 화면에 띄우고, 회신 건도 그 담당자 대기열로 보냅니다. 담당자가 수업 중이면 다른 상담원이 이력을 보면서 받도록 구성합니다."}},{"@type":"Question","name":"쇼핑몰인데 행사 때만 전화가 몰립니다. 콜백만 붙이면 되나요?","acceptedAnswer":{"@type":"Answer","text":"콜백만으로는 회신 목록이 다음 날로 밀립니다. 주문번호 기준 ARS 안내, 통화 후 자동 문자, 알림톡으로 인입 자체를 먼저 줄이고 남는 통화량을 기준으로 콜백을 설계하는 편이 낫습니다."}},{"@type":"Question","name":"제조업인데 본사와 공장이 떨어져 있어도 한 시스템으로 묶이나요?","acceptedAnswer":{"@type":"Answer","text":"묶입니다. 지오테스는 IP 교환기를 직접 개발하고 인터넷전화 회선도 직접 공급하기 때문에 거점별 회선과 내선 구성을 한 자리에서 잡습니다. 통신사 두 곳 이상에 회선을 열어 두면 한쪽 장애 때도 통화가 이어집니다."}},{"@type":"Question","name":"업종별로 비용 차이가 큰가요?","acceptedAnswer":{"@type":"Answer","text":"업종보다는 상담 인원과 회선 수, 필요한 기능에 따라 달라집니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 지금 쓰시는 구성을 보고 항목별로 산정해 드리니 1555-5528로 문의하시면 됩니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 구축</p>
+    <span class="eyebrow">콜센터 구축</span>
+    <h1>콜백플러스, 업종이 다르면<br>필요한 구성도 달라진다</h1>
+    <p class="meta">같은 콜백이라도 병원과 쇼핑몰은 쓰는 자리가 다르다.<br>업종별 현장을 놓고 무엇이 달라지는지 정리했다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜백플러스 업종마다 다르게 써야 하나요?</span>
+      <p>같은 기능이라도 <b>업종마다 쓰는 자리가 다릅니다</b>. 병원은 놓친 예약 문의를 다시 잡는 쪽, 학원은 상담 학부모를 특정 선생님에게 되돌리는 쪽, 쇼핑몰은 몰려드는 주문 문의를 순서대로 처리하는 쪽, 제조는 대리점·AS 접수를 담당 기술자에게 붙이는 쪽입니다. 그래서 <span class='hl'>회선 수·발신번호 구성·연동 지점이 업종마다 다르게 잡힙니다</span>. 지오테스는 지금 쓰시는 구성을 보고 어느 자리에 무엇이 필요한지부터 확인합니다.</p>
+    </div>
+    <h2>업종이 다르면 &#x27;놓친 전화&#x27;의 의미부터 다르다</h2><p>콜백을 알아보는 담당자들은 대체로 같은 말로 시작한다. 전화를 다 못 받는다는 것이다. 그런데 자리에 앉아 통화 기록을 뜯어 보면 못 받은 전화가 무엇이었는지가 업종마다 전혀 다르다. 병원에서 놓친 전화는 대개 <strong>예약을 잡으려던 사람</strong>이고, 쇼핑몰에서 놓친 전화는 <strong>이미 결제한 주문의 배송 문의</strong>다. 하나는 아직 고객이 아닌 사람이고, 하나는 이미 돈을 낸 사람이다.</p><p>이 차이는 곧바로 시스템 구성으로 이어진다. 예약 문의는 늦게 다시 걸어도 상당수가 살아난다. 배송 문의는 늦게 걸면 이미 화가 나 있거나 다른 채널로 항의가 넘어가 있다. 앞의 경우는 콜백 큐를 여유 있게 잡아도 되지만, 뒤의 경우는 대기 자리 자체를 줄이는 인입 설계가 먼저다.</p><p>그래서 콜백플러스 같은 이름으로 검색해 들어온 담당자에게 가장 먼저 물어보는 건 기능 목록이 아니라 '지난주에 못 받은 전화가 어떤 전화였는지'다. 업종별 구성 사례는 <a class='inlink' href='/industries/'>업종별 페이지</a>에 구분해 두었다.</p><ul><li><strong>병원</strong> — 진료 중 못 받은 예약·검사 문의, 진료 시간 외 인입</li><li><strong>학원</strong> — 수업 시간에 몰린 학부모 상담 전화</li><li><strong>쇼핑몰</strong> — 행사·배송 지연 때 순간적으로 터지는 주문 문의</li><li><strong>제조</strong> — 대리점 발주와 AS 접수가 같은 번호로 섞여 들어옴</li></ul><h2>병원은 &#x27;누가 다시 거느냐&#x27;가 콜백의 절반이다</h2><p>병원에서 콜백을 붙일 때 가장 먼저 막히는 지점은 기술이 아니라 사람이다. 부재중 목록이 쌓이는 건 쉽다. 문제는 진료가 끝난 뒤 그 목록을 누가 처리하느냐다. 데스크 인원이 두세 명인 의원에서 목록만 자동으로 쌓이면, 퇴근 직전에 아무도 손대지 않은 명단만 남는다.</p><p>그래서 병원 구축에서는 부재중 목록을 <strong>처리 대상 업무</strong>로 만들어 두는 쪽으로 잡는다. 인입이 들어온 순간 고객에게 자동 문자로 '연결이 어려워 다시 연락드린다'는 안내가 나가고, 데스크 화면에는 회신 대기 건이 남는다. 회신이 끝나야 목록에서 빠진다. 지오테스 구축에 들어가는 상담 CRM과 실시간 현황판이 이 자리를 맡는다.</p><h3>진료과가 여럿이면 번호부터 나눈다</h3><p>피부과와 정형외과를 같이 운영하거나, 검진센터를 따로 두는 곳이라면 착신번호별 구분이 필요하다. 어느 번호로 들어온 전화인지에 따라 화면에 뜨는 안내와 회신 담당이 갈린다. 착신번호별 구분과 브랜드별 발신번호는 별도로 구매하는 항목이 아니라 구축에 함께 들어간다. 병원 쪽 구성은 <a class='inlink' href='/industries/hospital/'>병원 컨택센터</a> 쪽에 정리해 두었다.</p><p>회신 전화를 걸 때 개인 휴대폰 번호가 찍히는 문제도 여기서 같이 정리된다. 발신번호를 대표번호로 고정해 두면 환자 입장에서는 병원이 다시 건 전화로 보인다.</p><h2>학원은 상담했던 선생님에게 되돌려 주는 게 핵심이다</h2><p>학원 상담은 이어지는 대화다. 지난주에 상담실장과 이야기를 나눈 학부모가 다시 전화를 걸었을 때, 처음 듣는 사람이 받아 같은 질문을 반복하면 그 상담은 사실상 처음으로 돌아간다. 학원에서 콜백이 실패하는 전형적인 모습이 이것이다. 부재중은 처리했는데 <strong>다른 사람이 처리해 버린</strong> 경우다.</p><p>그래서 학원 구축에서는 회신 라우팅을 이전 상담자 기준으로 잡는다. 전화가 걸려 오는 순간 스크린 팝업으로 이전 상담 이력과 담당자가 뜨고, 회신 건도 그 담당자 대기열로 들어간다. 담당자가 수업 중이면 다른 사람이 받되 이력을 보고 받는다. 이 구조는 <a class='inlink' href='/solution/crm/'>상담 CRM</a>과 <a class='inlink' href='/use-cases/routing/'>라우팅</a>이 맞물려야 나온다.</p><h3>시간대가 몰리는 업종의 회선 계산</h3><p>학원은 인입이 하루 종일 고르게 퍼지지 않는다. 등하원 시간과 시험 기간, 설명회 직후에 몰린다. 평균 통화량으로 회선을 잡으면 정작 필요한 시간에 통화 중이 된다. 회선 수는 평균이 아니라 몰리는 시간의 동시 통화를 기준으로 본다. 이 계산은 지금 쓰는 전화 기록을 봐야 나오는 숫자라 <a class='inlink' href='/contact/'>상담</a>에서 같이 확인한다.</p><ul><li>이전 상담자 기준 회신 배정</li><li>수업 중 부재 시 이력을 넘겨받는 대기열</li><li>설명회·시험 기간 집중 인입을 기준으로 한 회선 산정</li><li>상담 통화 녹취로 안내 내용 확인</li></ul><h2>쇼핑몰은 콜백보다 인입 구조를 먼저 손봐야 한다</h2><p>쇼핑몰 담당자가 콜백을 찾을 때, 실제로 필요한 건 콜백만이 아닌 경우가 많다. 행사 직후나 배송 지연 공지가 나간 날은 인입이 평소의 몇 배로 튄다. 이때 부재중을 전부 콜백으로 돌리면, 회신해야 할 목록이 상담 인원이 하루에 처리할 수 있는 양을 넘어선다. 목록이 밀리는 만큼 고객은 다시 전화를 건다. 같은 사람이 여러 번 인입되면서 통계는 더 나빠진다.</p><p>그래서 쇼핑몰은 순서가 다르다. 먼저 <strong>전화를 걸지 않아도 되게</strong> 만드는 쪽부터 손본다. 주문번호로 배송 상태를 안내하는 ARS를 앞에 두고, 통화 후 자동 문자로 처리 결과를 보내고, 반복 문의는 알림톡으로 미리 나가게 한다. 그러고 남는 전화가 실제로 상담원이 받아야 할 전화다. 이 남은 양을 기준으로 콜백을 설계한다.</p><p>부분 녹취도 이 업종에서 쓸모가 크다. 교환·환불처럼 분쟁이 생기는 통화에서 필요한 구간만 남겨 확인할 수 있다. 쇼핑몰 쪽 구성은 <a class='inlink' href='/industries/shop/'>쇼핑몰 고객센터</a>에 따로 정리했고, ARS 구성은 <a class='inlink' href='/solution/ivr/'>ARS·IVR</a> 쪽을 보면 된다.</p><div class="callout"><p>쇼핑몰에서 콜백만 붙이면 밀린 회신 목록이 다음 날로 넘어간다. 인입을 줄이는 자동 안내와 콜백을 같이 놓고 봐야 회신 목록이 당일에 닫힌다.</p></div><h2>제조는 발주와 AS를 가르는 데서 시작한다</h2><p>제조·유통 쪽 전화는 성격이 섞여 있다. 대리점 발주, 납기 문의, 설비 고장 접수가 같은 대표번호로 들어온다. 발주는 사무 인원이 받으면 되지만 고장 접수는 기술 담당자가 받아야 한다. 여기서 콜백을 그냥 붙이면, 기술 담당자가 받아야 할 접수 건이 사무 회신 목록에 섞여 하루를 넘긴다.</p><p>그래서 제조 구축은 인입 분기를 먼저 정리한다. 안내로 갈래를 나누고, 갈래별로 회신 담당과 대기열을 따로 둔다. 거래처 번호를 등록해 두면 걸려 온 순간 어느 대리점인지 화면에 뜬다. 지오테스가 만든 IP 교환기와 상담 애플리케이션을 함께 쓰기 때문에 이 분기 조건을 현장 사정에 맞춰 잡을 수 있다.</p><h3>본사와 공장이 떨어져 있을 때</h3><p>본사 사무실과 공장, 지역 서비스센터가 나뉘어 있는 곳은 각 거점을 하나의 내선망으로 묶는 게 먼저다. 인터넷전화 회선을 직접 공급하기 때문에 거점별 회선과 교환기 구성을 한 자리에서 잡을 수 있다. 통신사도 KT·LG유플러스·SK브로드밴드 중 조건이 맞는 쪽을 고르고, 두 곳 이상에 회선을 열어 두면 한쪽 장애 때도 통화가 이어진다. 제조 쪽 사례는 <a class='inlink' href='/industries/manufacturing/'>제조업 콜센터</a>에 있다.</p><div class="table-scroll"><table><thead><tr><th>업종</th><th>콜백에서 먼저 잡는 것</th><th>같이 보는 기능</th></tr></thead><tbody><tr><th>병원</th><td>회신 담당과 마감 기준</td><td>착신번호별 구분, 자동 안내 문자</td></tr><tr><th>학원</th><td>이전 상담자 기준 배정</td><td>스크린 팝업, 상담 이력</td></tr><tr><th>쇼핑몰</th><td>인입 자체를 줄이는 자동 안내</td><td>ARS, 알림톡, 부분 녹취</td></tr><tr><th>제조</th><td>발주와 AS 갈래 분리</td><td>거래처 식별, 거점 내선 연결</td></tr></tbody></table></div><h2>업종이 달라도 확인하는 순서는 같다</h2><p>여기까지 보면 업종마다 답이 다르다는 말이 결국 '견적을 받아 봐야 안다'는 말처럼 들릴 수 있다. 그렇지는 않다. 업종이 달라도 확인하는 순서는 같다. 지금 무엇을 쓰고 있는지, 놓치는 전화가 어떤 성격인지, 회신을 누가 언제까지 처리해야 하는지, 기존 시스템 중 남길 것이 무엇인지. 이 네 가지를 먼저 보면 필요한 구성은 대체로 정해진다.</p><p>쓰던 CRM이 있으면 그대로 두고 전화 기능만 붙이는 방식도 된다. 제조나 유통처럼 사내 시스템에 발주·재고가 들어 있는 곳은 이 방식이 오히려 부담이 적다. 반대로 병원이나 학원처럼 상담 이력 자체가 흩어져 있던 곳은 구축에 들어가는 상담 CRM을 그대로 쓰는 편이 낫다.</p><p>비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉜다. 상담 인원과 회선 수, 필요한 기능에 따라 달라지기 때문에 업종만 듣고 답할 수 있는 숫자가 아니다. 지금 쓰시는 구성을 보고 항목별로 무엇이 없어지고 무엇이 남는지 계산해 알려 드린다. 비용 항목이 어떻게 나뉘는지는 <a class='inlink' href='/guide/cost/'>비용 구조 안내</a>에서 먼저 볼 수 있다.</p><p>지오테스는 2006년부터 컨택센터 구축과 인터넷전화 한 분야만 해 왔고, 지금까지 120여 곳을 구축했다. 약정 기간과 위약금이 없고, 365일 24시간 이중화로 장애 시 백업 서버로 자동 전환된다. 어느 업종이든 지금 구성을 놓고 상담하려면 <strong>1555-5528</strong>로 연락하면 된다. 상담은 무료이고 평일 09:00~18:00에 받는다.</p><div class="callout"><p>업종별로 어떤 구성이 들어갔는지 먼저 보고 싶다면 <a class='inlink' href='/cases/'>구축 사례</a>와 <a class='inlink' href='/demo/'>시연 신청</a>을 이용하면 된다. 실제 화면을 보고 나서 판단하는 쪽이 빠르다.</p></div>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜백플러스 같은 콜백 기능은 업종마다 설정이 다른가요?</summary><div class="a">다릅니다. 병원은 회신 담당과 마감 기준, 학원은 이전 상담자 기준 배정, 쇼핑몰은 인입을 줄이는 자동 안내, 제조는 발주와 AS 갈래 분리가 먼저입니다. 기능 이름은 같아도 붙이는 자리가 달라집니다.</div></details><details><summary>병원인데 진료 시간 외에 들어온 전화는 어떻게 처리되나요?</summary><div class="a">인입 즉시 자동 안내 문자가 나가고 회신 대기 건으로 남습니다. 다음 진료 시작 때 데스크 화면에 처리해야 할 목록으로 뜨고, 회신이 끝나야 목록에서 빠집니다. 착신번호가 여럿이면 번호별로 나눠 볼 수 있습니다.</div></details><details><summary>학원에서 상담했던 선생님에게 다시 연결되게 할 수 있나요?</summary><div class="a">가능합니다. 걸려 온 번호로 이전 상담 이력과 담당자를 찾아 화면에 띄우고, 회신 건도 그 담당자 대기열로 보냅니다. 담당자가 수업 중이면 다른 상담원이 이력을 보면서 받도록 구성합니다.</div></details><details><summary>쇼핑몰인데 행사 때만 전화가 몰립니다. 콜백만 붙이면 되나요?</summary><div class="a">콜백만으로는 회신 목록이 다음 날로 밀립니다. 주문번호 기준 ARS 안내, 통화 후 자동 문자, 알림톡으로 인입 자체를 먼저 줄이고 남는 통화량을 기준으로 콜백을 설계하는 편이 낫습니다.</div></details><details><summary>제조업인데 본사와 공장이 떨어져 있어도 한 시스템으로 묶이나요?</summary><div class="a">묶입니다. 지오테스는 IP 교환기를 직접 개발하고 인터넷전화 회선도 직접 공급하기 때문에 거점별 회선과 내선 구성을 한 자리에서 잡습니다. 통신사 두 곳 이상에 회선을 열어 두면 한쪽 장애 때도 통화가 이어집니다.</div></details><details><summary>업종별로 비용 차이가 큰가요?</summary><div class="a">업종보다는 상담 인원과 회선 수, 필요한 기능에 따라 달라집니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 지금 쓰시는 구성을 보고 항목별로 산정해 드리니 1555-5528로 문의하시면 됩니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

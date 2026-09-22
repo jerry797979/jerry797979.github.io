@@ -25,3 +25,5 @@ free-callback-by-industry
 free-callback-sms-by-industry
 landline-callback-sms-by-industry
 smile-call-center-by-industry
+callback-munjassi-by-industry
+callback-plus-by-industry
