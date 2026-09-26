@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무료콜백 도입 절차, 놓친 전화 파악부터 오픈 후 점검까지 순서대로 | 지오테스</title>
+<meta name="description" content="무료콜백은 시스템을 먼저 고르면 흐름이 꼬입니다. 놓친 전화 파악, 콜백 흐름 설계, 회선·CRM 구성, 견적과 계약, 시범 통화, 오픈 후 점검까지 단계마다 준비할 것과 확인할 것을 정리했습니다. 상담 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/free-callback-steps/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="무료콜백 도입 절차, 놓친 전화 파악부터 오픈 후 점검까지 순서대로">
+<meta property="og:description" content="무료콜백은 시스템을 먼저 고르면 흐름이 꼬입니다. 놓친 전화 파악, 콜백 흐름 설계, 회선·CRM 구성, 견적과 계약, 시범 통화, 오픈 후 점검까지 단계마다 준비할 것과 확인할 것을 정리했습니다. 상담 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"무료콜백 도입할 때 가장 먼저 준비할 게 뭔가요?","acceptedAnswer":{"@type":"Answer","text":"쓰고 있는 번호 목록, 통화 내역, 상담 인원 근무표, 지금 부재중 전화를 어떻게 확인하는지 네 가지입니다. 이걸 보면 어느 시간대, 어느 번호에서 전화가 새는지 드러나고 콜백 흐름을 그 자리에 맞춰 짤 수 있습니다."}},{"@type":"Question","name":"쓰던 CRM이 있는데 새로 바꿔야 하나요?","acceptedAnswer":{"@type":"Answer","text":"바꾸지 않아도 됩니다. 쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식이 됩니다. CRM이 없다면 상담 CRM, 통화 녹취, 통계, 실시간 현황판, 스크린 팝업이 구축에 포함되어 따로 사지 않습니다."}},{"@type":"Question","name":"부재중 알림이나 콜백 문자는 추가 요금인가요?","acceptedAnswer":{"@type":"Answer","text":"부재중 자동 알림, 통화 후 자동 문자·알림톡, 블랙리스트, 클릭투콜, 스케줄 발신은 추가 비용 없이 함께 드리는 12가지에 들어 있습니다. 다만 회선 이용료와 통화료는 별도로 잡힙니다."}},{"@type":"Question","name":"무료콜백 도입 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"상담 인원, 회선 수, 필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 금액이 궁금하시면 1555-5528로 상담해 주십시오."}},{"@type":"Question","name":"홈페이지에서 콜백 신청을 받을 수도 있나요?","acceptedAnswer":{"@type":"Answer","text":"선택 항목인 콜백 API 연동으로 붙일 수 있습니다. 홈페이지나 쇼핑몰에서 남긴 번호를 상담 화면으로 받아 다시 거는 흐름입니다. 실제로 필요한지는 두 번째 단계에서 흐름을 그려 본 뒤 정하시는 편이 좋습니다."}},{"@type":"Question","name":"써 보다가 맞지 않으면 해지할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 약정 기간이 없고 위약금도 없습니다. 오픈 뒤 통계로 흐름을 점검해 보고 구성을 바꾸거나 좌석을 늘리는 것도 가능하며, 좌석을 늘리면 좌석당 비용만 더해집니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 구축</p>
+    <span class="eyebrow">콜센터 구축</span>
+    <h1>무료콜백 도입,<br>어떤 순서로 밟아야 하나</h1>
+    <p class="meta">놓친 전화를 파악하는 일부터 오픈 뒤 빠진 콜백을 찾는 일까지.<br>단계마다 무엇을 준비하고 무엇을 확인해야 하는지 짚었습니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">무료콜백 도입하려면 뭐부터 해야 하나요?</span>
+      <p><b>시스템 선택보다 먼저 할 일은 놓친 전화가 언제, 어느 번호로 생기는지 적어 보는 것입니다.</b> 그다음 <span class='hl'>누가 언제 다시 걸지 흐름을 그리고</span>, 그 흐름에 맞춰 회선·교환기·CRM 구성을 정합니다. 견적은 구축·회선·유지보수·부가서비스 네 항목으로 나눠 받고, 오픈 전에는 직접 전화를 걸어 부재중 알림부터 다시 걸기와 기록 저장까지 끝까지 따라가 봅니다. 오픈 후에는 통계로 빠진 콜백을 찾아 흐름을 고칩니다.</p>
+    </div>
+    <h2>첫 단계는 놓친 전화가 언제, 어느 번호로 생기는지 적어 보는 일이다</h2><p>무료콜백을 알아보는 담당자는 대개 전화를 자꾸 놓친다는 느낌에서 출발합니다. 그런데 어느 번호로, 어느 시간대에, 누가 자리를 비웠을 때 놓치는지 모르면 콜백 흐름을 짤 수 없습니다. 점심시간에 전화가 몰리는 병원과 퇴근 뒤 문의가 쌓이는 쇼핑몰은 다시 거는 방식부터 다릅니다. 그래서 이 단계에서는 도구를 보지 말고 지금 상태부터 적어야 합니다.</p><h3>준비할 것</h3><ul><li><strong>번호 목록</strong> — 대표번호, 지점·부서 직통번호, 광고에 쓰는 번호까지 전부</li><li><strong>통화 내역</strong> — 통신사 고지서나 전화기에 남은 수신 기록</li><li><strong>근무표</strong> — 상담 인원이 언제 자리에 있고 언제 비는지</li><li><strong>지금의 부재중 처리 방식</strong> — 휴대폰으로 찍어 두는지, 수기로 적는지, 아예 확인하지 않는지</li></ul><p><strong>확인할 것</strong>은 하나입니다. 지금 쓰는 전화기나 교환기에서 부재중 기록을 뽑아 볼 수 있는가. 뽑을 수 없다면 그 자체가 이 단계의 답입니다. 놓친 전화를 셀 수 없는 구조라면 콜백을 붙여도 무엇이 나아졌는지 확인할 방법이 없기 때문입니다.</p><h2>두 번째는 누가, 언제, 어떤 순서로 다시 걸지 흐름부터 그리는 일이다</h2><p>흐름을 먼저 정하지 않고 시스템부터 들이면, 부재중 알림은 오는데 누구 몫인지 몰라 서로 미루는 장면이 생깁니다. 종이에 부재중 발생, 알림, 담당자 배정, 다시 걸기, 결과 기록까지 한 줄로 그려 보고 칸마다 사람 이름을 적어 넣으십시오.</p><h3>이 단계에서 정해야 할 질문</h3><ul><li>부재중 알림을 <strong>팀장에게만</strong> 보낼지, <strong>번호별 담당자</strong>에게 나눠 보낼지</li><li>전화를 놓친 직후 고객에게 <strong>문자나 알림톡</strong>을 보낼지, 보낸다면 어떤 문구로 보낼지</li><li>영업시간 밖에 들어온 전화는 <strong>다음 날 누가 먼저</strong> 처리할지</li><li>같은 고객이 여러 번 걸었을 때 <strong>한 건으로 묶을지</strong></li><li>장난 전화나 반복 전화는 <strong>어떻게 거를지</strong></li></ul><p>이 질문들에 답이 나오면 필요한 기능이 저절로 정해집니다. 지오테스는 부재중 자동 알림, 통화 후 자동 문자·알림톡, 블랙리스트, 착신번호별 구분을 추가 비용 없이 주는 12가지 안에 넣어 두었습니다. 상담원이 다시 걸 때는 화면에서 번호를 눌러 거는 클릭투콜을, 정해 둔 시각에 몰아서 걸어야 한다면 스케줄 발신을 씁니다. 전체 개념이 먼저 궁금하다면 <a class='inlink' href='/posts/free-callback-system/'>무료콜백 시스템 설명</a>을 함께 보시면 됩니다.</p><h2>세 번째는 회선·교환기·CRM을 어떻게 이을지 구성을 정하는 단계다</h2><p>콜백이 끊기는 자리는 대개 연결부입니다. 부재중 기록은 교환기에, 고객 이력은 CRM에 있고, 문자는 또 다른 서비스에서 나가면 담당자는 화면 세 개를 오가며 번호를 옮겨 적습니다. 그러다 한 건이 빠집니다. 이 단계에서는 이 세 가지를 한 흐름으로 묶을 구성을 정합니다.</p><ul><li><strong>쓰던 CRM이 있다면</strong> — 그대로 두고 전화 기능만 붙이는 방식이 됩니다. 없다면 상담 CRM이 구축에 포함됩니다.</li><li><strong>홈페이지나 쇼핑몰에서 콜백 신청을 받으려면</strong> — 선택 항목인 콜백 API 연동이 필요한지 따져 봅니다.</li><li><strong>회선</strong> — KT·LG유플러스·SK브로드밴드 3사 가운데 조건이 맞는 곳을 고르고, 두 곳 이상에 열어 두면 한쪽에 장애가 나도 통화가 이어집니다.</li><li><strong>장애 대비</strong> — 365일 24시간 이중화로 장애가 나면 백업 서버로 자동 전환되는지 확인합니다.</li></ul><div class="callout"><p><strong>이 단계의 확인 질문</strong><br>부재중 전화를 다시 걸려고 번호를 눌렀을 때, 그 고객의 이전 통화와 상담 기록이 스크린 팝업으로 한 화면에 뜨는가. 뜨지 않는다면 상담원은 고객에게 같은 질문을 다시 하게 됩니다.</p></div><p>지오테스는 IP 교환기와 상담 애플리케이션을 직접 개발하고 인터넷전화 회선까지 직접 공급합니다. 문제가 생겼을 때 회선 탓인지 교환기 탓인지 업체끼리 미루는 일이 없고 물어볼 곳이 한 군데입니다. 구성 요소별 설명은 <a class='inlink' href='/solution/crm/'>상담 CRM</a> 페이지에 정리해 두었습니다.</p><h2>네 번째는 견적을 네 항목으로 나눠 받고 계약 조건을 확인하는 단계다</h2><p>견적서가 한 줄 총액으로만 오면 나중에 무엇이 빠졌는지 알 수 없습니다. 지오테스의 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 항목마다 아래를 확인하십시오.</p><div class="table-scroll"><table><thead><tr><th>항목</th><th>성격</th><th>견적 받을 때 확인할 것</th></tr></thead><tbody><tr><th>시스템 구축</th><td>1회</td><td>CRM·녹취·통계·실시간 현황판·스크린 팝업이 포함되어 있는지</td></tr><tr><th>회선 이용료</th><td>매월</td><td>통화료가 별도로 어떻게 잡히는지, 어느 통신사 회선인지</td></tr><tr><th>유지보수</th><td>별도 계약</td><td>장애가 났을 때 연락 창구와 처리 범위</td></tr><tr><th>부가서비스</th><td>선택</td><td>AI 통화요약·콜백 API 연동 등 실제로 쓸 것만 넣었는지</td></tr></tbody></table></div><p>금액은 상담 인원, 회선 수, 필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 좌석을 늘리면 좌석당 비용만 더해집니다. 기존 대비 얼마나 줄어드는지도 한 숫자로 말씀드리지 않고, 항목별로 무엇이 없어지고 무엇이 남는지 계산해 알려 드립니다. 항목 구조는 <a class='inlink' href='/pricing/'>요금 안내</a>에서 먼저 보실 수 있습니다.</p><p>계약 조건에서는 약정 기간과 위약금을 확인하십시오. 지오테스는 약정 기간이 없고 위약금도 없습니다. 콜백 흐름이 생각대로 돌지 않을 때 묶여 있지 않다는 점은 도입을 결정하는 담당자에게 부담을 덜어 줍니다.</p><h2>다섯 번째는 오픈 전에 직접 전화를 걸어 흐름을 끝까지 따라가 보는 단계다</h2><p>설정이 끝났다는 말만 듣고 오픈하면, 첫 부재중 전화가 들어왔을 때 알림이 엉뚱한 사람에게 가는 일이 생깁니다. 오픈 전에 담당자가 개인 휴대폰으로 대표번호에 걸고, 받지 않은 채 끊어 보십시오. 그 한 통이 두 번째 단계에서 그린 흐름을 그대로 지나가는지 확인하는 것이 이 단계의 전부입니다.</p><ul><li>부재중 알림이 <strong>정해 둔 담당자</strong>에게 가는가</li><li>고객 휴대폰으로 <strong>설정한 문구</strong>의 문자·알림톡이 오는가</li><li>클릭투콜로 다시 걸었을 때 <strong>녹취가 남고 CRM 기록에 붙는가</strong></li><li>블랙리스트에 넣은 번호가 <strong>실제로 걸러지는가</strong></li><li>영업시간 밖에 걸었을 때 <strong>필수 안내가 자동으로 재생</strong>되는가</li></ul><p>화면이 실제로 어떻게 움직이는지 미리 보고 싶다면 <a class='inlink' href='/demo/'>데모 신청</a>으로 확인하실 수 있습니다. 병원·학원·쇼핑몰처럼 번호가 여러 개인 곳은 번호마다 한 통씩 걸어 보는 편이 안전합니다.</p><h2>여섯 번째는 오픈 뒤 통계로 빠진 콜백을 찾아 흐름을 고치는 단계다</h2><p>오픈은 끝이 아닙니다. 실제 고객 전화가 들어오기 시작하면 종이 위 흐름에서 보이지 않던 틈이 드러납니다. 점심시간에 알림을 받은 담당자도 자리를 비웠다든지, 문자를 받은 고객이 되걸었는데 다시 부재중이 된다든지 하는 장면입니다.</p><ul><li><strong>통계</strong> — 부재중 건수와 다시 건 건수를 맞춰 보고, 차이 나는 건을 하나씩 찾아봅니다.</li><li><strong>실시간 현황판</strong> — 전화가 몰리는 시간대에 대기 중인 상담원이 있는지 봅니다.</li><li><strong>통화 종료 추적</strong> — 콜백 통화를 누가 먼저 끊었는지 확인합니다.</li><li><strong>부분 녹취</strong> — 콜백 통화 가운데 필요한 구간만 골라 들으며 응대 문구를 다듬습니다.</li></ul><div class="callout"><p>오픈 뒤 흐름을 고칠 때는 사람을 탓하기 전에 알림 대상과 문자 문구부터 바꿔 보십시오. 빠진 콜백의 상당수는 담당자 배정이 흐릿한 데서 생깁니다.</p></div><p>지오테스는 2006년부터 컨택센터 구축과 인터넷전화 한 분야만 해 왔고 지금까지 120여 곳을 구축했습니다. 2013년에는 필리핀 클락에 콜센터를 직접 세워 운영했기 때문에, 콜백이 현장에서 어디서 새는지를 쓰는 쪽의 눈으로 봅니다. 지금 구성을 알려 주시면 어느 단계부터 손봐야 할지 함께 짚어 드립니다. 상담은 <a class='inlink' href='/contact/'>문의하기</a> 또는 고객센터 1555-5528(평일 09:00~18:00, 상담 무료)로 하시면 됩니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>무료콜백 도입할 때 가장 먼저 준비할 게 뭔가요?</summary><div class="a">쓰고 있는 번호 목록, 통화 내역, 상담 인원 근무표, 지금 부재중 전화를 어떻게 확인하는지 네 가지입니다. 이걸 보면 어느 시간대, 어느 번호에서 전화가 새는지 드러나고 콜백 흐름을 그 자리에 맞춰 짤 수 있습니다.</div></details><details><summary>쓰던 CRM이 있는데 새로 바꿔야 하나요?</summary><div class="a">바꾸지 않아도 됩니다. 쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식이 됩니다. CRM이 없다면 상담 CRM, 통화 녹취, 통계, 실시간 현황판, 스크린 팝업이 구축에 포함되어 따로 사지 않습니다.</div></details><details><summary>부재중 알림이나 콜백 문자는 추가 요금인가요?</summary><div class="a">부재중 자동 알림, 통화 후 자동 문자·알림톡, 블랙리스트, 클릭투콜, 스케줄 발신은 추가 비용 없이 함께 드리는 12가지에 들어 있습니다. 다만 회선 이용료와 통화료는 별도로 잡힙니다.</div></details><details><summary>무료콜백 도입 비용은 얼마인가요?</summary><div class="a">상담 인원, 회선 수, 필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 금액이 궁금하시면 1555-5528로 상담해 주십시오.</div></details><details><summary>홈페이지에서 콜백 신청을 받을 수도 있나요?</summary><div class="a">선택 항목인 콜백 API 연동으로 붙일 수 있습니다. 홈페이지나 쇼핑몰에서 남긴 번호를 상담 화면으로 받아 다시 거는 흐름입니다. 실제로 필요한지는 두 번째 단계에서 흐름을 그려 본 뒤 정하시는 편이 좋습니다.</div></details><details><summary>써 보다가 맞지 않으면 해지할 수 있나요?</summary><div class="a">지오테스는 약정 기간이 없고 위약금도 없습니다. 오픈 뒤 통계로 흐름을 점검해 보고 구성을 바꾸거나 좌석을 늘리는 것도 가능하며, 좌석을 늘리면 좌석당 비용만 더해집니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
