@@ -35,3 +35,5 @@ call-center-survey
 edu-consulting-call
 busan-call-outsourcing
 hr-consulting-call
+kakao-alimtalk-send
+logistics-outsourcing-call
