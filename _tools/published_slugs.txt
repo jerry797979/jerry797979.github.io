@@ -37,3 +37,5 @@ busan-call-outsourcing
 hr-consulting-call
 kakao-alimtalk-send
 logistics-outsourcing-call
+daejeon-outsourcing
+franchise-sales-agency
