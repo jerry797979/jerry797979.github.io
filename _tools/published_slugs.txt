@@ -59,3 +59,13 @@ merchant-sales-agency
 namdong-outsourcing-mistakes
 sales-hiring-call
 survey-call-mistakes
+admin-outsourcing-mistakes
+alimtalk-vendor-mistakes
+busan-outsourcing-mistakes
+logistics-outsourcing-mistakes
+mandatory-edu-mistakes
+merchant-sales-mistakes
+outsourcing-co-mistakes
+outsourcing-rec-mistakes
+sales-agency-call-mistakes
+schedule-sales-mistakes
