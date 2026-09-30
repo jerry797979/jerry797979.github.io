@@ -79,3 +79,13 @@ merchant-sales-total-cost
 sales-hiring-mistakes
 survey-call-total-cost
 table-order-sales-mistakes
+admin-outsourcing-cost
+busan-outsourcing-cost
+daejeon-outsourcing-cost
+designer-outsourcing-cost
+edu-consulting-total-cost
+logistics-outsourcing-cost
+mandatory-edu-total-cost
+namdong-outsourcing-cost
+outsourcing-co-total-cost
+schedule-sales-total-cost
