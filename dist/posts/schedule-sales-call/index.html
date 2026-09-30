@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스케줄영업, 약속한 통화 시간을 놓치지 않게 만드는 발신 구조 | 지오테스</title>
+<meta name="description" content="스케줄영업은 고객과 약속한 시간에 정확히 다시 전화하는 것이 핵심입니다. 지오테스는 스케줄 발신·오토콜·클릭투콜을 상담 CRM, 녹취와 묶어 추가 비용 없이 제공하고, 약정 없이 시작할 수 있습니다. 상담 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/schedule-sales-call/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스케줄영업, 약속한 통화 시간을 놓치지 않게 만드는 발신 구조">
+<meta property="og:description" content="스케줄영업은 고객과 약속한 시간에 정확히 다시 전화하는 것이 핵심입니다. 지오테스는 스케줄 발신·오토콜·클릭투콜을 상담 CRM, 녹취와 묶어 추가 비용 없이 제공하고, 약정 없이 시작할 수 있습니다. 상담 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"스케줄영업용 발신 기능은 따로 비용을 내야 하나요?","acceptedAnswer":{"@type":"Answer","text":"스케줄 발신, 오토콜, 클릭투콜은 지오테스가 추가 비용 없이 함께 주는 12가지 기능 중 영업 자동화 항목에 들어 있습니다. 따로 구매하는 옵션이 아니라 구축에 포함됩니다."}},{"@type":"Question","name":"스케줄영업 콜센터 구축 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"상담 인원, 회선 수, 필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 1555-5528로 상담하시면 됩니다."}},{"@type":"Question","name":"지금 쓰는 영업 관리 프로그램을 계속 써도 되나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식이 가능합니다. 필요하면 DB API 연동이나 실시간 API 연동을 선택 항목으로 추가해 기존 프로그램과 데이터를 주고받게 할 수 있습니다."}},{"@type":"Question","name":"상담원이 퇴사하면 그 사람이 잡아 둔 재통화 약속은 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"재통화 일정이 개인 메모가 아니라 상담 CRM의 고객 이력에 저장되기 때문에, 담당자를 바꿔도 일정과 지난 통화 메모, 녹취가 그대로 남습니다. 새 담당자가 이어서 전화하면 됩니다."}},{"@type":"Question","name":"약정 기간이나 위약금이 있나요?","acceptedAnswer":{"@type":"Answer","text":"없습니다. 지오테스는 약정 기간과 위약금 없이 운영합니다. 영업 인원이 늘면 좌석당 비용만 추가되고, 회선 이용료와 통화료는 별도로 계산됩니다."}},{"@type":"Question","name":"발신 중에 시스템 장애가 나면 약속한 통화를 못 하게 되나요?","acceptedAnswer":{"@type":"Answer","text":"365일 24시간 이중화로 운영하며, 장애가 나면 백업 서버로 자동 전환됩니다. 회선을 통신사 두 곳 이상에 열어 두면 한쪽에 장애가 나도 통화가 이어집니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 운영</p>
+    <span class="eyebrow">콜센터 운영</span>
+    <h1>스케줄영업,<br>약속한 시간에 전화가 먼저 울리게</h1>
+    <p class="meta">메모지와 엑셀로 관리하던 재통화 약속을 발신 시스템으로 옮기는 방법<br>누가, 언제, 누구에게 다시 걸어야 하는지 화면이 먼저 알려 줍니다</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">스케줄영업에서 재통화 약속을 놓치지 않으려면 어떻게 관리해야 하나요?</span>
+      <p>스케줄영업에서 실적이 새는 곳은 대부분 <b>약속한 재통화</b>입니다. 상담원이 개인 메모나 엑셀로 일정을 들고 있으면 휴가·퇴사·바쁜 오후에 약속이 그대로 사라집니다. 해결책은 <span class='hl'>통화 기록과 다음 발신 일정을 같은 화면에 묶는 것</span>입니다. 지오테스는 스케줄 발신, 오토콜, 클릭투콜을 상담 CRM·녹취와 함께 <b>추가 비용 없이</b> 제공하고, 약정과 위약금 없이 시작할 수 있습니다.</p>
+    </div>
+    <h2>스케줄영업이 무너지는 곳은 첫 통화가 아니라 약속한 두 번째 통화다</h2><p>첫 통화에서 고객이 "지금은 회의 중이니 목요일 오후에 다시 주세요"라고 말합니다. 상담원은 포스트잇에 적거나 개인 엑셀에 한 줄을 추가합니다. 목요일 오후, 그 상담원은 다른 고객과 길게 통화하고 있고, 메모는 모니터 옆에서 떨어져 있습니다. 고객은 기다리다가 다른 곳과 이야기를 시작합니다.</p><p>스케줄영업의 성패는 이 <strong>두 번째 통화</strong>에서 갈립니다. 고객이 먼저 시간을 정해 줬다는 건 관심이 있다는 뜻인데, 그 약속을 어기면 관심은 불신으로 바뀝니다. 문제는 상담원의 성실함이 아니라, 약속이 사람의 기억과 개인 파일에만 남아 있다는 구조입니다.</p><ul><li><strong>담당자 부재</strong> — 휴가나 퇴사가 생기면 그 사람이 들고 있던 일정이 통째로 사라진다</li><li><strong>기록 분산</strong> — 통화 내용은 수첩에, 일정은 달력 앱에, 고객 정보는 엑셀에 흩어져 있다</li><li><strong>관리자 사각지대</strong> — 오늘 몇 건의 약속이 있었고 몇 건을 지켰는지 팀장이 확인할 방법이 없다</li></ul><p>그래서 스케줄영업을 제대로 하려면 재통화 약속을 <strong>회사 시스템 안의 발신 일정</strong>으로 바꿔야 합니다. 약속을 잡는 순간 그 일정이 고객 이력에 붙고, 정해진 시간이 되면 화면이 먼저 알려 주는 방식입니다.</p><h2>통화 기록과 다음 발신 일정은 같은 화면에 있어야 한다</h2><p>지오테스가 구축하는 상담 CRM은 통화가 끝나는 자리에서 다음 통화 일정을 함께 저장합니다. 상담원이 "목요일 오후 재통화, 견적서 검토 후 답변 예정"이라고 적어 두면, 그 시간에 해당 고객이 발신 대상으로 올라옵니다. 이것이 <strong>스케줄 발신</strong>입니다.</p><p>다시 전화를 걸 때는 고객 번호를 누를 필요도 없습니다. 목록에서 이름을 누르면 바로 연결되는 <strong>클릭투콜</strong>이 붙어 있고, 연결되는 순간 지난번 통화 메모와 녹취가 <strong>스크린 팝업</strong>으로 뜹니다. 상담원은 "지난번에 말씀하신 견적 건으로 연락드렸습니다"로 대화를 시작할 수 있습니다. 자세한 구조는 <a class='inlink' href='/solution/crm/'>상담 CRM 소개</a>에서 볼 수 있습니다.</p><h3>이미 쓰는 영업 관리 프로그램이 있다면</h3><p>쓰던 CRM을 버릴 필요는 없습니다. 기존 프로그램은 그대로 두고 전화 기능만 붙이는 방식도 가능합니다. 고객 데이터는 지금 쓰는 곳에 남기고, 발신·녹취·통계만 지오테스 쪽에서 맡는 구성입니다.</p><h2>발신 방식은 영업 단계에 맞춰 나눠 써야 효율이 난다</h2><p>스케줄영업 팀이라도 하루의 통화가 전부 약속된 재통화는 아닙니다. 새 명단에 처음 거는 통화, 약속한 시간의 재통화, 부재중으로 끊긴 고객에게 다시 거는 통화가 섞여 있습니다. 이 셋을 같은 방식으로 처리하면 상담원은 번호 누르는 데 시간을 다 씁니다.</p><div class="table-scroll"><table><thead><tr><th>영업 단계</th><th>맞는 발신 방식</th><th>상담원이 하는 일</th></tr></thead><tbody><tr><th>새 명단 첫 접촉</th><td>오토콜</td><td>연결된 통화만 받아 상담 시작</td></tr><tr><th>약속한 재통화</th><td>스케줄 발신 + 스크린 팝업</td><td>지난 메모를 보고 이어서 대화</td></tr><tr><th>목록에서 골라 거는 통화</th><td>클릭투콜</td><td>이름을 눌러 바로 연결</td></tr><tr><th>통화가 안 된 고객</th><td>부재중 자동 알림 · 자동 문자</td><td>알림 확인 후 다시 일정 등록</td></tr></tbody></table></div><p>오토콜은 명단을 순서대로 자동 발신하고, 연결된 통화만 상담원에게 넘깁니다. 신호음을 기다리고 부재를 확인하는 시간이 상담원 쪽에서 빠지는 셈입니다. 아웃바운드 운영 전반은 <a class='inlink' href='/use-cases/outbound/'>아웃바운드 활용 사례</a>에 정리해 두었습니다.</p><div class="callout"><p><strong>오토콜, 클릭투콜, 스케줄 발신은 따로 사는 기능이 아닙니다.</strong><br>지오테스가 추가 비용 없이 함께 주는 12가지 기능 안에 영업 자동화 항목으로 들어 있습니다.</p></div><h2>고객이 전화를 받기 전과 끊은 뒤까지 관리해야 약속이 이어진다</h2><p>스케줄영업에서 모르는 번호는 잘 받지 않습니다. 고객이 받는 화면에 어떤 번호가 뜨는지가 첫 관문입니다. 브랜드나 사업부를 여러 개 운영한다면 <strong>브랜드별 발신번호</strong>를 지정해, 고객이 이미 알고 있는 번호로 전화가 가도록 할 수 있습니다. 들어오는 전화도 <strong>착신번호별 구분</strong>으로 어느 광고, 어느 브랜드를 보고 연락했는지 나뉩니다.</p><p>통화가 끝난 뒤에도 할 일이 있습니다. 약속을 잡았다면 <strong>통화 후 자동 문자·알림톡</strong>으로 "목요일 오후에 다시 연락드리겠습니다"를 남겨 두면, 고객 쪽에서도 그 시간을 기억합니다. 통화가 안 된 고객은 <strong>부재중 자동 알림</strong>이 담당자에게 알려 주므로 다음 일정 등록을 빠뜨리지 않습니다.</p><ul><li><strong>블랙리스트</strong> — 연락을 원하지 않는다고 밝힌 고객은 발신 대상에서 빠지게 설정</li><li><strong>필수 안내 자동 재생</strong> — 녹취 고지 같은 안내를 상담원이 매번 말하지 않아도 되게</li><li><strong>부분 녹취</strong> — 계약 조건을 말한 구간처럼 필요한 부분만 따로 남기기</li></ul><p>녹취는 분쟁 대비만을 위한 것이 아닙니다. "지난번에 가격 조건을 뭐라고 말씀드렸더라"를 확인할 때, 신입 상담원이 선배의 재통화를 들으며 흐름을 익힐 때 가장 자주 쓰입니다. <a class='inlink' href='/solution/recording/'>통화 녹취</a> 페이지에서 저장·검색 방식을 볼 수 있습니다.</p><h2>팀장은 약속 건수와 이행 여부를 숫자로 봐야 한다</h2><p>스케줄영업 팀장이 매일 묻는 질문은 비슷합니다. 오늘 잡힌 재통화가 몇 건이었고, 그중 제시간에 건 게 몇 건인지. 누가 약속을 많이 잡고 누가 이행률이 낮은지. 엑셀을 모아 계산하면 하루가 지나고 나서야 알 수 있습니다.</p><p>지오테스 구축에는 <strong>통계</strong>와 <strong>실시간 현황판</strong>이 기본으로 들어 있습니다. 지금 누가 통화 중이고, 누가 대기 중이며, 오늘 발신과 연결이 어떻게 흘러가는지 화면 하나로 봅니다. <strong>통화 종료 추적</strong>으로 상담원이 먼저 끊었는지 고객이 끊었는지도 남습니다.</p><p>이 기록이 쌓이면 코칭 대화가 바뀝니다. "더 열심히 해라"가 아니라 "화요일 오전 약속이 자꾸 밀리는데, 그 시간대 오토콜 배정을 줄여 보자"처럼 구체적인 조정이 가능해집니다. 업종별 운영 예시는 <a class='inlink' href='/industries/sales/'>영업·텔레마케팅 업종</a>에서 확인할 수 있습니다.</p><h2>도입 부담은 약정 없는 구조와 이중화로 줄인다</h2><p>영업 조직은 인원 변화가 잦습니다. 시즌에 맞춰 좌석을 늘렸다가 줄이기도 하고, 새 상품을 붙이며 번호를 추가하기도 합니다. 이런 팀에게 긴 약정은 부담입니다. 지오테스는 <strong>약정 기간과 위약금이 없고</strong>, 좌석을 늘리면 좌석당 비용만 추가됩니다.</p><p>약속한 시간에 전화가 안 걸리면 스케줄영업은 의미가 없습니다. 그래서 시스템은 365일 24시간 이중화로 운영하고, 장애가 나면 백업 서버로 자동 전환됩니다. 회선도 통신사 두 곳 이상에 열어 두면 한쪽에 문제가 생겨도 통화가 이어집니다. KT·LG유플러스·SK브로드밴드 3사와 모두 제휴하고 있어 한 곳에 묶지 않고 조건이 맞는 쪽을 고릅니다.</p><div class="callout"><p><strong>비용은 구성을 보고 산정합니다.</strong><br>시스템 구축(1회), 회선 이용료(월), 유지보수(별도 계약), 부가서비스(선택) 네 항목으로 나뉘며, 지금 쓰는 구성에서 무엇이 없어지고 무엇이 남는지 항목별로 계산해 알려 드립니다.</p></div><p>지오테스는 2006년부터 컨택센터 구축과 인터넷전화 한 분야만 해 왔고, IP 교환기와 상담 애플리케이션을 직접 개발합니다. 2013년에는 필리핀 클락에 콜센터를 직접 세워 운영해 봤기 때문에, 상담원이 화면 앞에서 어디서 막히는지를 쓰는 쪽 입장에서 압니다. 구성과 비용 항목은 <a class='inlink' href='/pricing/'>요금 안내</a>에서 먼저 살펴보고, 1555-5528로 상담하시면 됩니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>스케줄영업용 발신 기능은 따로 비용을 내야 하나요?</summary><div class="a">스케줄 발신, 오토콜, 클릭투콜은 지오테스가 추가 비용 없이 함께 주는 12가지 기능 중 영업 자동화 항목에 들어 있습니다. 따로 구매하는 옵션이 아니라 구축에 포함됩니다.</div></details><details><summary>스케줄영업 콜센터 구축 비용은 얼마인가요?</summary><div class="a">상담 인원, 회선 수, 필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 1555-5528로 상담하시면 됩니다.</div></details><details><summary>지금 쓰는 영업 관리 프로그램을 계속 써도 되나요?</summary><div class="a">됩니다. 쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식이 가능합니다. 필요하면 DB API 연동이나 실시간 API 연동을 선택 항목으로 추가해 기존 프로그램과 데이터를 주고받게 할 수 있습니다.</div></details><details><summary>상담원이 퇴사하면 그 사람이 잡아 둔 재통화 약속은 어떻게 되나요?</summary><div class="a">재통화 일정이 개인 메모가 아니라 상담 CRM의 고객 이력에 저장되기 때문에, 담당자를 바꿔도 일정과 지난 통화 메모, 녹취가 그대로 남습니다. 새 담당자가 이어서 전화하면 됩니다.</div></details><details><summary>약정 기간이나 위약금이 있나요?</summary><div class="a">없습니다. 지오테스는 약정 기간과 위약금 없이 운영합니다. 영업 인원이 늘면 좌석당 비용만 추가되고, 회선 이용료와 통화료는 별도로 계산됩니다.</div></details><details><summary>발신 중에 시스템 장애가 나면 약속한 통화를 못 하게 되나요?</summary><div class="a">365일 24시간 이중화로 운영하며, 장애가 나면 백업 서버로 자동 전환됩니다. 회선을 통신사 두 곳 이상에 열어 두면 한쪽에 장애가 나도 통화가 이어집니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

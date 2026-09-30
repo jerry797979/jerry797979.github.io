@@ -39,3 +39,13 @@ kakao-alimtalk-send
 logistics-outsourcing-call
 daejeon-outsourcing
 franchise-sales-agency
+accounting-outsourcing
+alimtalk-vendor
+designer-outsourcing-call
+hotel-outsourcing-call
+namdong-outsourcing
+outsourcing-company
+outsourcing-vendor-pick
+sales-agency-call-system
+schedule-sales-call
+table-order-sales
