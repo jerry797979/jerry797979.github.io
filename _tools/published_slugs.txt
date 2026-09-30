@@ -49,3 +49,13 @@ outsourcing-vendor-pick
 sales-agency-call-system
 schedule-sales-call
 table-order-sales
+admin-outsourcing-call
+daejeon-outsourcing-mistakes
+designer-outsourcing-mistakes
+edu-consulting-mistakes
+ev-sales-call-system
+mandatory-edu-sales
+merchant-sales-agency
+namdong-outsourcing-mistakes
+sales-hiring-call
+survey-call-mistakes
