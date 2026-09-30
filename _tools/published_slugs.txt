@@ -69,3 +69,13 @@ outsourcing-co-mistakes
 outsourcing-rec-mistakes
 sales-agency-call-mistakes
 schedule-sales-mistakes
+accounting-outsourcing-mistakes
+ev-sales-call-mistakes
+franchise-sales-mistakes
+hotel-outsourcing-mistakes
+hr-consulting-mistakes
+kakao-alimtalk-mistakes
+merchant-sales-total-cost
+sales-hiring-mistakes
+survey-call-total-cost
+table-order-sales-mistakes
