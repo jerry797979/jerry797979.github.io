@@ -89,3 +89,5 @@ mandatory-edu-total-cost
 namdong-outsourcing-cost
 outsourcing-co-total-cost
 schedule-sales-total-cost
+alimtalk-vendor-total-cost
+outsourcing-rec-total-cost
