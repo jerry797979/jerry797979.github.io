@@ -12,7 +12,7 @@
 - 각 글 맨 위에 답변 박스를 둡니다. AI 검색이 그 문단을 인용해 갑니다.
 - 남의 글을 옮기지 않습니다. 구조만 참고하고 문장은 새로 씁니다.
 """
-import os, sys, html
+import os, sys, html, re
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_solution import relativize, SITE, OG_BASE, TEL, TEL_RAW, header
@@ -347,9 +347,16 @@ def block(kind, val):
 
 def render(g, base="guide", base_name="가이드"):
     """base 를 바꾸면 같은 서식으로 다른 섹션(예: 정보 /posts/)도 찍어낼 수 있습니다."""
+    # qa_ld 가 켜진 글은 본문의 h3(질문) + 바로 뒤 p(답)도 FAQ 구조화 데이터에 넣는다
+    pairs = []
+    if g.get("qa_ld"):
+        for _, blocks in g["body"]:
+            for (k1, v1), (k2, v2) in zip(blocks, blocks[1:]):
+                if k1 == "h3" and k2 == "p":
+                    pairs.append((re.sub(r"^Q\d+\.\s*", "", v1), re.sub(r"<[^>]+>", "", v2)))
     faq_ld = ",".join(
         '{"@type":"Question","name":%s,"acceptedAnswer":{"@type":"Answer","text":%s}}'
-        % (jstr(q), jstr(a)) for q, a in g["faq"])
+        % (jstr(q), jstr(a)) for q, a in pairs + list(g["faq"]))
 
     secs = ""
     for h2, blocks in g["body"]:
