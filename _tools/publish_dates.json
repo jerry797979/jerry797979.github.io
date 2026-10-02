@@ -124,5 +124,15 @@
   "corporate-call-center": "2026-10-03",
   "inhouse-call-center-build": "2026-10-03",
   "onpremise-cc-solution": "2026-10-03",
-  "rental-cc-solution": "2026-10-03"
+  "rental-cc-solution": "2026-10-03",
+  "call-agent-system-build": "2026-10-03",
+  "call-center-ars-build": "2026-10-03",
+  "call-center-crm-link": "2026-10-03",
+  "call-center-cti-build": "2026-10-03",
+  "call-center-ivr-build": "2026-10-03",
+  "call-recording-build": "2026-10-03",
+  "contact-center-build-cost": "2026-10-03",
+  "contact-center-solution": "2026-10-03",
+  "ip-call-center-build": "2026-10-03",
+  "ipcc-build-cost": "2026-10-03"
 }

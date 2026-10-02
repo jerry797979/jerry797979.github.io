@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜센터 CTI 구축, 전화와 상담 화면을 묶기 전에 정할 것 | 지오테스</title>
+<meta name="description" content="콜센터 CTI 구축은 교환기·회선·상담 화면을 하나로 묶어, 전화가 울릴 때 고객 정보가 먼저 뜨게 하는 일입니다. 쓰던 CRM에 전화 기능만 붙일지, 상담 CRM까지 함께 갈지부터 정하세요. 지오테스는 교환기와 상담 앱을 직접 만들고 회선까지 공급합니다. 상담 1555-5528.">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/call-center-cti-build/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜센터 CTI 구축, 전화와 상담 화면을 묶기 전에 정할 것">
+<meta property="og:description" content="콜센터 CTI 구축은 교환기·회선·상담 화면을 하나로 묶어, 전화가 울릴 때 고객 정보가 먼저 뜨게 하는 일입니다. 쓰던 CRM에 전화 기능만 붙일지, 상담 CRM까지 함께 갈지부터 정하세요. 지오테스는 교환기와 상담 앱을 직접 만들고 회선까지 공급합니다. 상담 1555-5528.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜센터 CTI 구축 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"상담 인원·회선 수·필요한 기능에 따라 달라서, 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 금액이 궁금하시면 1555-5528로 상담해 주세요."}},{"@type":"Question","name":"쓰던 CRM에 CTI만 연동할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 쓰던 CRM은 그대로 두고 스크린 팝업, 클릭투콜 같은 전화 기능만 붙이는 방식이 있습니다. 기존 CRM이 외부 연동을 받을 수 있는지부터 먼저 확인하고 연동 범위를 정합니다."}},{"@type":"Question","name":"CTI를 구축하면 녹취 장비는 따로 사야 하나요?","acceptedAnswer":{"@type":"Answer","text":"따로 사지 않습니다. 지오테스 구축에는 통화 녹취, 상담 CRM, 통계, 실시간 현황판, 스크린 팝업이 포함되어 있습니다. 부분 녹취도 추가 비용 없이 함께 드리는 기능에 들어 있습니다."}},{"@type":"Question","name":"CTI 구축 계약에 약정 기간이나 위약금이 있나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 약정 기간이 없고 위약금도 없습니다. 써 보고 맞지 않으면 계약에 묶이지 않습니다. 구성과 비용 항목은 상담 때 항목별로 나눠서 안내해 드립니다."}},{"@type":"Question","name":"CTI 서버에 장애가 나면 상담이 멈추나요?","acceptedAnswer":{"@type":"Answer","text":"365일 24시간 이중화로 운영해서, 장애가 나면 백업 서버로 자동 전환됩니다. 회선도 통신사 두 곳 이상에 열어 두면 한쪽에 장애가 나도 다른 쪽으로 통화가 이어집니다."}},{"@type":"Question","name":"나중에 상담석을 늘리면 비용이 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"좌석을 늘리면 좌석당 비용만 추가됩니다. 시스템을 처음부터 다시 구축하지 않아도 됩니다. 회선 이용료와 통화료는 별도이니, 늘릴 인원과 회선 수를 알려 주시면 그 구성으로 산정해 드립니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 콜센터 구축</p>
+    <span class="eyebrow">콜센터 구축</span>
+    <h1>콜센터 CTI 구축,<br>전화와 화면을 하나로 잇는 일</h1>
+    <p class="meta">전화가 울리면 고객 정보가 먼저 뜨고, 끊으면 기록이 남는 구조.<br>교환기부터 상담 화면까지 어디서 끊기는지 짚어 봅니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜센터 CTI 구축하려면 뭐부터 정해야 하나요?</span>
+      <p>먼저 <b>쓰던 CRM을 그대로 둘지, 상담 CRM까지 새로 갈지</b>를 정해야 합니다. 그다음 교환기·회선·상담 화면을 한 업체가 맡는지 확인하세요. 세 곳이 나뉘어 있으면 팝업이 안 뜰 때 책임을 서로 넘기기 쉽습니다. 지오테스는 <span class='hl'>IP 교환기와 상담 애플리케이션을 직접 만들고 회선까지 공급</span>하고, 녹취·통계·현황판·스크린 팝업을 구축에 포함합니다. 약정 기간이 없고 위약금도 없습니다.</p>
+    </div>
+    <h2>CTI가 없으면 상담원은 전화와 화면 사이에서 시간을 버린다</h2><p>전화가 울립니다. 상담원이 받고 ‘성함이 어떻게 되세요’ 하고 묻습니다. 고객이 이름과 번호를 불러 주는 동안 상담원은 다른 창으로 넘어가 검색창에 번호를 입력합니다. 지난 문의 내역을 찾는 사이 고객은 같은 설명을 처음부터 다시 합니다. <strong>콜센터 CTI 구축</strong>을 검색하는 담당자라면 아마 이 장면을 매일 보고 계실 겁니다.</p><p>CTI는 전화와 컴퓨터를 하나로 묶는 기술입니다. 전화가 들어오는 순간 발신번호로 고객을 찾아 상담 화면에 띄우고(스크린 팝업), 화면에서 번호를 누르면 바로 전화가 걸리고(클릭투콜), 통화가 끝나면 녹취 파일과 상담 기록이 같은 고객 아래에 붙습니다. 개념을 더 자세히 보시려면 <a class='inlink' href='/guide/cti/'>CTI 가이드</a>를 참고하세요.</p><ul><li><strong>고객 정보를 찾는 동안 통화가 비는 시간</strong>이 매번 생긴다</li><li><strong>녹취를 찾으려면</strong> 날짜와 시간대를 기억해서 장비를 뒤져야 한다</li><li><strong>누가 몇 통을 받았는지</strong> 팀장이 엑셀로 손수 집계한다</li><li><strong>부재중 전화</strong>를 다음 날 출근해서야 발견한다</li></ul><p>이 증상들은 상담원 실력 탓이 아닙니다. 전화와 화면이 따로 돌아가니 생기는 일이고, CTI 구축으로 해결할 대상이 바로 이 틈입니다.</p><h2>교환기·회선·상담 화면을 한 곳이 맞춰야 CTI가 끊기지 않는다</h2><p>흔히 보는 구성은 이렇습니다. 회선은 통신사, 교환기는 장비 업체, 상담 프로그램은 개발사가 각각 맡습니다. 평소에는 문제가 없지만 어느 날 팝업이 안 뜨면 통신사는 회선은 정상이라고 하고, 장비 업체는 교환기는 정상이라고 하고, 개발사는 신호가 안 들어온다고 합니다. 원인을 찾는 동안 상담원은 다시 손으로 고객을 검색합니다.</p><p>지오테스는 이 틈을 없애는 쪽으로 일해 왔습니다. 2006년부터 컨택센터 구축과 인터넷전화 한 분야만 했고, 2008년에는 남의 녹취 제품을 파는 대신 녹취 시스템을 직접 개발하기 시작했습니다. 지금은 아래를 모두 직접 맡습니다.</p><ul><li><strong>IP 교환기(IP-PBX)</strong>: 직접 개발한 교환기라 착신 분배와 팝업 신호를 같은 쪽에서 손볼 수 있다</li><li><strong>상담 애플리케이션</strong>: 스크린 팝업, 클릭투콜, 상담 기록 화면을 직접 만든다</li><li><strong>인터넷전화 회선</strong>: 회선까지 직접 공급해서 전화가 들어오는 길부터 화면까지 한 곳이 책임진다</li></ul><p>회선은 KT·LG유플러스·SK브로드밴드 3사와 모두 제휴해 두었습니다. 한 통신사에 묶어 두지 않고, 사무실 위치와 쓰시는 조건에 맞는 쪽을 골라 연결합니다.</p><h2>쓰던 CRM이 있다면 버리지 말고 전화 기능만 붙이는 방법부터 따져 본다</h2><p>사내 고객관리 프로그램을 오래 써 온 곳은 고객 이력, 주문, 계약 정보가 이미 그 안에 쌓여 있습니다. 이런 곳에서 CTI를 이유로 프로그램을 통째로 바꾸면 데이터를 옮기고 상담원을 다시 교육하는 일이 전화 연동보다 더 커집니다.</p><p>그래서 지오테스는 쓰던 CRM이 있으면 그대로 두고 전화 기능만 붙이는 방식도 함께 안내합니다. 반대로 고객관리가 엑셀과 메모장에 흩어져 있다면 <a class='inlink' href='/solution/crm/'>상담 CRM</a>까지 한 번에 갖추는 편이 정리가 빠릅니다.</p><div class="table-scroll"><table><thead><tr><th>구분</th><th>쓰던 CRM에 전화 기능만 붙이기</th><th>상담 CRM까지 함께 구축</th></tr></thead><tbody><tr><th>맞는 곳</th><td>고객 데이터가 자체 프로그램에 쌓여 있는 곳</td><td>고객관리가 엑셀·수기로 흩어진 곳</td></tr><tr><th>상담원 화면</th><td>익숙한 기존 화면을 그대로 쓴다</td><td>전화와 상담 기록이 한 화면에 모인다</td></tr><tr><th>스크린 팝업</th><td>기존 CRM 쪽 연동 방식을 맞춰 붙인다</td><td>구축 범위에 들어 있다</td></tr><tr><th>녹취·통계</th><td>통화 쪽에서 제공하고 CRM과 연결한다</td><td>같은 화면 안에서 바로 본다</td></tr><tr><th>먼저 확인할 것</th><td>기존 CRM이 외부 연동을 받을 수 있는지</td><td>지금 쓰는 고객 자료를 어떻게 옮길지</td></tr></tbody></table></div><p>어느 쪽이 맞는지는 지금 쓰시는 화면을 직접 보면 금방 갈립니다. 상담 때 현재 CRM 이름과 쓰는 방식을 알려 주시면 연동할 수 있는 범위부터 먼저 확인해 드립니다.</p><h2>녹취·통계·현황판까지 한 묶음이어야 CTI가 제 몫을 한다</h2><p>팝업은 붙었는데 녹취는 별도 장비에, 통계는 또 다른 프로그램에 있다면 상담원과 팀장은 여전히 창을 오가야 합니다. 지오테스 구축에는 상담 CRM, 통화 녹취, 통계, 실시간 현황판, 스크린 팝업이 포함되어 있어 따로 사지 않습니다. 녹취 구성은 <a class='inlink' href='/solution/recording/'>통화 녹취</a> 페이지에서 보실 수 있습니다.</p><ul><li><strong>영업 자동화</strong>: 오토콜, 클릭투콜, 스케줄 발신</li><li><strong>브랜드 구분</strong>: 착신번호별 구분, 브랜드별 발신번호</li><li><strong>상담 품질</strong>: 필수 안내 자동 재생, 욕설 방지 안내, 통화 종료 추적</li><li><strong>고객 관리</strong>: 블랙리스트, 통화 후 자동 문자·알림톡, 부재중 자동 알림, 부분 녹취</li></ul><div class="callout"><p>위 12가지는 <strong>추가 비용 없이 함께 드리는 기능</strong>입니다. 다른 견적서와 비교하실 때는 이 항목들이 별도 줄로 따로 잡혀 있는지 나란히 놓고 보시는 게 정확합니다.</p></div><p>AI 통화요약, 콜백·DB·실시간 API 연동, AI 응대, 보이는 ARS는 선택 항목입니다. 처음부터 다 넣지 않고 운영하면서 필요해질 때 추가하면 됩니다.</p><h2>계약 전에 장애 대응과 약정 조건은 꼭 확인해야 한다</h2><p>CTI는 전화와 화면을 묶는 만큼 서버가 멈추면 둘이 함께 멈춥니다. 그래서 ‘장애가 나면 어떻게 되느냐’는 질문을 계약서에 서명하기 전에 해야 합니다. 지오테스는 365일 24시간 이중화로 운영하고, 장애가 나면 백업 서버로 자동 전환됩니다.</p><p>회선도 같은 원리로 다룹니다. 통신사 두 곳 이상에 회선을 열어 두면 한쪽 통신사에 장애가 나도 다른 쪽으로 통화가 이어집니다. 3사와 모두 제휴하고 있어서 이렇게 나눠 여는 구성이 어렵지 않습니다.</p><div class="callout"><p>지오테스는 <strong>약정 기간이 없고 위약금도 없습니다.</strong> 써 보고 맞지 않으면 묶여 있지 않아도 됩니다. 시스템이 계약서가 아니라 품질로 고객을 붙잡아야 한다는 게 이 조건을 둔 이유입니다.</p></div><p>2013년에는 필리핀 클락에 콜센터를 직접 세워 운영했습니다. 시스템을 파는 쪽이 아니라 쓰는 쪽에서 전화가 멈추는 순간을 겪어 봤기 때문에, 이중화와 회선 분산을 구축의 기본값으로 둡니다.</p><h2>비용은 지금 쓰는 구성을 보고 항목별로 산정한다</h2><p>콜센터 CTI 구축 비용은 상담 인원·회선 수·필요한 기능에 따라 달라집니다. 그래서 지오테스는 금액을 먼저 말하지 않고, 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 아래 네 항목으로 나뉩니다.</p><ul><li><strong>시스템 구축</strong>: 1회</li><li><strong>회선 이용료</strong>: 월 단위, 통화료는 별도</li><li><strong>유지보수</strong>: 별도 계약</li><li><strong>부가서비스</strong>: 필요할 때만 선택</li></ul><p>상담석을 늘리면 좌석당 비용만 추가됩니다. 지금 시스템에서 옮겨 오면 얼마나 줄어드는지도 많이 물으시는데, 이는 지금 무엇을 쓰고 계신지에 따라 완전히 달라집니다. 그래서 숫자 하나로 답하지 않고 <strong>항목별로 무엇이 없어지고 무엇이 남는지</strong> 계산해서 알려 드립니다. 비용 구조는 <a class='inlink' href='/pricing/'>요금 안내</a>에 정리해 두었습니다.</p><p>상담 전에 상담 인원, 쓰는 회선 수, 지금 쓰는 CRM과 녹취 장비, 꼭 필요한 기능을 적어 두시면 이야기가 빨라집니다. 화면이 실제로 어떻게 돌아가는지 먼저 보고 싶으시면 <a class='inlink' href='/demo/'>데모</a>를 신청하시고, 구성 상담은 고객센터 1555-5528(상담 무료, 평일 09:00~18:00)로 연락 주세요.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜센터 CTI 구축 비용은 얼마인가요?</summary><div class="a">상담 인원·회선 수·필요한 기능에 따라 달라서, 지금 쓰시는 구성을 보고 산정해 드립니다. 비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉩니다. 금액이 궁금하시면 1555-5528로 상담해 주세요.</div></details><details><summary>쓰던 CRM에 CTI만 연동할 수 있나요?</summary><div class="a">됩니다. 쓰던 CRM은 그대로 두고 스크린 팝업, 클릭투콜 같은 전화 기능만 붙이는 방식이 있습니다. 기존 CRM이 외부 연동을 받을 수 있는지부터 먼저 확인하고 연동 범위를 정합니다.</div></details><details><summary>CTI를 구축하면 녹취 장비는 따로 사야 하나요?</summary><div class="a">따로 사지 않습니다. 지오테스 구축에는 통화 녹취, 상담 CRM, 통계, 실시간 현황판, 스크린 팝업이 포함되어 있습니다. 부분 녹취도 추가 비용 없이 함께 드리는 기능에 들어 있습니다.</div></details><details><summary>CTI 구축 계약에 약정 기간이나 위약금이 있나요?</summary><div class="a">지오테스는 약정 기간이 없고 위약금도 없습니다. 써 보고 맞지 않으면 계약에 묶이지 않습니다. 구성과 비용 항목은 상담 때 항목별로 나눠서 안내해 드립니다.</div></details><details><summary>CTI 서버에 장애가 나면 상담이 멈추나요?</summary><div class="a">365일 24시간 이중화로 운영해서, 장애가 나면 백업 서버로 자동 전환됩니다. 회선도 통신사 두 곳 이상에 열어 두면 한쪽에 장애가 나도 다른 쪽으로 통화가 이어집니다.</div></details><details><summary>나중에 상담석을 늘리면 비용이 어떻게 되나요?</summary><div class="a">좌석을 늘리면 좌석당 비용만 추가됩니다. 시스템을 처음부터 다시 구축하지 않아도 됩니다. 회선 이용료와 통화료는 별도이니, 늘릴 인원과 회선 수를 알려 주시면 그 구성으로 산정해 드립니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
