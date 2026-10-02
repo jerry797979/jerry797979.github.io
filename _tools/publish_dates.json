@@ -94,5 +94,15 @@
   "outsourcing-rec-total-cost": "2026-10-01",
   "sales-agency-total-cost": "2026-10-02",
   "sales-hiring-total-cost": "2026-10-02",
-  "call-center-build-faq": "2026-10-02"
+  "call-center-build-faq": "2026-10-02",
+  "call-center-build-cost": "2026-10-02",
+  "call-center-build-expert": "2026-10-02",
+  "call-center-build-method": "2026-10-02",
+  "call-center-build-price": "2026-10-02",
+  "call-center-build-quote": "2026-10-02",
+  "call-center-build-vendor": "2026-10-02",
+  "call-center-setup-guide": "2026-10-02",
+  "call-center-system-build": "2026-10-02",
+  "call-center-system-cost": "2026-10-02",
+  "call-center-vendor-recommend": "2026-10-02"
 }

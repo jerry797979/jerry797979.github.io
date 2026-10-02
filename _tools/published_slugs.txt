@@ -94,3 +94,13 @@ outsourcing-rec-total-cost
 sales-agency-total-cost
 sales-hiring-total-cost
 call-center-build-faq
+call-center-build-cost
+call-center-build-expert
+call-center-build-method
+call-center-build-price
+call-center-build-quote
+call-center-build-vendor
+call-center-setup-guide
+call-center-system-build
+call-center-system-cost
+call-center-vendor-recommend
