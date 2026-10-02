@@ -104,3 +104,13 @@ call-center-setup-guide
 call-center-system-build
 call-center-system-cost
 call-center-vendor-recommend
+call-center-establish
+call-center-ops-system
+call-center-phone-build
+call-center-phone-system
+call-center-program
+call-center-setup-cost
+call-center-solution-pick
+call-center-solution-vendor
+small-call-center-setup
+sme-call-center-build

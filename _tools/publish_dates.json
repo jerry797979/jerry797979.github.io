@@ -104,5 +104,15 @@
   "call-center-setup-guide": "2026-10-02",
   "call-center-system-build": "2026-10-02",
   "call-center-system-cost": "2026-10-02",
-  "call-center-vendor-recommend": "2026-10-02"
+  "call-center-vendor-recommend": "2026-10-02",
+  "call-center-establish": "2026-10-03",
+  "call-center-ops-system": "2026-10-03",
+  "call-center-phone-build": "2026-10-03",
+  "call-center-phone-system": "2026-10-03",
+  "call-center-program": "2026-10-03",
+  "call-center-setup-cost": "2026-10-03",
+  "call-center-solution-pick": "2026-10-03",
+  "call-center-solution-vendor": "2026-10-03",
+  "small-call-center-setup": "2026-10-03",
+  "sme-call-center-build": "2026-10-03"
 }
