@@ -134,5 +134,14 @@
   "contact-center-build-cost": "2026-10-03",
   "contact-center-solution": "2026-10-03",
   "ip-call-center-build": "2026-10-03",
-  "ipcc-build-cost": "2026-10-03"
+  "ipcc-build-cost": "2026-10-03",
+  "ai-call-center-build": "2026-10-03",
+  "ai-callbot-build-cost": "2026-10-03",
+  "call-agent-manage-program": "2026-10-03",
+  "call-center-ai-build": "2026-10-03",
+  "call-center-ai-counsel": "2026-10-03",
+  "call-center-erp-link": "2026-10-03",
+  "call-counsel-program": "2026-10-03",
+  "call-history-manage": "2026-10-03",
+  "call-management-system": "2026-10-03"
 }

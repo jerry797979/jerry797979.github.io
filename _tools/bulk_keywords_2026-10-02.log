@@ -100,3 +100,105 @@ CRM 보고 실패(무시) call-center-phone-system: The read operation timed out
 CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
 완료: ['call-center-establish', 'call-center-ops-system', 'call-center-phone-build', 'call-center-phone-system', 'call-center-program', 'call-center-setup-cost', 'call-center-solution-pick', 'call-center-solution-vendor', 'small-call-center-setup', 'sme-call-center-build']
 ==== 남은 키워드 30개 ====
+[생성] 기업 콜센터 구축
+  1회차 통과 — corporate-call-center (4873자)
+[생성] 자체 콜센터 구축
+  1회차 통과 — inhouse-call-center-build (4603자)
+[생성] 클라우드 콜센터 구축
+  1회차 통과 — cloud-call-center-build (4295자)
+[생성] 클라우드 콜센터 비용
+  1회차 통과 — cloud-call-center-cost (4899자)
+[생성] 클라우드 콜센터 업체
+  1회차 통과 — cloud-call-center-vendor (4864자)
+[생성] 클라우드 콜센터 추천
+  1회차 통과 — cloud-call-center-recommend (4578자)
+[생성] 콜센터 구축형 솔루션
+  1회차 통과 — onpremise-cc-solution (4825자)
+[생성] 콜센터 임대형 솔루션
+  1회차 통과 — rental-cc-solution (4847자)
+[생성] 콜센터 구축과 임대 차이
+  1회차 반려 1건: 본문에 키워드 '콜센터 구축과 임대 차이' 가 3회 이상 나와야 함(현재 2회)
+  2회차 통과 — call-center-build-vs-rental (4754자)
+[생성] 콜센터 서버 구축
+  1회차 통과 — call-center-server-build (4855자)
+자동 생성 10개 보충: corporate-call-center, inhouse-call-center-build, cloud-call-center-build, cloud-call-center-cost, cloud-call-center-vendor, cloud-call-center-recommend, onpremise-cc-solution, rental-cc-solution, call-center-build-vs-rental, call-center-server-build
+발행 파일 생성: call-center-build-vs-rental (2026-10-03)
+발행 파일 생성: call-center-server-build (2026-10-03)
+발행 파일 생성: cloud-call-center-build (2026-10-03)
+발행 파일 생성: cloud-call-center-cost (2026-10-03)
+발행 파일 생성: cloud-call-center-recommend (2026-10-03)
+발행 파일 생성: cloud-call-center-vendor (2026-10-03)
+발행 파일 생성: corporate-call-center (2026-10-03)
+발행 파일 생성: inhouse-call-center-build (2026-10-03)
+발행 파일 생성: onpremise-cc-solution (2026-10-03)
+발행 파일 생성: rental-cc-solution (2026-10-03)
+sitemap.xml  170개 URL
+robots.txt   생성
+sitemap 재생성
+발행 전 검사 통과 (127쪽)
+저장소에 커밋·푸시 완료
+올림  call-center-build-vs-rental                   https://ziotes.com/posts/call-center-build-vs-rental/
+올림  call-center-server-build                      https://ziotes.com/posts/call-center-server-build/
+올림  cloud-call-center-build                       https://ziotes.com/posts/cloud-call-center-build/
+올림  cloud-call-center-cost                        https://ziotes.com/posts/cloud-call-center-cost/
+올림  cloud-call-center-recommend                   https://ziotes.com/posts/cloud-call-center-recommend/
+올림  cloud-call-center-vendor                      https://ziotes.com/posts/cloud-call-center-vendor/
+올림  corporate-call-center                         https://ziotes.com/posts/corporate-call-center/
+올림  inhouse-call-center-build                     https://ziotes.com/posts/inhouse-call-center-build/
+올림  onpremise-cc-solution                         https://ziotes.com/posts/onpremise-cc-solution/
+올림  rental-cc-solution                            https://ziotes.com/posts/rental-cc-solution/
+전송 완료 10개 / 실패 0개
+CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
+완료: ['call-center-build-vs-rental', 'call-center-server-build', 'cloud-call-center-build', 'cloud-call-center-cost', 'cloud-call-center-recommend', 'cloud-call-center-vendor', 'corporate-call-center', 'inhouse-call-center-build', 'onpremise-cc-solution', 'rental-cc-solution']
+==== 남은 키워드 20개 ====
+[생성] IP 콜센터 구축
+  1회차 통과 — ip-call-center-build (4848자)
+[생성] IPCC 구축 비용
+  1회차 통과 — ipcc-build-cost (4584자)
+[생성] 컨택센터 구축 비용
+  1회차 통과 — contact-center-build-cost (4341자)
+[생성] 컨택센터 솔루션 구축
+  1회차 통과 — contact-center-solution (4826자)
+[생성] 콜센터 CTI 구축
+  1회차 통과 — call-center-cti-build (4683자)
+[생성] 콜센터 IVR 구축
+  1회차 통과 — call-center-ivr-build (4925자)
+[생성] 콜센터 ARS 구축
+  1회차 통과 — call-center-ars-build (4900자)
+[생성] 콜센터 통화녹음 구축
+  1회차 통과 — call-recording-build (4919자)
+[생성] 콜센터 상담원 시스템 구축
+  1회차 통과 — call-agent-system-build (5157자)
+[생성] 콜센터 CRM 연동
+  1회차 통과 — call-center-crm-link (4916자)
+자동 생성 10개 보충: ip-call-center-build, ipcc-build-cost, contact-center-build-cost, contact-center-solution, call-center-cti-build, call-center-ivr-build, call-center-ars-build, call-recording-build, call-agent-system-build, call-center-crm-link
+발행 파일 생성: call-agent-system-build (2026-10-03)
+발행 파일 생성: call-center-ars-build (2026-10-03)
+발행 파일 생성: call-center-crm-link (2026-10-03)
+발행 파일 생성: call-center-cti-build (2026-10-03)
+발행 파일 생성: call-center-ivr-build (2026-10-03)
+발행 파일 생성: call-recording-build (2026-10-03)
+발행 파일 생성: contact-center-build-cost (2026-10-03)
+발행 파일 생성: contact-center-solution (2026-10-03)
+발행 파일 생성: ip-call-center-build (2026-10-03)
+발행 파일 생성: ipcc-build-cost (2026-10-03)
+sitemap.xml  180개 URL
+robots.txt   생성
+sitemap 재생성
+발행 전 검사 통과 (137쪽)
+저장소에 커밋·푸시 완료
+올림  call-agent-system-build                       https://ziotes.com/posts/call-agent-system-build/
+올림  call-center-ars-build                         https://ziotes.com/posts/call-center-ars-build/
+올림  call-center-crm-link                          https://ziotes.com/posts/call-center-crm-link/
+올림  call-center-cti-build                         https://ziotes.com/posts/call-center-cti-build/
+올림  call-center-ivr-build                         https://ziotes.com/posts/call-center-ivr-build/
+올림  call-recording-build                          https://ziotes.com/posts/call-recording-build/
+올림  contact-center-build-cost                     https://ziotes.com/posts/contact-center-build-cost/
+올림  contact-center-solution                       https://ziotes.com/posts/contact-center-solution/
+올림  ip-call-center-build                          https://ziotes.com/posts/ip-call-center-build/
+올림  ipcc-build-cost                               https://ziotes.com/posts/ipcc-build-cost/
+전송 완료 10개 / 실패 0개
+CRM 보고 실패(무시) contact-center-build-cost: Remote end closed connection without response
+CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
+완료: ['call-agent-system-build', 'call-center-ars-build', 'call-center-crm-link', 'call-center-cti-build', 'call-center-ivr-build', 'call-recording-build', 'contact-center-build-cost', 'contact-center-solution', 'ip-call-center-build', 'ipcc-build-cost']
+==== 남은 키워드 10개 ====

@@ -134,3 +134,12 @@ contact-center-build-cost
 contact-center-solution
 ip-call-center-build
 ipcc-build-cost
+ai-call-center-build
+ai-callbot-build-cost
+call-agent-manage-program
+call-center-ai-build
+call-center-ai-counsel
+call-center-erp-link
+call-counsel-program
+call-history-manage
+call-management-system
