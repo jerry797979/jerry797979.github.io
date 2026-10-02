@@ -114,3 +114,13 @@ call-center-solution-pick
 call-center-solution-vendor
 small-call-center-setup
 sme-call-center-build
+call-center-build-vs-rental
+call-center-server-build
+cloud-call-center-build
+cloud-call-center-cost
+cloud-call-center-recommend
+cloud-call-center-vendor
+corporate-call-center
+inhouse-call-center-build
+onpremise-cc-solution
+rental-cc-solution

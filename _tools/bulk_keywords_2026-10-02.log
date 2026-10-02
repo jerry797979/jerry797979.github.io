@@ -49,3 +49,54 @@ sitemap 재생성
 CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
 완료: ['call-center-build-cost', 'call-center-build-expert', 'call-center-build-method', 'call-center-build-price', 'call-center-build-quote', 'call-center-build-vendor', 'call-center-setup-guide', 'call-center-system-build', 'call-center-system-cost', 'call-center-vendor-recommend']
 ==== 남은 키워드 40개 ====
+[생성] 콜센터 솔루션 업체
+  1회차 통과 — call-center-solution-vendor (4972자)
+[생성] 콜센터 솔루션 추천
+  1회차 통과 — call-center-solution-pick (5290자)
+[생성] 콜센터 프로그램 구축
+  1회차 통과 — call-center-program (4879자)
+[생성] 콜센터 전화 시스템 구축
+  1회차 통과 — call-center-phone-system (4641자)
+[생성] 콜센터 전화 구축
+  1회차 통과 — call-center-phone-build (4834자)
+[생성] 콜센터 설립 방법
+  1회차 통과 — call-center-establish (5404자)
+[생성] 콜센터 설립 비용
+  1회차 통과 — call-center-setup-cost (4800자)
+[생성] 콜센터 운영 시스템 구축
+  1회차 통과 — call-center-ops-system (4900자)
+[생성] 소규모 콜센터 구축
+  1회차 통과 — small-call-center-setup (4541자)
+[생성] 중소기업 콜센터 구축
+  1회차 통과 — sme-call-center-build (5044자)
+자동 생성 10개 보충: call-center-solution-vendor, call-center-solution-pick, call-center-program, call-center-phone-system, call-center-phone-build, call-center-establish, call-center-setup-cost, call-center-ops-system, small-call-center-setup, sme-call-center-build
+발행 파일 생성: call-center-establish (2026-10-03)
+발행 파일 생성: call-center-ops-system (2026-10-03)
+발행 파일 생성: call-center-phone-build (2026-10-03)
+발행 파일 생성: call-center-phone-system (2026-10-03)
+발행 파일 생성: call-center-program (2026-10-03)
+발행 파일 생성: call-center-setup-cost (2026-10-03)
+발행 파일 생성: call-center-solution-pick (2026-10-03)
+발행 파일 생성: call-center-solution-vendor (2026-10-03)
+발행 파일 생성: small-call-center-setup (2026-10-03)
+발행 파일 생성: sme-call-center-build (2026-10-03)
+sitemap.xml  160개 URL
+robots.txt   생성
+sitemap 재생성
+발행 전 검사 통과 (117쪽)
+저장소에 커밋·푸시 완료
+올림  call-center-establish                         https://ziotes.com/posts/call-center-establish/
+올림  call-center-ops-system                        https://ziotes.com/posts/call-center-ops-system/
+올림  call-center-phone-build                       https://ziotes.com/posts/call-center-phone-build/
+올림  call-center-phone-system                      https://ziotes.com/posts/call-center-phone-system/
+올림  call-center-program                           https://ziotes.com/posts/call-center-program/
+올림  call-center-setup-cost                        https://ziotes.com/posts/call-center-setup-cost/
+올림  call-center-solution-pick                     https://ziotes.com/posts/call-center-solution-pick/
+올림  call-center-solution-vendor                   https://ziotes.com/posts/call-center-solution-vendor/
+올림  small-call-center-setup                       https://ziotes.com/posts/small-call-center-setup/
+올림  sme-call-center-build                         https://ziotes.com/posts/sme-call-center-build/
+전송 완료 10개 / 실패 0개
+CRM 보고 실패(무시) call-center-phone-system: The read operation timed out
+CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
+완료: ['call-center-establish', 'call-center-ops-system', 'call-center-phone-build', 'call-center-phone-system', 'call-center-program', 'call-center-setup-cost', 'call-center-solution-pick', 'call-center-solution-vendor', 'small-call-center-setup', 'sme-call-center-build']
+==== 남은 키워드 30개 ====
