@@ -202,3 +202,4 @@ CRM 보고 실패(무시) contact-center-build-cost: Remote end closed connectio
 CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown': []}
 완료: ['call-agent-system-build', 'call-center-ars-build', 'call-center-crm-link', 'call-center-cti-build', 'call-center-ivr-build', 'call-recording-build', 'contact-center-build-cost', 'contact-center-solution', 'ip-call-center-build', 'ipcc-build-cost']
 ==== 남은 키워드 10개 ====
+==== 남은 키워드 9개 ====
