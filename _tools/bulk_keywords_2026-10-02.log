@@ -203,3 +203,61 @@ CRM 홈페이지 현황 보고: {'ok': True, 'added': 10, 'skipped': 0, 'unknown
 완료: ['call-agent-system-build', 'call-center-ars-build', 'call-center-crm-link', 'call-center-cti-build', 'call-center-ivr-build', 'call-recording-build', 'contact-center-build-cost', 'contact-center-solution', 'ip-call-center-build', 'ipcc-build-cost']
 ==== 남은 키워드 10개 ====
 ==== 남은 키워드 9개 ====
+[생성] 콜센터 상담 프로그램
+  1회차 통과 — call-counsel-program (5440자)
+[생성] 콜센터 상담원 관리 프로그램
+  1회차 통과 — call-agent-manage-program (4629자)
+[생성] 콜센터 통화 관리 시스템
+  1회차 통과 — call-management-system (4958자)
+[생성] 콜센터 상담 이력 관리
+  1회차 통과 — call-history-manage (5153자)
+[생성] 콜센터 AI 구축
+  1회차 통과 — call-center-ai-build (4511자)
+[생성] AI 콜센터 구축
+  1회차 통과 — ai-call-center-build (4969자)
+[생성] AI 콜봇 구축 비용
+  1회차 통과 — ai-callbot-build-cost (4554자)
+[생성] 콜센터 AI 상담 시스템
+  1회차 통과 — call-center-ai-counsel (4758자)
+자동 생성 8개 보충: call-counsel-program, call-agent-manage-program, call-management-system, call-history-manage, call-center-ai-build, ai-call-center-build, ai-callbot-build-cost, call-center-ai-counsel
+발행 파일 생성: ai-call-center-build (2026-10-03)
+발행 파일 생성: ai-callbot-build-cost (2026-10-03)
+발행 파일 생성: call-agent-manage-program (2026-10-03)
+발행 파일 생성: call-center-ai-build (2026-10-03)
+발행 파일 생성: call-center-ai-counsel (2026-10-03)
+발행 파일 생성: call-center-erp-link (2026-10-03)
+발행 파일 생성: call-counsel-program (2026-10-03)
+발행 파일 생성: call-history-manage (2026-10-03)
+발행 파일 생성: call-management-system (2026-10-03)
+sitemap.xml  189개 URL
+robots.txt   생성
+sitemap 재생성
+발행 전 검사 통과 (146쪽)
+저장소에 커밋·푸시 완료
+올림  ai-call-center-build                          https://ziotes.com/posts/ai-call-center-build/
+올림  ai-callbot-build-cost                         https://ziotes.com/posts/ai-callbot-build-cost/
+올림  call-agent-manage-program                     https://ziotes.com/posts/call-agent-manage-program/
+올림  call-center-ai-build                          https://ziotes.com/posts/call-center-ai-build/
+올림  call-center-ai-counsel                        https://ziotes.com/posts/call-center-ai-counsel/
+올림  call-center-erp-link                          https://ziotes.com/posts/call-center-erp-link/
+올림  call-counsel-program                          https://ziotes.com/posts/call-counsel-program/
+올림  call-history-manage                           https://ziotes.com/posts/call-history-manage/
+올림  call-management-system                        https://ziotes.com/posts/call-management-system/
+전송 완료 9개 / 실패 0개
+CRM 홈페이지 현황 보고: {'ok': True, 'added': 9, 'skipped': 0, 'unknown': []}
+완료: ['ai-call-center-build', 'ai-callbot-build-cost', 'call-agent-manage-program', 'call-center-ai-build', 'call-center-ai-counsel', 'call-center-erp-link', 'call-counsel-program', 'call-history-manage', 'call-management-system']
+==== 남은 키워드 1개 ====
+[생성] 전화번호부터 콜센터까지 구축
+  1회차 통과 — phone-to-callcenter-build (4563자)
+자동 생성 1개 보충: phone-to-callcenter-build
+발행 파일 생성: phone-to-callcenter-build (2026-10-03)
+sitemap.xml  190개 URL
+robots.txt   생성
+sitemap 재생성
+발행 전 검사 통과 (147쪽)
+저장소에 커밋·푸시 완료
+올림  phone-to-callcenter-build                     https://ziotes.com/posts/phone-to-callcenter-build/
+전송 완료 1개 / 실패 0개
+CRM 홈페이지 현황 보고: {'ok': True, 'added': 1, 'skipped': 0, 'unknown': []}
+완료: ['phone-to-callcenter-build']
+==== 남은 키워드 0개 ====

@@ -144,3 +144,5 @@ call-counsel-program
 call-history-manage
 call-management-system
 phone-to-callcenter-build
+ai-callbot-cost-mistakes
+ai-callcenter-mistakes
