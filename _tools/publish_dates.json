@@ -146,5 +146,7 @@
   "call-management-system": "2026-10-03",
   "phone-to-callcenter-build": "2026-10-03",
   "ai-callbot-cost-mistakes": "2026-10-03",
-  "ai-callcenter-mistakes": "2026-10-03"
+  "ai-callcenter-mistakes": "2026-10-03",
+  "ip-callcenter-mistakes": "2026-10-04",
+  "ipcc-cost-mistakes": "2026-10-04"
 }
