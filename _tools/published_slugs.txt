@@ -148,3 +148,5 @@ ai-callbot-cost-mistakes
 ai-callcenter-mistakes
 ip-callcenter-mistakes
 ipcc-cost-mistakes
+corporate-cc-mistakes
+small-cc-build-mistakes

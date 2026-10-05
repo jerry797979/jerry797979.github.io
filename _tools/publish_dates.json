@@ -148,5 +148,7 @@
   "ai-callbot-cost-mistakes": "2026-10-03",
   "ai-callcenter-mistakes": "2026-10-03",
   "ip-callcenter-mistakes": "2026-10-04",
-  "ipcc-cost-mistakes": "2026-10-04"
+  "ipcc-cost-mistakes": "2026-10-04",
+  "corporate-cc-mistakes": "2026-10-05",
+  "small-cc-build-mistakes": "2026-10-05"
 }
