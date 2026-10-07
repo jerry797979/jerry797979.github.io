@@ -152,5 +152,7 @@
   "corporate-cc-mistakes": "2026-10-05",
   "small-cc-build-mistakes": "2026-10-05",
   "inhouse-cc-build-mistakes": "2026-10-06",
-  "phone-to-cc-mistakes": "2026-10-06"
+  "phone-to-cc-mistakes": "2026-10-06",
+  "cc-build-cost-mistakes": "2026-10-07",
+  "sme-cc-build-mistakes": "2026-10-07"
 }
