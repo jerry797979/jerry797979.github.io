@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜센터 AI 구축 후 후회하는 장면들, 이미 운영 중인 곳이 놓친 것 | 지오테스</title>
+<meta name="description" content="콜센터 AI 구축 뒤에 흔히 나오는 실수는 상담원으로 넘어가는 길이 막힌 AI 응대, CRM에 들어가지 않는 통화요약, 기본 기능을 따로 산 일, 도입 전 기록을 남기지 않은 일입니다. 각 장면이 생긴 이유와 피하는 법을 정리했습니다. 상담 1555-5528">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/cc-ai-build-mistakes/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜센터 AI 구축 후 후회하는 장면들, 이미 운영 중인 곳이 놓친 것">
+<meta property="og:description" content="콜센터 AI 구축 뒤에 흔히 나오는 실수는 상담원으로 넘어가는 길이 막힌 AI 응대, CRM에 들어가지 않는 통화요약, 기본 기능을 따로 산 일, 도입 전 기록을 남기지 않은 일입니다. 각 장면이 생긴 이유와 피하는 법을 정리했습니다. 상담 1555-5528">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜센터 AI 구축하면 상담원 없이 운영할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"그렇게 설계하면 고객이 AI 안에서 맴돌다 끊는 일이 늘어납니다. AI가 답하지 못하거나 고객이 원할 때 곧바로 상담원에게 넘기는 경로를 먼저 만들고, 그 위에 AI 응대를 얹는 방식을 권합니다."}},{"@type":"Question","name":"AI 통화요약은 기존 CRM에 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스 상담 CRM을 쓰시면 같은 화면에 이어 붙습니다. 쓰던 CRM을 그대로 두고 싶다면 DB API 연동이나 실시간 API 연동으로 요약을 넘기는 방식도 가능합니다. 지금 쓰는 CRM을 알려 주시면 연결 방법을 확인해 드립니다."}},{"@type":"Question","name":"녹취 고지나 폭언 경고도 AI를 사야 하나요?","acceptedAnswer":{"@type":"Answer","text":"아닙니다. 필수 안내 자동 재생과 욕설 방지 안내는 지오테스가 추가 비용 없이 함께 드리는 기본 기능입니다. 통화 후 자동 문자·알림톡, 부재중 자동 알림도 기본에 들어 있어 AI로 따로 사지 않아도 됩니다."}},{"@type":"Question","name":"콜센터 AI 구축 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"상담 인원·회선 수·필요한 기능에 따라 달라서, 지금 쓰시는 구성을 보고 산정해 드립니다. AI 통화요약과 AI 응대는 선택 항목인 부가서비스로 들어갑니다. 금액이 궁금하시면 1555-5528로 상담해 주십시오."}},{"@type":"Question","name":"AI를 써 보고 맞지 않으면 해지할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"지오테스는 약정 기간과 위약금이 없습니다. 써 보면서 AI 응대 범위를 줄이거나 시간대를 조정하는 일도 계약에 묶이지 않고 할 수 있습니다."}},{"@type":"Question","name":"AI 도입 효과는 어떻게 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"도입 전 기존 시스템에서 인입량, 끊긴 통화, 통화 시간을 내려받아 두고, 도입 뒤 같은 기준으로 통계 화면에서 비교하시면 됩니다. 통화 종료 추적으로 고객이 어느 단계에서 끊었는지도 볼 수 있습니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · AI 컨택센터</p>
+    <span class="eyebrow">AI 컨택센터</span>
+    <h1>콜센터 AI 구축,<br>붙이고 나서 후회하는 장면들</h1>
+    <p class="meta">AI를 도입한 콜센터에서 실제로 문제가 터지는 곳은 AI 자체보다 그 앞뒤입니다.<br>실패한 장면을 먼저 보고, 같은 실수를 피하는 순서를 짚습니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜센터 AI 구축하고 나서 오히려 불편해지는 이유가 뭔가요?</span>
+      <p>대부분은 AI가 기존 상담 흐름과 <b>따로 돌기 때문</b>입니다. 상담원으로 넘어가는 길이 없는 AI 응대, CRM에 들어가지 않는 통화요약, 이미 기본으로 받을 수 있는 기능을 따로 산 일이 대표적입니다. 해법은 <span class='hl'>AI를 교환기·녹취·상담 화면과 한 구조 안에 넣는 것</span>입니다. 도입 전 응대 기록을 남겨 두어야 효과도 따져 볼 수 있습니다.</p>
+    </div>
+    <h2>AI 응대만 먼저 걸어 두면 고객은 상담원을 못 찾고 끊는다</h2><p>흔한 장면이 있습니다. 대표번호에 AI 응대를 걸어 두고 첫 주 통계를 열어 보니 끊긴 통화가 눈에 띄게 늘었습니다. 녹취를 들어 보면 고객은 같은 질문을 두세 번 바꿔 말하다가 "상담원"이라고 외치고, 그래도 안내가 처음으로 돌아가자 전화를 끊습니다. 다음 날 그 고객은 더 화가 난 상태로 다시 전화합니다.</p><p>원인은 AI의 성능보다 설계에 있습니다. AI가 답하지 못하는 순간 어디로 넘길지, 상담원이 모두 통화 중이면 어떻게 할지를 정하지 않은 채 AI만 붙인 것입니다. 사람에게 넘어가는 출구가 없는 AI 응대는 고객에게 잠긴 문과 같습니다.</p><ul><li><strong>상담원 연결 경로</strong>: AI가 답하지 못하거나 고객이 원하면 곧바로 상담석으로 넘기는 흐름을 먼저 만든다</li><li><strong>대기 상황 확인</strong>: 실시간 현황판으로 지금 몇 명이 대기 중인지 상담팀장이 바로 본다</li><li><strong>놓친 통화 처리</strong>: 부재중 자동 알림과 통화 후 자동 문자·알림톡으로 끊긴 고객에게 먼저 연락한다</li></ul><p>지오테스는 IP 교환기와 상담 애플리케이션을 직접 개발합니다. 그래서 AI 응대와 상담원 연결이 같은 교환기 안에서 이어지고, 넘기는 조건도 콜센터 사정에 맞춰 정할 수 있습니다. 구성은 <a class='inlink' href='/solution/aicc/'>AI 컨택센터 소개</a>에서 볼 수 있습니다.</p><h2>통화요약이 상담 화면 밖에 쌓이면 상담원은 다시 손으로 적는다</h2><p>AI 통화요약을 붙인 콜센터에서 몇 주 뒤 상담팀장이 이렇게 말합니다. "요약은 나오는데 아무도 안 봐요." 요약은 AI 업체가 준 별도 웹 화면에 쌓이고, 상담원은 고객 이력을 원래 쓰던 CRM에서 봅니다. 결국 요약을 복사해 CRM 메모란에 붙여 넣거나, 아예 통화 내용을 처음부터 다시 적습니다.</p><p>이 실수는 요약 기능을 고르는 단계에서 생깁니다. 요약의 정확도만 비교하고, 그 요약이 어느 화면의 어느 칸에 들어가는지는 확인하지 않은 것입니다. 상담원이 전화를 받는 순간 보는 화면에 이전 통화 요약이 함께 떠야 쓸모가 생깁니다.</p><div class="callout"><p><strong>확인할 질문 하나</strong><br>"다음에 같은 고객이 전화하면, 스크린 팝업에 지난 통화 요약이 같이 뜨나요?" 이 질문에 바로 답하지 못하면 요약은 따로 노는 기록이 됩니다.</p></div><p>지오테스 구축에는 상담 CRM, 통화 녹취, 스크린 팝업이 포함돼 있어 AI 통화요약을 선택 항목으로 더하면 같은 화면에 이어 붙습니다. 쓰던 CRM을 바꾸기 어렵다면 그대로 두고 DB API 연동이나 실시간 API 연동으로 요약을 넘기는 방식도 됩니다. 연동 방식은 <a class='inlink' href='/solution/crm/'>상담 CRM</a> 페이지에 정리돼 있습니다.</p><h2>이미 받을 수 있는 기능을 AI 이름으로 따로 사는 일이 생각보다 많다</h2><p>AI 도입 견적서를 다시 펼쳐 보면 이런 항목이 섞여 있는 경우가 있습니다. 통화 시작 때 녹취 고지를 자동으로 틀어 주는 기능, 폭언하는 고객에게 경고 안내를 내보내는 기능, 상담이 끝난 뒤 고객에게 문자를 보내는 기능입니다. AI라는 이름이 붙어 있지만 실제로는 교환기에서 처리할 수 있는 일들입니다.</p><p>이런 중복은 AI 업체와 교환기·상담 프로그램 업체가 다를 때 잘 생깁니다. 각자 자기 제품 범위 안에서 기능을 제안하다 보니, 이미 가진 기능과 새로 사는 기능이 겹치는지 누구도 짚어 주지 않습니다.</p><div class="table-scroll"><table><thead><tr><th>AI 기능처럼 제안받는 것</th><th>지오테스에서의 위치</th></tr></thead><tbody><tr><th>녹취 고지 등 필수 안내 자동 재생</th><td>추가 비용 없이 함께 주는 기본 기능</td></tr><tr><th>폭언 고객 경고 안내</th><td>욕설 방지 안내로 기본 제공</td></tr><tr><th>통화 후 안내 문자 발송</th><td>통화 후 자동 문자·알림톡으로 기본 제공</td></tr><tr><th>놓친 통화 고객에게 다시 연락</th><td>부재중 자동 알림, 스케줄 발신으로 기본 제공</td></tr><tr><th>통화 내용 정리</th><td>AI 통화요약, 선택 항목</td></tr><tr><th>사람 대신 첫 응대</th><td>AI 응대, 선택 항목</td></tr></tbody></table></div><p>표에서 보듯 정말 AI가 필요한 부분은 통화요약과 AI 응대 정도입니다. 나머지는 기본 기능으로 해결되는지 먼저 확인하고, 남는 것만 선택 항목으로 더하면 됩니다.</p><h2>도입 전 응대 기록을 남기지 않으면 AI가 효과가 있었는지 아무도 모른다</h2><p>AI를 붙이고 몇 달이 지나 경영진이 묻습니다. "그래서 좋아진 거예요?" 상담팀장은 체감상 나아졌다고 답하지만 근거를 내놓지 못합니다. 도입 전 인입량, 포기호, 통화 시간을 따로 남겨 두지 않았기 때문입니다. 비교할 기준이 없으니 계속 쓸지, 범위를 넓힐지, 줄일지 판단도 못 합니다.</p><p>이 실수는 시스템 교체와 AI 도입을 한꺼번에 할 때 특히 많이 생깁니다. 이전 시스템의 통계를 내려받지 않은 채 해지해 버리면 기록이 사라집니다.</p><ul><li><strong>도입 전</strong>: 시간대별 인입량, 끊긴 통화, 평균 통화 시간을 기존 시스템에서 내려받아 둔다</li><li><strong>도입 직후</strong>: 같은 항목을 같은 기준으로 통계 화면에서 본다</li><li><strong>운영 중</strong>: 통화 종료 추적으로 고객이 어느 단계에서 끊었는지 확인한다</li></ul><p>지오테스는 절감 효과를 몇 퍼센트라고 미리 말하지 않습니다. 지금 무엇을 쓰고 있는지에 따라 결과가 완전히 달라지기 때문입니다. 대신 지금 구성을 보고 항목별로 무엇이 없어지고 무엇이 남는지 계산해 알려 드립니다.</p><h2>남의 시연만 보고 고르면 우리 콜센터 통화에서 막힌다</h2><p>시연에서는 매끄럽던 AI 응대가 실제로 열자마자 막히는 일도 흔합니다. 시연은 짧고 또렷한 질문으로 진행되지만, 실제 고객은 주문번호를 말하다 말고 배송 불만부터 꺼내고, 병원이라면 예약 변경과 진료 문의를 한 통화에 섞습니다. 업종마다 통화 모양이 다른데, 그걸 확인하지 않고 고른 것입니다.</p><p>지오테스는 2013년 필리핀 클락에 콜센터를 직접 세워 운영해 봤습니다. 시스템을 파는 쪽이 아니라 쓰는 쪽에서 겪어 보니, 기능 목록보다 우리 통화가 어디서 막히는지가 먼저라는 걸 알게 됐습니다.</p><div class="callout"><p><strong>시연을 볼 때 요청할 것</strong><br>우리 콜센터에서 자주 들어오는 문의 유형을 미리 정리해 가서, 그 흐름대로 AI 응대와 상담원 연결을 직접 걸어 보게 해 달라고 하십시오. <a class='inlink' href='/demo/'>데모 신청</a>에서 지금 쓰는 흐름을 함께 적어 주시면 그 기준으로 보여 드립니다.</p></div><p>이미 AI 콜센터를 구축하며 겪는 구조 문제는 <a class='inlink' href='/posts/ai-callcenter-mistakes/'>AI 콜센터 구축 실수</a> 글에서도 다뤘으니 함께 보시면 판단이 쉬워집니다.</p><h2>약정에 묶이면 AI가 맞지 않아도 되돌리지 못한다</h2><p>마지막 장면은 계약서에서 나옵니다. AI 응대를 써 보니 우리 고객층과 맞지 않아 범위를 줄이려는데, 약정 기간이 남아 위약금이 걸려 있습니다. 결국 쓰지도 않는 기능 비용을 계속 내거나, 고객 불편을 감수하고 그대로 둡니다.</p><p>AI는 처음부터 딱 맞게 설계하기 어렵습니다. 써 보면서 넘기는 조건을 바꾸고, 어떤 문의는 AI에서 빼고, 어떤 시간대에만 켜는 식으로 조정해야 합니다. 그런데 계약이 그 조정을 막으면 AI 도입 자체가 부담이 됩니다.</p><ul><li><strong>약정과 위약금</strong>: 지오테스는 약정 기간과 위약금이 없다</li><li><strong>장애 대비</strong>: 365일 24시간 이중화로 장애가 나면 백업 서버로 자동 전환된다</li><li><strong>회선</strong>: KT·LG유플러스·SK브로드밴드 3사와 모두 제휴해 두 곳 이상에 열어 두면 한쪽 장애에도 통화가 이어진다</li></ul><p>비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉘고 AI 기능은 부가서비스에 들어갑니다. 상담 인원·회선 수·필요한 기능에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. 항목 구조는 <a class='inlink' href='/pricing/'>요금 안내</a>에서 먼저 보실 수 있고, 구체적인 산정은 1555-5528로 문의하시면 됩니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜센터 AI 구축하면 상담원 없이 운영할 수 있나요?</summary><div class="a">그렇게 설계하면 고객이 AI 안에서 맴돌다 끊는 일이 늘어납니다. AI가 답하지 못하거나 고객이 원할 때 곧바로 상담원에게 넘기는 경로를 먼저 만들고, 그 위에 AI 응대를 얹는 방식을 권합니다.</div></details><details><summary>AI 통화요약은 기존 CRM에 저장되나요?</summary><div class="a">지오테스 상담 CRM을 쓰시면 같은 화면에 이어 붙습니다. 쓰던 CRM을 그대로 두고 싶다면 DB API 연동이나 실시간 API 연동으로 요약을 넘기는 방식도 가능합니다. 지금 쓰는 CRM을 알려 주시면 연결 방법을 확인해 드립니다.</div></details><details><summary>녹취 고지나 폭언 경고도 AI를 사야 하나요?</summary><div class="a">아닙니다. 필수 안내 자동 재생과 욕설 방지 안내는 지오테스가 추가 비용 없이 함께 드리는 기본 기능입니다. 통화 후 자동 문자·알림톡, 부재중 자동 알림도 기본에 들어 있어 AI로 따로 사지 않아도 됩니다.</div></details><details><summary>콜센터 AI 구축 비용은 얼마인가요?</summary><div class="a">상담 인원·회선 수·필요한 기능에 따라 달라서, 지금 쓰시는 구성을 보고 산정해 드립니다. AI 통화요약과 AI 응대는 선택 항목인 부가서비스로 들어갑니다. 금액이 궁금하시면 1555-5528로 상담해 주십시오.</div></details><details><summary>AI를 써 보고 맞지 않으면 해지할 수 있나요?</summary><div class="a">지오테스는 약정 기간과 위약금이 없습니다. 써 보면서 AI 응대 범위를 줄이거나 시간대를 조정하는 일도 계약에 묶이지 않고 할 수 있습니다.</div></details><details><summary>AI 도입 효과는 어떻게 확인하나요?</summary><div class="a">도입 전 기존 시스템에서 인입량, 끊긴 통화, 통화 시간을 내려받아 두고, 도입 뒤 같은 기준으로 통계 화면에서 비교하시면 됩니다. 통화 종료 추적으로 고객이 어느 단계에서 끊었는지도 볼 수 있습니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

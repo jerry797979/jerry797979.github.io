@@ -154,3 +154,5 @@ inhouse-cc-build-mistakes
 phone-to-cc-mistakes
 cc-build-cost-mistakes
 sme-cc-build-mistakes
+cc-ai-build-mistakes
+cc-solution-mistakes
