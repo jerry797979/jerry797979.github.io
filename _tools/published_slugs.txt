@@ -156,3 +156,5 @@ cc-build-cost-mistakes
 sme-cc-build-mistakes
 cc-ai-build-mistakes
 cc-solution-mistakes
+ai-counsel-sys-mistakes
+cc-ars-build-mistakes
