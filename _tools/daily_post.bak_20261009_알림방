@@ -84,18 +84,6 @@ def notify(text):
         except Exception as ex:
             log("텔레그램 전송 실패 %s: %s" % (cid, ex))
 
-    # 2026-10-09: 이 봇 방은 사용자가 잘 안 본다 — 아침 한도 실패 알림을 못 봤다.
-    # 늘 보는 방(pweng-geo-bot 방)에도 같이 보낸다.
-    try:
-        g = json.load(open("C:/Users/marke/pweng-geo-bot/config.json", encoding="utf-8"))
-        data = json.dumps({"chat_id": g["telegram_chat_id"], "text": re.sub(r"<[^>]+>", "", text),
-                           "disable_web_page_preview": True}).encode("utf-8")
-        urllib.request.urlopen(urllib.request.Request(
-            "https://api.telegram.org/bot%s/sendMessage" % g["telegram_token"],
-            data=data, headers={"Content-Type": "application/json"}), timeout=15).read()
-    except Exception as ex:
-        log("텔레그램(보는 방) 전송 실패: %s" % ex)
-
 
 def autofill(need, pool):
     """대기열이 모자라면 CRM 키워드로 원고를 만들어 채운다.

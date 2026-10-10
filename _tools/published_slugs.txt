@@ -158,3 +158,5 @@ cc-ai-build-mistakes
 cc-solution-mistakes
 ai-counsel-sys-mistakes
 cc-ars-build-mistakes
+crm-link-mistakes
+cti-build-mistakes
