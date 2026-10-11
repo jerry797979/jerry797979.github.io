@@ -160,5 +160,7 @@
   "ai-counsel-sys-mistakes": "2026-10-09",
   "cc-ars-build-mistakes": "2026-10-09",
   "crm-link-mistakes": "2026-10-10",
-  "cti-build-mistakes": "2026-10-10"
+  "cti-build-mistakes": "2026-10-10",
+  "erp-link-mistakes": "2026-10-11",
+  "ivr-build-mistakes": "2026-10-11"
 }

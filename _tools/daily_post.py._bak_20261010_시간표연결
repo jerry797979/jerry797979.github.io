@@ -33,12 +33,6 @@ import gen_sitemap
 import push_post
 from backlog import BACKLOG
 
-# CRM '홈페이지 자동발행' 화면의 하루 편수 (geo_sync.py 가 매일 9시에 받아 둠, 없으면 원래 값) — 2026-10-10
-try:
-    import sys as _s; _s.path.insert(0, r"C:\Users\marke\pweng-geo-bot"); import geo_plan
-except Exception:
-    geo_plan = None
-
 try:
     import crm_sync
 except Exception:
@@ -182,8 +176,6 @@ def 커밋(slugs):
 
 def main():
     count = int(sys.argv[1]) if len(sys.argv) > 1 else 2
-    if geo_plan:
-        count = geo_plan.daily("ziotes", count)
     published = load_pub()
     pool = list(BACKLOG)
     pending = [p for p in pool if p["slug"] not in published]

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜센터 ERP 연동 실수, 팝업이 안 뜨고 이력이 갈라지는 이유 | 지오테스</title>
+<meta name="description" content="콜센터 ERP 연동에서 흔한 실수는 ERP를 뜯어고치는 것, 전화번호 형식을 맞추지 않는 것, 통화 기록을 ERP 밖에 두는 것입니다. 실패 장면과 피하는 방법을 정리했습니다. 상담 1555-5528">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#6d4aff">
+<link rel="canonical" href="https://ziotes.com/posts/erp-link-mistakes/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="콜센터 ERP 연동 실수, 팝업이 안 뜨고 이력이 갈라지는 이유">
+<meta property="og:description" content="콜센터 ERP 연동에서 흔한 실수는 ERP를 뜯어고치는 것, 전화번호 형식을 맞추지 않는 것, 통화 기록을 ERP 밖에 두는 것입니다. 실패 장면과 피하는 방법을 정리했습니다. 상담 1555-5528">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="지오테스">
+<meta property="og:image" content="https://ziotes.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/nova-post.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"콜센터 ERP 연동하려면 ERP를 수정해야 하나요?","acceptedAnswer":{"@type":"Answer","text":"꼭 그렇지 않습니다. 지오테스는 ERP는 그대로 두고 전화 시스템이 필요한 데이터를 읽어 오고 상담 결과를 남기는 방식으로 연결합니다. ERP 업데이트가 연동에 미치는 영향을 줄이려면 이 방식이 유리합니다."}},{"@type":"Question","name":"ERP 연동 후 고객 팝업이 안 뜨는 이유는 뭔가요?","acceptedAnswer":{"@type":"Answer","text":"대부분 ERP에 저장된 전화번호 형식이 제각각이거나, 걸려 온 번호가 ERP에 없는 경우입니다. 하이픈 처리, 한 고객의 여러 번호, 한 번호에 걸린 여러 고객을 어떻게 다룰지 연동 전에 정해야 합니다."}},{"@type":"Question","name":"ERP 정보를 전부 실시간으로 불러와야 하나요?","acceptedAnswer":{"@type":"Answer","text":"그럴 필요는 없습니다. 자주 바뀌지 않는 고객 정보는 DB API 연동으로, 출고 상태처럼 지금 값이 중요한 항목만 실시간 API 연동으로 나누면 바쁜 시간에도 ERP와 상담 화면이 함께 느려지는 일을 줄일 수 있습니다."}},{"@type":"Question","name":"ERP 서버가 점검 중이면 콜센터 전화도 안 되나요?","acceptedAnswer":{"@type":"Answer","text":"연동을 어떻게 짜느냐에 달렸습니다. 지오테스는 ERP 응답이 없어도 통화 연결과 녹취는 그대로 진행되도록 분리하고, 전화 시스템은 365일 24시간 이중화로 장애 시 백업 서버로 자동 전환됩니다."}},{"@type":"Question","name":"콜센터 ERP 연동 비용은 얼마인가요?","acceptedAnswer":{"@type":"Answer","text":"상담 인원, 회선 수, 연동할 항목에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. ERP 연동은 부가서비스 중 선택 항목입니다. 금액이 궁금하시면 1555-5528로 상담해 주세요. 상담은 무료입니다."}},{"@type":"Question","name":"이미 쓰는 CRM이 있는데 ERP 연동도 같이 할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식도 가능합니다. CRM과 ERP 중 어느 쪽 데이터를 상담 화면에 띄우고 통화 결과를 어디에 남길지 구성을 보고 함께 정합니다. 약정 기간이 없어 단계별로 넓혀 갈 수 있습니다."}}]}</script>
+</head>
+<body>
+
+
+<div class="topbar"><span class="dot"></span> AI 통화요약·AI 응대 <b>정식 제공 시작</b> · 기존 고객사는 추가 구축 없이 적용됩니다</div>
+<header>
+  <div class="wrap nav">
+    <a href="/" class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></a>
+    <nav class="nav-links">
+      <div class="has-sub">
+        <a href="/solution/">솔루션</a>
+        <div class="sub"><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+      </div>
+      <a href="/use-cases/">활용사례</a>
+      <a href="/industries/">업종별</a>
+      <a href="/demo/">화면 예시</a>
+      <a href="/pricing/">요금</a>
+      <a href="/cases/">구축사례</a>
+      <a href="/about/">회사소개</a>
+      <a href="/posts/">정보</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="tel:15555528" class="nav-call">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>1555-5528</span></a>
+      <button class="nav-burger" type="button" aria-label="메뉴 열기" onclick="document.getElementById('drawer').classList.add('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="drawer-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <span class="logo logo-img"><img src="/assets/logo-mark.png" alt="지오테스 Ziotes"></span>
+      <button class="pm-x" type="button" aria-label="메뉴 닫기" onclick="document.getElementById('drawer').classList.remove('open')">&times;</button>
+    </div>
+    <div class="dgroup"><b>솔루션</b><a href="/solution/aicc/">AI 컨택센터</a><a href="/solution/ipcc/">콜센터 솔루션</a><a href="/solution/crm/">고객관리 CRM</a><a href="/solution/ivr/">ARS·IVR</a><a href="/solution/recording/">통화 녹취</a><a href="/solution/chat/">통합 채팅상담</a><a href="/solution/voip/">기업 인터넷전화</a><a href="/solution/extra/">부가서비스</a><a href="/solution/marketing/">온라인 마케팅</a></div>
+    <div class="dgroup"><b>도입</b><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a><a href="/demo/">화면 예시</a><a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/posts/">정보</a></div>
+    <div class="dgroup"><b>회사</b><a href="/about/">회사소개</a><a href="/contact/">상담 문의</a></div>
+  </div>
+</div>
+
+<div class="post-hero">
+  <div class="wrap">
+    <p class="crumb"><a href="/">홈</a> · <a href="/posts/">정보</a> · 고객관리 CRM</p>
+    <span class="eyebrow">고객관리 CRM</span>
+    <h1>콜센터 ERP 연동,<br>붙여 놓고 후회하는 장면들</h1>
+    <p class="meta">팝업은 안 뜨고, 통화 이력은 두 곳에 흩어지고, ERP 점검 날엔 전화까지 멈춥니다.<br>이미 연동을 해 본 곳들이 겪은 실수와 그 대가, 피하는 순서를 짚습니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <article>
+    <div class="answer">
+      <span class="lab">콜센터 ERP 연동할 때 많이 하는 실수가 뭔가요?</span>
+      <p>가장 흔한 실수는 <b>ERP를 고쳐서 전화를 붙이는 것</b>입니다. 이렇게 하면 ERP를 업데이트할 때마다 연동이 깨지고, 전산팀 일정에 상담 현장이 묶입니다. 그다음은 전화번호 형식을 맞추지 않아 팝업이 안 뜨는 경우, 통화 기록이 ERP와 따로 놀아 이력이 갈라지는 경우입니다. <span class='hl'>ERP는 그대로 두고 전화 쪽에서 필요한 데이터만 읽고 남기는 구조</span>로 잡으면 이런 실수 대부분을 피할 수 있습니다. 연동이 끊겨도 통화는 이어지게 설계해야 합니다.</p>
+    </div>
+    <h2>ERP를 뜯어고쳐 전화를 붙이면 업데이트 때마다 다시 깨진다</h2><p>흔한 장면부터 보겠습니다. 상담 화면에 주문 내역을 띄우고 싶어서 ERP 개발사에 전화 연동 모듈을 따로 의뢰합니다. 처음 몇 달은 잘 돌아갑니다. 그러다 ERP 버전이 올라가고, 다음 날 아침 상담석에서 고객 정보가 하나도 안 뜹니다. 개발사는 다음 달 일정이 가능하다고 하고, 그동안 상담원은 전화를 받으면서 ERP 창을 따로 열어 이름을 검색합니다.</p><p>이 실수의 대가는 고치는 비용보다 <strong>기다리는 시간</strong>에서 더 크게 나옵니다. 전화 쪽 문제를 ERP 쪽 사람이 고쳐야 하니 상담팀장은 원인을 알아도 손을 쓸 수 없습니다. 전산팀은 ERP 본업에 연동 유지보수까지 떠안게 되고요.</p><h3>피하는 방법</h3><p>ERP 안쪽은 건드리지 않고, 전화 시스템이 ERP의 데이터를 <strong>읽어 오고 남기기만</strong> 하게 경계를 나눕니다. 지오테스는 교환기와 상담 애플리케이션을 직접 개발하기 때문에 이 연결부를 전화 쪽에서 맡습니다. ERP가 업데이트돼도 읽는 항목만 그대로면 전화 쪽은 영향을 받지 않습니다. 이 방식의 전체 구조는 <a class='inlink' href='/posts/call-center-erp-link/'>ERP는 그대로 두고 전화 쪽에서 잇는 방법</a>에 정리해 두었습니다.</p><h2>전화번호 형식을 맞추지 않으면 팝업은 끝내 뜨지 않는다</h2><p>연동을 마쳤는데 팝업이 뜨는 고객과 안 뜨는 고객이 섞여 나옵니다. 열어 보면 ERP에는 하이픈이 들어간 번호, 국번 없는 번호, 사무실 대표번호만 적힌 거래처가 뒤섞여 있습니다. 전화는 휴대폰으로 걸려 오는데 ERP에는 회사 유선번호만 있으니 찾을 수가 없습니다.</p><p>상담원은 금세 팝업을 믿지 않게 됩니다. 뜨든 안 뜨든 일단 ERP에서 다시 검색하는 습관이 생기고, 그러면 연동을 한 의미가 사라집니다. 더 나쁜 경우는 같은 번호가 여러 거래처에 걸려 있어 <strong>엉뚱한 고객 정보가 뜨는 것</strong>입니다. 다른 회사 주문 내역을 보고 응대하는 사고로 이어집니다.</p><ul><li><strong>번호 정리 규칙</strong>을 먼저 정합니다. 하이픈·공백을 빼고 비교하는 식으로 전화 쪽에서 맞춥니다.</li><li><strong>한 고객에 여러 번호</strong>가 있는 경우 어느 필드까지 찾을지 정합니다.</li><li><strong>한 번호에 여러 고객</strong>이 걸리면 목록으로 띄워 상담원이 고르게 합니다.</li><li>못 찾은 번호는 상담원이 그 자리에서 이어 붙일 수 있게 해 다음 통화부터 뜨게 합니다.</li></ul><p>이 정리는 연동 개발보다 먼저 해야 합니다. 개발을 끝낸 뒤에 번호 문제를 발견하면 구조를 다시 짜야 하는 경우가 생깁니다. 스크린 팝업이 어떻게 고객을 찾는지는 <a class='inlink' href='/solution/crm/'>상담 CRM 소개</a>에서 화면으로 확인할 수 있습니다.</p><h2>전화가 올 때마다 ERP를 직접 조회하면 바쁜 시간에 둘 다 느려진다</h2><p>월말 마감 날 오전, 회계팀이 ERP로 정산을 돌리는 시간에 인입이 몰립니다. 전화가 울릴 때마다 상담 화면이 ERP에 고객을 조회하니 팝업은 통화가 시작되고 한참 뒤에야 뜨고, 회계팀은 ERP가 왜 이렇게 느리냐고 전산팀을 찾습니다. 서로 원인을 모른 채 하루가 지나갑니다.</p><p>모든 데이터를 실시간으로 가져와야 한다고 생각하는 데서 이 실수가 시작됩니다. 고객 이름과 담당자처럼 자주 바뀌지 않는 정보는 실시간일 필요가 없습니다. 반면 오늘 출고 상태나 미수금처럼 지금 값이 중요한 정보는 실시간으로 봐야 합니다.</p><div class="table-scroll"><table><thead><tr><th>어떤 실수</th><th>현장에서 보이는 장면</th><th>피하는 방법</th></tr></thead><tbody><tr><th>ERP를 고쳐 전화를 붙임</th><td>ERP 업데이트 뒤 팝업이 사라지고 수정은 개발사 일정에 묶임</td><td>ERP는 그대로 두고 전화 쪽에서 읽고 남기는 구조로 연결</td></tr><tr><th>번호 형식 정리 없이 연동</th><td>팝업이 뜨다 말다 하고 다른 고객 정보가 뜸</td><td>번호 정리 규칙과 중복 번호 처리부터 정함</td></tr><tr><th>모든 정보를 실시간 조회</th><td>인입이 몰리면 팝업이 늦고 ERP도 느려짐</td><td>자주 안 바뀌는 정보는 DB API, 지금 값이 중요한 것만 실시간 API</td></tr><tr><th>통화 기록을 ERP 밖에 둠</th><td>녹취는 전화 쪽, 주문은 ERP 쪽에 있어 분쟁 때 맞춰 보기 어려움</td><td>통화 종료 시 상담 결과와 녹취 위치를 ERP에 남김</td></tr><tr><th>연동이 전화를 붙잡는 구조</th><td>ERP 점검 시간에 전화 연결까지 멈춤</td><td>연동이 끊겨도 통화와 녹취는 그대로 이어지게 분리</td></tr></tbody></table></div><p>지오테스에서는 이 둘을 선택 항목으로 나눠 둡니다. 자주 쓰는 고객 정보는 <strong>DB API 연동</strong>으로, 지금 상태가 필요한 항목만 <strong>실시간 API 연동</strong>으로 붙입니다. 어느 항목을 어느 쪽으로 보낼지는 ERP 구성을 보고 함께 정합니다.</p><h2>통화 기록이 ERP 밖에 머물면 분쟁이 났을 때 맞춰 볼 수가 없다</h2><p>배송 지연 항의가 들어왔고, 고객은 지난번 통화에서 분명 날짜를 약속받았다고 합니다. 팀장은 ERP에서 주문을 찾고, 녹취 프로그램을 따로 열어 날짜와 번호로 통화를 뒤집니다. 같은 날 같은 번호로 통화가 여러 건이면 하나씩 들어 봐야 합니다. 그사이 고객은 기다리고 있습니다.</p><p>ERP 연동을 화면에 띄우는 것으로만 생각하면 이렇게 됩니다. 정보는 ERP에서 전화로 들어오는데, 통화 결과는 ERP로 돌아가지 않습니다. 결국 <strong>주문 이력과 통화 이력이 두 군데로 갈라집니다</strong>.</p><div class="callout"><p><strong>연동은 양쪽으로 해야 합니다.</strong> 전화가 올 때 ERP에서 정보를 읽어 오는 것과 똑같이, 통화가 끝날 때 상담 결과와 녹취를 찾을 단서를 ERP 쪽 기록에 남겨야 나중에 한 화면에서 맞춰 볼 수 있습니다.</p></div><p>지오테스 구축에는 통화 녹취와 상담 CRM이 따로 사는 항목 없이 함께 들어갑니다. 녹취가 같은 시스템 안에 있으니 통화 종료 시점에 어느 주문 건과 연결된 통화인지 남기기가 수월합니다. 녹취를 별도 제품으로 붙였을 때 생기는 어긋남은 <a class='inlink' href='/posts/cti-build-mistakes/'>CTI 구축 실수</a> 글에서도 다뤘습니다.</p><h2>연동이 끊겼을 때 전화까지 멈추게 짜면 ERP 점검 날 상담이 서 버린다</h2><p>ERP 서버 점검을 공지한 저녁, 야간 상담조가 출근했는데 상담 프로그램이 로그인 단계에서 멈춰 있습니다. 상담 화면이 ERP 응답을 기다리도록 짜여 있어서, ERP가 내려가니 전화를 받는 화면까지 같이 멈춘 것입니다. 전화는 계속 울리는데 받을 방법이 없습니다.</p><p>연동을 처음 설계할 때 장애 상황을 가정하지 않으면 이런 구조가 됩니다. ERP는 정기 점검도 있고 예상치 못한 장애도 있습니다. 그때마다 콜센터가 함께 멈춘다면 연동이 오히려 약점이 됩니다.</p><ul><li><strong>ERP 응답이 없으면</strong> 팝업만 비워 두고 통화 연결과 녹취는 그대로 진행되게 합니다.</li><li><strong>전화 시스템 자체</strong>는 이중화해 서버 장애 때 백업 서버로 자동 전환되게 합니다.</li><li><strong>회선</strong>은 통신사 두 곳 이상에 열어 두면 한쪽에 장애가 나도 통화가 이어집니다.</li></ul><p>지오테스는 365일 24시간 이중화로 운영하고, KT·LG유플러스·SK브로드밴드 3사와 모두 제휴하고 있어 회선을 한 통신사에만 묶지 않습니다. ERP가 쉬는 시간에도 전화는 받아야 한다는 전제에서 연동부를 설계합니다. 실제로 장애 상황에서 화면이 어떻게 동작하는지는 <a class='inlink' href='/demo/'>데모</a>로 직접 확인해 보실 수 있습니다.</p><h2>처음부터 모든 연동을 한꺼번에 잡으면 오픈이 밀리고 계약에 묶인다</h2><p>주문·재고·미수·AS·배송을 전부 상담 화면에 띄우겠다는 요구 사항서가 만들어집니다. 항목마다 ERP 쪽 확인이 필요하니 일정이 계속 밀리고, 오픈 날짜가 늦어지는 동안 상담원은 여전히 개인 휴대폰과 메모장으로 일합니다. 막상 열어 보면 매일 쓰는 건 주문 조회와 고객 이름 정도입니다.</p><p>여기에 장기 약정까지 걸려 있으면 대가가 더 커집니다. 써 보니 필요 없던 연동을 빼거나, 써 보니 꼭 필요한 연동을 추가하려 해도 계약 조건 때문에 움직이기 어렵습니다.</p><div class="callout"><p><strong>먼저 열고, 쓰면서 넓히는 순서</strong>가 안전합니다. 전화·녹취·팝업처럼 매일 쓰는 것부터 붙이고, 상담원이 실제로 자주 찾는 ERP 항목을 확인한 뒤 연동을 늘립니다. 지오테스는 약정 기간과 위약금이 없어 이렇게 단계를 나눠도 계약에 묶이지 않습니다.</p></div><p>비용은 시스템 구축, 회선 이용료, 유지보수, 부가서비스 네 항목으로 나뉘고, ERP 연동은 부가서비스 쪽 선택 항목입니다. 어디까지 연동할지에 따라 달라지기 때문에 지금 쓰시는 구성을 보고 항목별로 무엇이 필요하고 무엇이 빠지는지 계산해 드립니다. 항목 구성은 <a class='inlink' href='/pricing/'>요금 안내</a>에서 먼저 보시고, 구체적인 산정은 1555-5528로 문의해 주시면 됩니다.</p>
+
+    <h2>자주 묻는 것</h2>
+    <div class="faq"><details><summary>콜센터 ERP 연동하려면 ERP를 수정해야 하나요?</summary><div class="a">꼭 그렇지 않습니다. 지오테스는 ERP는 그대로 두고 전화 시스템이 필요한 데이터를 읽어 오고 상담 결과를 남기는 방식으로 연결합니다. ERP 업데이트가 연동에 미치는 영향을 줄이려면 이 방식이 유리합니다.</div></details><details><summary>ERP 연동 후 고객 팝업이 안 뜨는 이유는 뭔가요?</summary><div class="a">대부분 ERP에 저장된 전화번호 형식이 제각각이거나, 걸려 온 번호가 ERP에 없는 경우입니다. 하이픈 처리, 한 고객의 여러 번호, 한 번호에 걸린 여러 고객을 어떻게 다룰지 연동 전에 정해야 합니다.</div></details><details><summary>ERP 정보를 전부 실시간으로 불러와야 하나요?</summary><div class="a">그럴 필요는 없습니다. 자주 바뀌지 않는 고객 정보는 DB API 연동으로, 출고 상태처럼 지금 값이 중요한 항목만 실시간 API 연동으로 나누면 바쁜 시간에도 ERP와 상담 화면이 함께 느려지는 일을 줄일 수 있습니다.</div></details><details><summary>ERP 서버가 점검 중이면 콜센터 전화도 안 되나요?</summary><div class="a">연동을 어떻게 짜느냐에 달렸습니다. 지오테스는 ERP 응답이 없어도 통화 연결과 녹취는 그대로 진행되도록 분리하고, 전화 시스템은 365일 24시간 이중화로 장애 시 백업 서버로 자동 전환됩니다.</div></details><details><summary>콜센터 ERP 연동 비용은 얼마인가요?</summary><div class="a">상담 인원, 회선 수, 연동할 항목에 따라 달라서 지금 쓰시는 구성을 보고 산정해 드립니다. ERP 연동은 부가서비스 중 선택 항목입니다. 금액이 궁금하시면 1555-5528로 상담해 주세요. 상담은 무료입니다.</div></details><details><summary>이미 쓰는 CRM이 있는데 ERP 연동도 같이 할 수 있나요?</summary><div class="a">쓰던 CRM은 그대로 두고 전화 기능만 붙이는 방식도 가능합니다. CRM과 ERP 중 어느 쪽 데이터를 상담 화면에 띄우고 통화 결과를 어디에 남길지 구성을 보고 함께 정합니다. 약정 기간이 없어 단계별로 넓혀 갈 수 있습니다.</div></details></div>
+
+
+    <div class="cta">
+      <div class="dot"></div>
+      <h2>어디부터 손대야 할지 모르시겠다면</h2>
+      <p>지금 쓰시는 전화 환경을 보고, 필요한 것만 골라 알려드립니다. 상담은 무료입니다.</p>
+      <div class="btns">
+        <a href="tel:15555528" class="btn btn-white">1555-5528</a>
+        <a href="/contact/" class="btn btn-line">무료 상담신청</a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="flogo">지오<b>테스</b></div>
+    <div class="fnav">
+      <a href="/solution/">솔루션</a><a href="/use-cases/">활용사례</a><a href="/industries/">업종별</a>
+      <a href="/pricing/">요금</a><a href="/cases/">구축사례</a><a href="/about/">회사소개</a><a href="/guide/">가이드</a><a href="/glossary/">용어집</a><a href="/posts/">정보</a><a href="/contact/">상담문의</a>
+    </div>
+    <div class="info">
+      ㈜지오테스솔루션 · 대표이사 신명남 · 사업자등록번호 144-81-03835<br>
+      통신판매신고 제2023-고양덕양구-0487호 · 개인정보책임자 정필락<br>
+      경기 고양시 덕양구 삼막3길 5 고양삼송듀클래스 904호<br>
+      고객센터 1555-5528 · 영업 070-4509-0770 · 기술 070-4509-0766 · help@ziotes.com<br>
+      © 2006 ZioTEs Solution Inc. All Rights Reserved.
+    </div>
+  </div>
+</footer>
+
+<div class="fab">
+  <a href="tel:15555528" class="call" aria-label="전화 상담">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+  </a>
+  <a href="https://pf.kakao.com/_xaxgYMC" target="_blank" rel="noopener" class="kko" aria-label="카카오톡 상담">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.4C6.9 3.4 2.8 6.6 2.8 10.6c0 2.6 1.7 4.9 4.3 6.2-.2.7-.7 2.4-.8 2.8-.1.4.2.4.4.3.2-.1 2.4-1.6 3.3-2.3.6.1 1.2.1 1.8.1 5.1 0 9.2-3.2 9.2-7.2S17.1 3.4 12 3.4z"/></svg>
+  </a>
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

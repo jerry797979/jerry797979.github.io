@@ -246,9 +246,6 @@ def check(d, keyword, avoid_titles=(), keep_slug=None):
             if tag.lower() != "br":
                 bad.append("%s 에는 <br> 말고 다른 태그를 쓸 수 없음 (<%s> 발견)" % (칸, tag))
 
-    # 2026-10-10 사용자: "콜론으로 제목을 나누는 방식은 별로" — '키워드: 설명' 말고 한 문장으로. 1:1 같은 비율은 괜찮다.
-    if re.search(r"(?<![0-9]):(?![0-9])", d.get("title", "")):
-        bad.append("제목을 콜론으로 나누지 말 것 — 키워드를 넣은 한 문장으로")
     # 제목 겹침 — 각도만 바꾸고 제목을 베끼면 같은 글이 두 번 나가는 셈입니다.
     if avoid_titles:
         같은것 = similar_title(d.get("title", ""), avoid_titles)

@@ -160,3 +160,5 @@ ai-counsel-sys-mistakes
 cc-ars-build-mistakes
 crm-link-mistakes
 cti-build-mistakes
+erp-link-mistakes
+ivr-build-mistakes
