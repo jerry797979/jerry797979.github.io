@@ -164,5 +164,7 @@
   "erp-link-mistakes": "2026-10-11",
   "ivr-build-mistakes": "2026-10-11",
   "call-center-build-mistakes": "2026-10-12",
-  "cc-build-price-mistakes": "2026-10-12"
+  "cc-build-price-mistakes": "2026-10-12",
+  "cc-method-mistakes": "2026-10-13",
+  "cc-quote-mistakes": "2026-10-13"
 }

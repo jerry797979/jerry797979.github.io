@@ -164,3 +164,5 @@ erp-link-mistakes
 ivr-build-mistakes
 call-center-build-mistakes
 cc-build-price-mistakes
+cc-method-mistakes
+cc-quote-mistakes
