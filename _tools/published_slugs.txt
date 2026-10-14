@@ -166,3 +166,5 @@ call-center-build-mistakes
 cc-build-price-mistakes
 cc-method-mistakes
 cc-quote-mistakes
+callcenter-cost-mistakes
+cc-vendor-mistakes

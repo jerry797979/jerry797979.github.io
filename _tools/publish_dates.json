@@ -166,5 +166,7 @@
   "call-center-build-mistakes": "2026-10-12",
   "cc-build-price-mistakes": "2026-10-12",
   "cc-method-mistakes": "2026-10-13",
-  "cc-quote-mistakes": "2026-10-13"
+  "cc-quote-mistakes": "2026-10-13",
+  "callcenter-cost-mistakes": "2026-10-14",
+  "cc-vendor-mistakes": "2026-10-14"
 }
