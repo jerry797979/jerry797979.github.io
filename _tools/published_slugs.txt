@@ -168,3 +168,5 @@ cc-method-mistakes
 cc-quote-mistakes
 callcenter-cost-mistakes
 cc-vendor-mistakes
+cc-expert-vendor-mistakes
+cc-recommend-mistakes

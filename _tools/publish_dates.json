@@ -168,5 +168,7 @@
   "cc-method-mistakes": "2026-10-13",
   "cc-quote-mistakes": "2026-10-13",
   "callcenter-cost-mistakes": "2026-10-14",
-  "cc-vendor-mistakes": "2026-10-14"
+  "cc-vendor-mistakes": "2026-10-14",
+  "cc-expert-vendor-mistakes": "2026-10-15",
+  "cc-recommend-mistakes": "2026-10-15"
 }
