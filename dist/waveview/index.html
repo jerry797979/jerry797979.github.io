@@ -89,6 +89,11 @@ svg{display:block}
 .ind svg{width:18px;height:18px;color:#b2b5be;opacity:0}
 .ind:hover svg,.ind.off svg{opacity:1}
 .ind.off{color:#8a8d96}.ind.off small{color:#6f727c}
+.lgfold{pointer-events:auto;width:22px;height:20px;border:1px solid #3a3e48;border-radius:3px;display:grid;place-items:center;color:#d1d4dc;background:#131313;margin-top:3px}
+.lgfold:hover{background:#2a2e39}
+.lgfold svg{width:14px;height:14px}
+.legend.folded #lgInds{display:none}
+.legend.folded .lgfold svg{transform:rotate(180deg)}
 .dilabel{position:absolute;left:8px;top:4px;z-index:3;font-size:13px;color:#ffffff;pointer-events:none}
 .dilabel small{color:#b2b5be;font-size:12px;margin:0 5px}
 .drawhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:4;background:rgba(41,98,255,.92);color:#fff;font-size:12px;padding:5px 10px;border-radius:4px;pointer-events:none;white-space:nowrap}
@@ -215,6 +220,7 @@ svg{display:block}
       <div class="legend">
         <div class="lg-title"><span class="coin" id="lgCoin"></span><b id="lgName"></b><span class="ohlc" id="lgOhlc"></span></div>
         <div id="lgInds"></div>
+        <button class="lgfold" id="lgFold" aria-label="지표 목록 접기"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 11l4-4 4 4"/></svg></button>
       </div>
       <div class="drawhint" id="hint" hidden></div>
       <div class="replay" id="replayBar" hidden>
@@ -604,6 +610,10 @@ function renderLegend(){
     `<button class="ind${S.show[k] ? '' : ' off'}" data-k="${k}" title="${S.show[k] ? '숨기기' : '보이기'}">${n}<small>${p}</small>${S.show[k] ? EYE : EYE_OFF}</button>`).join('');
   renderOhlc();
 }
+const lgEl = document.querySelector('.legend');
+lgEl.classList.toggle('folded', !!store.get('lgFold', false));
+$('#lgFold').onclick = () => { const f = !lgEl.classList.contains('folded'); lgEl.classList.toggle('folded', f); store.set('lgFold', f);
+  $('#lgFold').setAttribute('aria-label', f ? '지표 목록 펼치기' : '지표 목록 접기'); };
 function toggleInd(k){ S.show[k] = !S.show[k]; store.set('show', S.show); applyVisibility(); }
 $('#lgInds').addEventListener('click', e => { const b = e.target.closest('.ind'); if (b) toggleInd(b.dataset.k); });
 
