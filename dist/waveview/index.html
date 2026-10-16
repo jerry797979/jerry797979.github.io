@@ -106,6 +106,11 @@ svg{display:block}
 .pv.lt{background:#e0e3eb}.pv.lt span{background:#fff}
 .pv.sy{background:linear-gradient(90deg,#0f0f0f 50%,#e0e3eb 50%)}.pv.sy span:nth-child(1){background:#2a2e39}.pv.sy span:nth-child(2){background:linear-gradient(90deg,#2a2e39 50%,#fff 50%)}.pv.sy span:nth-child(3){background:#fff}
 
+.guide{margin:0;padding:16px 20px 20px 40px;display:flex;flex-direction:column;gap:14px;line-height:1.6;overflow:auto}
+.guide a{color:var(--blue)}
+.guide a.btn{color:#fff}
+.toast .act{align-self:flex-start;margin-top:4px;height:28px;padding:0 10px;border-radius:4px;background:var(--blue);color:#fff;font-weight:600;font-size:12.5px}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -387,6 +392,19 @@ svg{display:block}
   </div>
 </div>
 
+<div class="modal" id="guideModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="guideTitle" style="width:min(520px,100%)">
+    <header><span id="guideTitle">한텍 MT5 연결 방법</span><button class="tb" id="guideClose" aria-label="닫기">✕</button></header>
+    <ol class="guide">
+      <li><b>파이썬 설치 (처음 한 번)</b><br><a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org 다운로드 페이지</a>에서 노란 <b>Download Python</b> 버튼을 눌러 설치합니다. 설치 첫 화면 아래의 <b>"Add python.exe to PATH"</b> 를 꼭 체크하세요.</li>
+      <li><b>브리지 받기</b><br><a class="btn" style="display:inline-grid;place-items:center;margin-top:6px;text-decoration:none" href="https://jerry797979.github.io/waveview/waveview-mt5-bridge.zip" target="_blank" rel="noopener">waveview-mt5-bridge.zip 받기</a><br>받은 파일을 오른쪽 클릭 → <b>압축 풀기</b> 합니다. (예: 바탕화면)</li>
+      <li><b>MT5 켜기</b><br>평소처럼 한텍 MT5 를 켜고 로그인합니다.</li>
+      <li><b>브리지 실행</b><br>압축을 푼 폴더에서 <b>start_bridge.bat</b> 를 더블클릭합니다. 파란 경고창이 뜨면 <b>추가 정보 → 실행</b>을 누르세요. 검은 창에 <b>"MT5 연결됨"</b> 이 나오면 성공입니다. 이 창은 닫지 말고 작게 내려 두세요.</li>
+      <li><b>이 페이지로 돌아오기</b><br>10초 안에 자동으로 <b>"한텍 MT5 · 실시간"</b> 으로 바뀝니다. 크롬이 <b>로컬 네트워크 접근</b>을 물으면 <b>허용</b>을 누르세요.</li>
+      <li><b>(선택) 자동 실행</b><br>같은 폴더의 <b>autostart_on.bat</b> 를 한 번 더블클릭하면, 다음부터는 컴퓨터를 켤 때 브리지가 저절로 실행됩니다.</li>
+    </ol>
+  </div>
+</div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
@@ -687,7 +705,7 @@ function drawOverlay(){
       ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(255,255,255,.75)';
       ctx.beginPath(); ctx.moveTo(x + 3, mid); ctx.lineTo(x + bw - 3, mid); ctx.stroke(); ctx.setLineDash([]);
       const tw = ctx.measureText(names[b.s]).width, cx = x + bw / 2;
-      ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8);
+      if (cx - tw / 2 > labelEnd - tw * .35){ ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8); labelEnd = cx + tw / 2; }
     }
     ctx.textAlign = 'start';
   }
@@ -864,18 +882,16 @@ function onBar(bar){
   checkAlerts(prevPrice, bar.close);
 }
 function startSim(){
-  const sigTick = S.sym.dvol * Math.sqrt(S.tf[1] / 86400) / Math.sqrt(30);
-  S.ticks = 0;
+  // 실제 시계에 맞춰 1초마다 조금씩 움직이고, 봉 시간이 다 차면 새 봉을 연다
+  const sigSec = S.sym.dvol / Math.sqrt(86400);
   S.timer = setInterval(() => {
-    const last = S.bars[S.bars.length - 1];
-    if (++S.ticks >= 30){
-      S.ticks = 0; const o = last.close;
-      onBar({ time:last.time + S.tf[1], open:o, high:o, low:o, close:o });
-    } else {
-      const c = last.close * Math.exp(gauss(Math.random) * sigTick);
-      onBar({ ...last, close:c, high:Math.max(last.high, c), low:Math.min(last.low, c) });
-    }
-  }, 500);
+    const last = S.bars[S.bars.length - 1], now = Date.now() / 1000 + KST;
+    const c = last.close * Math.exp(gauss(Math.random) * sigSec * 1.2);
+    if (now >= last.time + S.tf[1]){
+      const t = last.time + Math.floor((now - last.time) / S.tf[1]) * S.tf[1];
+      onBar({ time:t, open:last.close, high:Math.max(last.close, c), low:Math.min(last.close, c), close:c });
+    } else onBar({ ...last, close:c, high:Math.max(last.high, c), low:Math.min(last.low, c) });
+  }, 1000);
 }
 async function loadTD(sym, tf){
   const src = tf[3] ? tf : tfBy(tf[5]);
@@ -949,7 +965,7 @@ async function initMT5(){
   } catch (e) {
     if (!S.mt5warned){
       S.mt5warned = true;
-      toast('한텍 MT5 연결 대기 중', 'MT5 를 켠 PC에서 start_bridge.bat 를 실행하세요. 실행하면 자동으로 연결됩니다. 그 전까지는 시뮬레이션으로 보여줍니다.');
+      toast('한텍 MT5 연결 대기 중', '사장님 PC에서 연결 프로그램(브리지)을 한 번 켜 주셔야 합니다. 켜면 자동으로 연결되고, 그 전까지는 시뮬레이션으로 보여줍니다.', false, ['연결 방법 보기', openGuide]);
     }
     S.mt5retry = setTimeout(async () => { if (await initMT5()) load(); }, 10000);
     return false;
@@ -1040,15 +1056,16 @@ function fire(msg, price){
   S.log.unshift({ t, msg:`${S.sym.id} ${msg} · ${price}` }); S.log = S.log.slice(0, 40);
   $('#log').innerHTML = S.log.map(l => `<li><time>${l.t}</time><span>${l.msg}</span></li>`).join('');
 }
-function toast(title, msg, isAlert){
+function toast(title, msg, isAlert, action){
   const el = document.createElement('div'); el.className = 'toast';
   el.innerHTML = `<div class="ic">${CLOCK}</div><div class="bd"><div class="hd">${isAlert ? '얼러트' : ''}<span>${isAlert ? `<i class="coin" style="background:${S.sym.icon}"></i>` : ''}<b></b></span></div><div class="msg"></div></div><button class="cl" aria-label="닫기">×</button>`;
   el.querySelector('b').textContent = title; el.querySelector('.msg').textContent = msg;
   if (!isAlert) el.querySelector('b').style.fontWeight = '700';
   el.querySelector('.cl').onclick = () => el.remove();
+  if (action){ const b = document.createElement('button'); b.className = 'act'; b.textContent = action[0]; b.onclick = () => { action[1](); el.remove(); }; el.querySelector('.bd').append(b); }
   $('#toasts').prepend(el);
   while ($('#toasts').children.length > 3) $('#toasts').lastChild.remove();
-  setTimeout(() => el.remove(), 8000);
+  if (!action) setTimeout(() => el.remove(), 8000);
 }
 
 /* ---------- 그리기 (수평선 · 추세선 · 가격 얼러트) ---------- */
@@ -1310,6 +1327,12 @@ document.addEventListener('keydown', e => {
   else if (k === 'a'){ e.preventDefault(); const pr = priceAtCrosshair(); addAlert(pr); toast('얼러트 만듦', `${S.sym.id} ${fmt(pr)} 교차 시 알립니다.`); }
   else if (k === 'h'){ e.preventDefault(); addHLine(priceAtCrosshair()); }
 });
+
+function openGuide(){ $('#guideModal').hidden = false; }
+$('#guideClose').onclick = () => { $('#guideModal').hidden = true; };
+$('#guideModal').addEventListener('click', e => { if (e.target.id === 'guideModal') $('#guideModal').hidden = true; });
+$('#feed').style.cursor = 'pointer'; $('#feed').title = '한텍 MT5 연결 방법';
+$('#feed').addEventListener('click', openGuide);
 
 /* ---------- 앱 메뉴: 테마 · 줌 · 세팅 ---------- */
 const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
