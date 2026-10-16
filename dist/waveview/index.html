@@ -754,11 +754,16 @@ function renderLowLine(){
   S.lowPrice = Math.min(...S.bars.slice(-P.low.len).map(b => b.low));
   lowLine = candle.createPriceLine({ price:S.lowPrice, color:'#9598a1', lineWidth:1, lineStyle:2, title:'', axisLabelColor:'#4caf50', axisLabelTextColor:'#ffffff' });
 }
+// 선 이름표: 가까운 이름표와 겹치면 왼쪽으로 비켜 놓는다
+const placedLabels = [];
 function lineLabel(text, y, color, pw){
   ctx.font = '12px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
   const tw = ctx.measureText(text).width;
-  ctx.fillStyle = C.bg; ctx.fillRect(pw - tw - 14, y - 8, tw + 8, 16);
-  ctx.fillStyle = color; ctx.fillText(text, pw - 10, y);
+  let right = pw - 10;
+  for (const r of placedLabels) if (Math.abs(r.y - y) < 16 && right - tw - 6 < r.right && right > r.left - 6) right = r.left - 12;
+  placedLabels.push({ y, left:right - tw, right });
+  ctx.fillStyle = C.bg; ctx.fillRect(right - tw - 4, y - 8, tw + 8, 16);
+  ctx.fillStyle = color; ctx.fillText(text, right, y);
   ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'start';
 }
 
@@ -780,6 +785,7 @@ function drawOverlay(){
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
+  placedLabels.length = 0;
   const ts = chart.timeScale(), pw = w - chart.priceScale('right').width();
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h); ctx.clip();
 
