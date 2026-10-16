@@ -402,7 +402,7 @@ const S = {
   show: Object.assign({ bb:true, ma:true, db:true, ses:true, us:true, low:true, di:true }, store.get('show', {})),
   removed: store.get('removed', []),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
-  cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:false, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null,
+  cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
 };
 
 /* ---------- 데이터 ---------- */
@@ -838,8 +838,8 @@ function iconFor(n){
   return '#9598a1';
 }
 async function initMT5(){
-  clearInterval(S.qtimer); S.qtimer = null;
-  if (!S.cfg.mt5) return;
+  clearInterval(S.qtimer); S.qtimer = null; clearTimeout(S.mt5retry); S.mt5ok = false;
+  if (!S.cfg.mt5) return false;
   try {
     const j = await mt5Get('/symbols');
     if (!j.symbols.length) throw new Error('MT5 시장가 창에 종목이 없습니다');
@@ -855,8 +855,16 @@ async function initMT5(){
       } catch {}
     };
     pollQuotes(); S.qtimer = setInterval(pollQuotes, 3000);
+    if (S.mt5warned) toast('한텍 MT5 연결됨', 'MT5 시세로 차트를 다시 그립니다.');
+    S.mt5ok = true; S.mt5warned = false;
+    return true;
   } catch (e) {
-    toast('MT5 브리지 연결 안 됨', `${S.cfg.mt5url} 에 연결하지 못했습니다. PC에서 mt5_bridge.py 가 실행 중인지 확인하세요. (${e.message})`);
+    if (!S.mt5warned){
+      S.mt5warned = true;
+      toast('한텍 MT5 연결 대기 중', 'MT5 를 켠 PC에서 start_bridge.bat 를 실행하세요. 실행하면 자동으로 연결됩니다. 그 전까지는 시뮬레이션으로 보여줍니다.');
+    }
+    S.mt5retry = setTimeout(async () => { if (await initMT5()) load(); }, 10000);
+    return false;
   }
 }
 async function loadBinance(sym, tf){
@@ -907,7 +915,7 @@ async function load(){
   if (live && sym.feed === 'mt5'){ setFeed(true, '한텍 MT5 · 실시간'); startMT5Poll(sym, tf, id); }
   else if (live && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
   else if (live){ setFeed(true); openSocket(sym, tf, id); }
-  else { setFeed(false); startSim(); }
+  else { setFeed(false, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 시뮬레이션' : '시뮬레이션'); startSim(); }
 }
 
 function applyRange(){

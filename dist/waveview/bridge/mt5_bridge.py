@@ -214,9 +214,9 @@ def watcher():
 
 def main():
     load_config()
-    if not mt5.initialize():
-        print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인한 뒤 다시 실행하세요.", mt5.last_error())
-        return
+    while not mt5.initialize():
+        print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인하면 자동으로 연결합니다. (10초 뒤 다시 시도)", mt5.last_error())
+        time.sleep(10)
     acc = mt5.account_info()
     detect_offset()
     print(f"MT5 연결됨: {acc.server if acc else '?'} · 서버시간 UTC{server_offset / 3600:+g}")
