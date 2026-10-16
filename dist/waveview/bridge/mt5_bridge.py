@@ -21,6 +21,13 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+import sys
+
+# 창 없이(pythonw) 실행되면 출력이 없으므로 로그 파일로 보낸다
+if sys.stdout is None:
+    _log = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bridge.log"), "a", encoding="utf-8", buffering=1)
+    sys.stdout = sys.stderr = _log
+
 import MetaTrader5 as mt5
 
 HERE = os.path.dirname(os.path.abspath(__file__))
