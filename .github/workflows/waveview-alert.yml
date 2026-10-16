@@ -1,0 +1,49 @@
+name: 웨이브뷰 텔레그램 알림
+
+# 5분마다 금 시세를 확인해 돌파 더블비 신호를 텔레그램으로 보낸다.
+# 필요한 Secrets: TWELVEDATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+# GitHub 예약 실행은 몇 분씩 늦게 시작될 수 있다.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "테스트 메시지만 보내기"
+        type: boolean
+        default: false
+
+concurrency:
+  group: waveview-alert
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: _tools
+      - uses: actions/cache/restore@v4
+        with:
+          path: .waveview-state.json
+          key: waveview-state-${{ github.run_id }}
+          restore-keys: waveview-state-
+      - name: 신호 확인
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WAVEVIEW_WATCH: "XAU/USD:5min,XAU/USD:4h"
+          WAVEVIEW_TEST: ${{ inputs.test }}
+        run: python3 _tools/waveview_alert.py
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .waveview-state.json
+          key: waveview-state-${{ github.run_id }}
