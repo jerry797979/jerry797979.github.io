@@ -17,7 +17,7 @@
   color-scheme:light;
 }
 html,body{height:100%}
-body{margin:0;background:var(--gap);color:var(--text);font-family:var(--font);font-size:14px}
+body{margin:0;background:var(--gap);color:var(--text);font-family:var(--font);font-size:13px}
 [hidden]{display:none!important}
 button,select,input{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
@@ -37,7 +37,7 @@ svg{display:block}
 .sym select{border:0;background:none;font-weight:700;font-size:14px;padding:0;cursor:pointer;appearance:none}
 .coin{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe58a,#e0a800);flex:none}
 .sep{width:1px;height:22px;background:var(--border);margin:0 4px;flex:none}
-.tb{height:30px;padding:0 8px;border-radius:4px;display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none;font-size:14.5px;font-weight:500}
+.tb{height:30px;padding:0 8px;border-radius:4px;display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none;font-size:13.5px;font-weight:500}
 .tb:hover{background:var(--hover)}
 .tb[aria-pressed="true"]{color:var(--blue);background:var(--blue-soft)}
 .tb svg{width:22px;height:22px}
@@ -52,6 +52,17 @@ svg{display:block}
 .menu label:hover{background:var(--hover)}
 .menu small{color:var(--sub);margin-left:auto}
 
+.tfmenu{width:260px;max-height:calc(100vh - 60px);overflow:auto;padding:4px 0}
+.tfmenu h4{margin:0;padding:10px 16px 4px;font-size:12px;color:var(--sub);font-weight:500;border-top:1px solid var(--border)}
+.tfmenu h4:first-child{border-top:0}
+.tfmenu .it{display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 10px 0 16px;height:32px;font-size:13.5px;text-align:left}
+.tfmenu .it:hover{background:var(--hover)}
+.tfmenu .it.on{background:#2a2e39;color:#fff}
+.tfmenu .star{width:26px;height:26px;display:grid;place-items:center;border-radius:4px;color:#c1c4cd}
+.tfmenu .star.fav{color:var(--text)}
+.tfmenu .it.on .star{color:#fff}
+.tfmenu .star:hover{background:rgba(0,0,0,.08)}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -63,32 +74,32 @@ svg{display:block}
 /* 차트 */
 .charts{grid-area:chart;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--chart)}
 #mainWrap{position:relative;flex:1;min-height:0}
-#mainChart,#diChart{position:absolute;inset:0}
+#mainChart,#diChart{position:absolute;inset:0;z-index:1}
 #overlay{position:absolute;left:0;top:0;pointer-events:none;z-index:2}
 #diWrap{position:relative;height:140px;border-top:1px solid #2a2a2a;flex:none}
 .legend{position:absolute;left:8px;top:6px;z-index:3;display:flex;flex-direction:column;gap:2px;pointer-events:none;color:#ffffff;text-shadow:0 0 3px #131313,0 0 3px #131313;max-width:calc(100% - 90px)}
-.lg-title{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;font-size:16px}
+.lg-title{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:14px}
 .lg-title .coin{width:16px;height:16px}
 .lg-title b{font-weight:600;color:#ffffff}
-.ohlc{display:flex;gap:10px;flex-wrap:wrap;font-size:14.5px;font-variant-numeric:tabular-nums;color:#ffffff}
+.ohlc{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;font-variant-numeric:tabular-nums;color:#ffffff}
 .ohlc span em{font-style:normal}
-.ind{pointer-events:auto;display:flex;align-items:center;gap:6px;font-size:14px;color:#ffffff;padding:1px 4px;margin-left:-4px;border-radius:3px;text-align:left}
+.ind{pointer-events:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:#ffffff;padding:1px 4px;margin-left:-4px;border-radius:3px;text-align:left}
 .ind:hover{background:rgba(255,255,255,.06)}
-.ind small{color:#b2b5be;font-size:13px}
+.ind small{color:#b2b5be;font-size:12px}
 .ind svg{width:18px;height:18px;color:#b2b5be;opacity:0}
 .ind:hover svg,.ind.off svg{opacity:1}
 .ind.off{color:#8a8d96}.ind.off small{color:#6f727c}
-.dilabel{position:absolute;left:8px;top:4px;z-index:3;font-size:14px;color:#ffffff;pointer-events:none}
-.dilabel small{color:#b2b5be;font-size:13px;margin:0 6px}
+.dilabel{position:absolute;left:8px;top:4px;z-index:3;font-size:13px;color:#ffffff;pointer-events:none}
+.dilabel small{color:#b2b5be;font-size:12px;margin:0 5px}
 .drawhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:4;background:rgba(41,98,255,.92);color:#fff;font-size:12px;padding:5px 10px;border-radius:4px;pointer-events:none;white-space:nowrap}
 
 /* 하단 기간 바 */
 .bottom{flex:none;height:34px;background:var(--chrome);border-top:4px solid var(--gap);display:flex;align-items:center;gap:8px;padding:0 6px;min-width:0}
 .ranges{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
 .ranges::-webkit-scrollbar{display:none}
-.rb{height:26px;padding:0 8px;border-radius:4px;font-size:14px;white-space:nowrap}
+.rb{height:26px;padding:0 8px;border-radius:4px;font-size:13px;white-space:nowrap}
 .rb:hover{background:var(--hover)}
-.clock{margin-left:auto;font-size:14px;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
+.clock{margin-left:auto;font-size:13px;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
 
 /* 리플레이 바 */
 .replay{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:4;background:var(--chrome);border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,.35);display:flex;align-items:center;gap:2px;padding:4px 6px;white-space:nowrap}
@@ -102,20 +113,20 @@ svg{display:block}
 .ph button[aria-selected="true"]{color:var(--text);background:var(--hover)}
 .pb{overflow:auto;min-height:0;flex:1}
 .wl-head,.wl-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 64px;gap:4px;align-items:center;padding:0 12px}
-.wl-head{height:30px;font-size:13px;color:var(--sub)}
+.wl-head{height:28px;font-size:12px;color:var(--sub)}
 .wl-head span:not(:first-child),.wl-row span:not(:first-child){text-align:right}
-.wl-row{height:38px;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+.wl-row{height:34px;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
 .wl-row:hover{background:var(--hover)}
 .wl-row[aria-current="true"]{background:var(--blue-soft)}
 .wl-row .s{display:flex;align-items:center;gap:8px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wl-row .s i{width:16px;height:16px;border-radius:50%;flex:none}
 .detail{border-top:1px solid var(--border);padding:14px 12px;display:flex;flex-direction:column;gap:4px}
 .detail .nm{color:var(--sub);font-size:13px}
-.detail .px{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.detail .px{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
 .detail .ch{font-size:14px;font-variant-numeric:tabular-nums}
 .upc{color:var(--up)} .dnc{color:var(--down)}
 .sec{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)}
-.sec h3{margin:0;font-size:13.5px;color:var(--sub);font-weight:600}
+.sec h3{margin:0;font-size:12.5px;color:var(--sub);font-weight:600}
 .row{display:flex;gap:6px}
 .inp{flex:1;min-width:0;height:32px;border:1px solid var(--border);border-radius:4px;padding:0 8px;background:#fff}
 .inp:focus{border-color:var(--blue);outline:0}
@@ -177,6 +188,7 @@ svg{display:block}
     <label class="sym"><span class="coin" id="symIcon"></span><select id="sym" aria-label="종목"></select></label>
     <span class="sep"></span>
     <div id="tfs" style="display:flex;gap:2px" role="group" aria-label="타임프레임"></div>
+    <button class="tb" id="tfMore" aria-haspopup="true" aria-label="모든 타임프레임" style="padding:0 4px"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4" style="width:18px;height:18px"><path d="M8 11l6 6 6-6"/></svg></button>
     <span class="sep"></span>
     <button class="tb" id="indBtn" aria-haspopup="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 21l6-7 5 4 9-10"/><path d="M19 8h5v5"/></svg>지표</button>
     <span class="sep"></span>
@@ -251,6 +263,7 @@ svg{display:block}
 </div>
 
 <div class="menu" id="indMenu" hidden></div>
+<div class="menu tfmenu" id="tfMenu" hidden></div>
 
 <div class="modal" id="setModal" hidden>
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="setTitle">
@@ -283,12 +296,12 @@ const $ = s => document.querySelector(s);
 const KST = 9 * 3600;
 const C = { bg:'#131313', grid:'#1e1e1e', text:'#e0e3eb', line:'#2a2a2a', up:'#089981', down:'#f23645', signal:'#f5c518',
   basis:'#4caf50', inner:'#f23645', outer:'#e8e8e8', ma60:'#42a5f5', ma200:'#ff9800', trend:'#2962ff',
-  asia:'255,193,7', eu:'0,188,212', us:'186,104,200' };
+  asia:'255,193,7', eu:'38,198,218', us:'206,147,216' };
 // [키, 초, 표시, Twelve Data 주기, 바이낸스 주기, 없을 때 합성할 원본]
 const TFS = [
   ['1m',60,'1분','1min','1m'], ['2m',120,'2분',null,null,'1m'], ['3m',180,'3분',null,'3m','1m'],
   ['5m',300,'5분','5min','5m'], ['10m',600,'10분',null,null,'5m'], ['15m',900,'15분','15min','15m'],
-  ['30m',1800,'30분','30min','30m'], ['1h',3600,'1시간','1h','1h'], ['2h',7200,'2시간','2h','2h'],
+  ['30m',1800,'30분','30min','30m'], ['45m',2700,'45분','45min',null,'15m'], ['1h',3600,'1시간','1h','1h'], ['2h',7200,'2시간','2h','2h'],
   ['3h',10800,'3시간',null,null,'1h'], ['4h',14400,'4시간','4h','4h'], ['8h',28800,'8시간','8h','8h'],
   ['1D',86400,'날','1day','1d'], ['1W',604800,'주','1week','1w'], ['1M',2592000,'달','1month','1M'],
 ];
@@ -315,7 +328,7 @@ const IND = [
   ['bb','더블 볼린저밴드','20 2 4'],
   ['ma','이동평균','20 60 200'],
   ['db','돌파 더블비 신호','몸통 마감'],
-  ['ses','세션박스','1시간 이하'],
+  ['ses','세션','아시아 유로 미장'],
   ['us','어제 미장 구간 고저 라인',''],
   ['low','최저점꼬리','500'],
   ['di','DI 이격도','14 close'],
@@ -412,7 +425,7 @@ function sessions(bars, tf){
 /* ---------- 차트 ---------- */
 const base = {
   autoSize: true,
-  layout: { background:{ type:'solid', color:C.bg }, textColor:C.text, fontSize:13, attributionLogo:false,
+  layout: { background:{ type:'solid', color:C.bg }, textColor:C.text, fontSize:12, attributionLogo:false,
     fontFamily:'-apple-system, BlinkMacSystemFont, "Trebuchet MS", "Malgun Gothic", "Apple SD Gothic Neo", Roboto, Ubuntu, sans-serif' },
   grid: { vertLines:{ color:C.grid }, horzLines:{ color:C.grid } },
   rightPriceScale: { borderColor:C.line, minimumWidth:76 },
@@ -525,24 +538,25 @@ function drawOverlay(){
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
-  const ts = chart.timeScale(), pw = ts.width();
+  const ts = chart.timeScale(), pw = w - chart.priceScale('right').width();
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h); ctx.clip();
 
-  if (S.show.ses && S.tf[1] <= 3600 && S.sess.length){
+  if (S.show.ses && S.tf[1] <= 14400 && S.sess.length){
+    // 세션: 배경을 옅게 칠하고, 차트 맨 아래에 색 띠 + 이름을 둔다 (캔들을 가리지 않음)
     const half = (ts.options().barSpacing || 6) / 2, range = ts.getVisibleLogicalRange();
     const names = { asia:'아시아', eu:'유로', us:'미장' };
-    ctx.font = '11px -apple-system, "Malgun Gothic", sans-serif';
+    const bottom = h - (ts.options().visible ? ts.height() : 0), ry = bottom - 20;
+    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
     for (const b of S.sess){
       if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1)) continue;
       const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(b.i1);
-      const y1 = candle.priceToCoordinate(b.hi), y2 = candle.priceToCoordinate(b.lo);
-      if ([x1, x2, y1, y2].some(v => v == null)) continue;
-      const rgb = C[b.s], x = Math.round(x1 - half), bw = Math.round(x2 - x1 + half * 2);
-      ctx.fillStyle = `rgba(${rgb},.06)`; ctx.fillRect(x, y1, bw, y2 - y1);
-      ctx.strokeStyle = `rgba(${rgb},.35)`; ctx.lineWidth = 1;
-      ctx.strokeRect(x + .5, Math.round(y1) + .5, bw - 1, Math.round(y2 - y1));
-      if (bw > 40){ ctx.fillStyle = `rgba(${rgb},.85)`; ctx.fillText(names[b.s], x + 4, y1 - 5); }
+      if (x1 == null || x2 == null) continue;
+      const rgb = C[b.s], x = Math.round(x1 - half), bw = Math.max(1, Math.round(x2 - x1 + half * 2));
+      ctx.fillStyle = `rgba(${rgb},.045)`; ctx.fillRect(x, 0, bw, ry);
+      ctx.fillStyle = `rgba(${rgb},.55)`; ctx.fillRect(x, ry, bw - 1, 14);
+      if (bw > 34){ ctx.fillStyle = '#131313'; ctx.fillText(names[b.s], x + 5, ry + 7.5); }
     }
+    ctx.textBaseline = 'alphabetic';
   }
 
   const lines = S.trends.slice(); if (S.draft && S.draft.b) lines.push(S.draft);
@@ -947,10 +961,35 @@ $('#sym').onchange = e => selectSym(e.target.value);
 function selectSym(id){ S.sym = SYMS.find(s => s.id === id); $('#sym').value = id; $('#symIcon').style.background = S.sym.icon; store.set('sym', id); renderWL(); load(); }
 $('#symIcon').style.background = S.sym.icon;
 
-$('#tfs').innerHTML = TFS.map(t => `<button class="tb" data-tf="${t[0]}" aria-pressed="${t === S.tf}">${t[2]}</button>`).join('');
+const TF_GROUPS = [['분', t => t[1] < 3600], ['시간', t => t[1] >= 3600 && t[1] < 86400], ['날', t => t[1] >= 86400]];
+const menuLabel = t => t[1] < 3600 ? `${t[1] / 60} 분` : t[1] < 86400 ? `${t[1] / 3600} 시간` : { '1D':'1 날', '1W':'1 주', '1M':'1 달' }[t[0]];
+let favs = store.get('favTf', TFS.filter(t => t[0] !== '45m').map(t => t[0]));
+function renderTfBar(){
+  const list = TFS.filter(t => favs.includes(t[0]) || t === S.tf);
+  $('#tfs').innerHTML = list.map(t => `<button class="tb" data-tf="${t[0]}" aria-pressed="${t === S.tf}">${t[2]}</button>`).join('');
+}
+function renderTfMenu(){
+  const star = '<svg viewBox="0 0 18 18" width="16" height="16"><path d="M9 1.8l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5L1.8 7l5-.6z" fill="currentColor"/></svg>';
+  $('#tfMenu').innerHTML = TF_GROUPS.map(([g, f]) => `<h4>${g}</h4>` + TFS.filter(f).map(t =>
+    `<button class="it${t === S.tf ? ' on' : ''}" data-tf="${t[0]}">${menuLabel(t)}<span class="star${favs.includes(t[0]) ? ' fav' : ''}" data-fav="${t[0]}" title="즐겨찾기">${favs.includes(t[0]) ? star : star.replace('fill="currentColor"', 'fill="none" stroke="currentColor"')}</span></button>`).join('')).join('');
+}
+$('#tfMore').onclick = e => {
+  e.stopPropagation(); const m = $('#tfMenu');
+  if (!m.hidden){ m.hidden = true; return; }
+  renderTfMenu(); const r = $('#tfMore').getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(r.left - 120, window.innerWidth - 268)) + 'px'; m.style.top = (r.bottom + 4) + 'px'; m.hidden = false;
+};
+$('#tfMenu').addEventListener('click', e => {
+  e.stopPropagation();
+  const f = e.target.closest('[data-fav]');
+  if (f){ const k = f.dataset.fav; favs = favs.includes(k) ? favs.filter(x => x !== k) : [...favs, k]; store.set('favTf', favs); renderTfMenu(); renderTfBar(); return; }
+  const b = e.target.closest('[data-tf]'); if (b){ $('#tfMenu').hidden = true; setTf(b.dataset.tf); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('#tfMenu')) $('#tfMenu').hidden = true; });
+renderTfBar();
 function setTf(k, range){
   S.tf = tfBy(k); S.range = range || null; store.set('tf', k);
-  $('#tfs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.tf === k));
+  renderTfBar();
   load();
 }
 $('#tfs').addEventListener('click', e => { const b = e.target.closest('[data-tf]'); if (b) setTf(b.dataset.tf); });
