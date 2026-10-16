@@ -51,7 +51,7 @@ svg{display:block}
 .ctmenu button.on{color:var(--blue)}
 .ctmenu svg{width:22px;height:22px}
 .tfbuf{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:8;background:var(--chrome);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 18px;font-size:22px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.4);pointer-events:none}
-.ind .vals{display:flex;gap:7px;margin-left:6px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ind .vals{display:flex;gap:6px;margin-left:6px;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ind .vals em{font-style:normal}
 .ind.off .vals{display:none}
 .bottom .rt{margin-left:auto;display:flex;align-items:center;gap:2px}
@@ -145,6 +145,37 @@ svg{display:block}
 .ktr td.y{color:#f5c518}
 #ktrName{font-size:14px}
 
+.seg{display:flex;gap:4px;background:var(--hover);border-radius:6px;padding:3px;margin:10px 12px}
+.seg button{flex:1;height:28px;border-radius:4px;font-weight:600;font-size:12.5px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--chrome);color:var(--text);box-shadow:0 0 0 1px var(--blue)}
+.badge{background:#f23645;color:#fff;border-radius:9px;font-size:10.5px;padding:0 6px;line-height:16px}
+.tbar{display:flex;align-items:center;gap:4px;padding:0 8px 6px;border-bottom:1px solid var(--border)}
+.ib{width:30px;height:30px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
+.ib:hover{background:var(--hover)}
+.ib svg{width:20px;height:20px}
+.alist{list-style:none;margin:0;padding:0}
+.alist li{position:relative;padding:9px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px;cursor:pointer}
+.alist li:hover{background:var(--hover)}
+.alist .t{font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:70px}
+.alist .m{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.alist .m .coin{width:13px;height:13px}
+.alist .on{color:#22ab94}.alist .off{color:var(--sub)}
+.alist .acts{position:absolute;right:6px;top:6px;display:none;gap:2px}
+.alist li:hover .acts{display:flex}
+.alist .acts button{width:26px;height:26px;border-radius:4px;display:grid;place-items:center;color:var(--sub)}
+.alist .acts button:hover{background:var(--border);color:var(--text)}
+.alist .acts svg{width:16px;height:16px}
+.alist .empty{cursor:default;color:var(--sub);font-size:12px}
+.lg-day{padding:10px 12px 4px;font-size:11.5px;color:var(--sub)}
+.alist li.unread{background:rgba(41,98,255,.14)}
+.cond{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--border);border-radius:6px;position:relative}
+.cond .rm{position:absolute;right:4px;top:4px}
+.frow{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start}
+.frow>label{padding-top:8px;font-size:12.5px;color:var(--sub)}
+.addc{color:var(--blue);font-size:12.5px;justify-self:start;padding:4px 0}
+.chk{display:flex;gap:14px;flex-wrap:wrap;padding-top:6px}
+.chk label{display:flex;gap:6px;align-items:center;font-size:12.5px}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -162,23 +193,23 @@ svg{display:block}
 #mainWrap.grab-move *{cursor:move!important}
 #mainWrap.grab-pt *{cursor:pointer!important}
 #diWrap{position:relative;height:140px;border-top:1px solid #2a2a2a;flex:none}
-.legend{position:absolute;left:8px;top:6px;z-index:3;display:flex;flex-direction:column;gap:2px;pointer-events:none;color:#ffffff;text-shadow:0 0 3px #131313,0 0 3px #131313;max-width:calc(100% - 90px)}
-.lg-title{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:14px}
+.legend{position:absolute;left:8px;top:6px;z-index:3;display:flex;flex-direction:column;gap:1px;pointer-events:none;color:#ffffff;text-shadow:0 0 3px #131313,0 0 3px #131313;max-width:calc(100% - 90px)}
+.lg-title{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:13px}
 .lg-title .coin{width:16px;height:16px}
 .lg-title b{font-weight:600;color:#ffffff}
-.ohlc{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;font-variant-numeric:tabular-nums;color:#ffffff}
+.ohlc{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums;color:#ffffff}
 .ohlc span em{font-style:normal}
-.ind{pointer-events:auto;display:flex;align-items:center;gap:4px;font-size:13px;color:#ffffff;height:24px;padding:0 4px;margin-left:-5px;border:1px solid transparent;border-radius:4px;width:max-content;max-width:100%;cursor:default}
+.ind{pointer-events:auto;display:flex;align-items:center;gap:4px;font-size:12px;color:#ffffff;height:20px;padding:0 4px;margin-left:-5px;border:1px solid transparent;border-radius:4px;width:max-content;max-width:100%;cursor:default}
 .ind .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ind small{color:#b2b5be;font-size:12px;margin-left:5px}
+.ind small{color:#b2b5be;font-size:11px;margin-left:5px}
 .ind .acts{display:none;align-items:center;gap:1px;margin-left:4px}
-.ind .acts button{width:24px;height:22px;border-radius:3px;display:grid;place-items:center;color:#d1d4dc}
+.ind .acts button{width:22px;height:18px;border-radius:3px;display:grid;place-items:center;color:#d1d4dc}
 .ind .acts button:hover{background:#2a2e39}
-.ind .acts svg{width:18px;height:18px}
+.ind .acts svg{width:16px;height:16px}
 .ind:hover{border-color:#434651;background:rgba(19,19,19,.85)}
 .ind:hover .acts{display:flex}
 .ind .offeye{display:none;color:#8a8d96;margin-left:4px}
-.ind .offeye svg{width:18px;height:18px}
+.ind .offeye svg{width:15px;height:15px}
 .ind.off{color:#8a8d96}.ind.off small{color:#6f727c}
 .ind.off .offeye{display:grid}
 .ind.off:hover .offeye{display:none}
@@ -190,7 +221,7 @@ svg{display:block}
 .lgfold svg{width:14px;height:14px}
 .legend.folded #lgInds{display:none}
 .legend.folded .lgfold svg{transform:rotate(180deg)}
-.dilabel{position:absolute;left:8px;top:4px;z-index:3;font-size:13px;color:#ffffff;pointer-events:none}
+.dilabel{position:absolute;left:8px;top:4px;z-index:3;font-size:12px;color:#ffffff;pointer-events:none}
 .dilabel small{color:#b2b5be;font-size:12px;margin:0 5px}
 .drawhint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:4;background:rgba(41,98,255,.92);color:#fff;font-size:12px;padding:5px 10px;border-radius:4px;pointer-events:none;white-space:nowrap}
 
@@ -252,7 +283,7 @@ svg{display:block}
 /* 설정 창 */
 .modal{position:fixed;inset:0;z-index:40;background:rgba(19,23,34,.45);display:grid;place-items:center;padding:16px}
 .dlg{background:var(--chrome);color:var(--text);border-radius:8px;width:min(440px,100%);box-shadow:0 10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:calc(100% - 32px)}
-.dlg header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);font-size:17px;font-weight:600}
+.dlg header{display:flex;align-items:center;gap:6px;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);font-size:17px;font-weight:600}
 .dlg form{padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow:auto}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:12.5px;color:var(--sub)}
@@ -317,6 +348,7 @@ svg{display:block}
   <nav class="tools" aria-label="그리기 도구">
     <button class="tool" data-mode="cursor" aria-pressed="true" title="십자선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 5v18M5 14h18"/></svg></button>
     <button class="tool" data-mode="trend" aria-pressed="false" title="추세선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8.5 19.5l11-11"/><circle cx="7" cy="21" r="2"/><circle cx="21" cy="7" r="2"/></svg></button>
+    <button class="tool" data-mode="brush" aria-pressed="false" title="브러시"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 22c3 0 5-1.5 5-4 0-1.7 1.3-3 3-3s3 1.3 3 3"/><path d="M13 15l9-9 1.5 1.5-9 9"/></svg></button>
     <button class="tool" data-mode="ray" aria-pressed="false" title="수평 레이"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M10 14h14"/><circle cx="7.5" cy="14" r="2"/></svg></button>
     <button class="tool" data-mode="vline" aria-pressed="false" title="수직선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 4v7.5M14 16.5V24"/><circle cx="14" cy="14" r="2"/></svg></button>
     <button class="tool" data-mode="rect" aria-pressed="false" title="사각형"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="6" y="8" width="16" height="12"/><circle cx="6" cy="8" r="1.8" fill="currentColor"/><circle cx="22" cy="20" r="1.8" fill="currentColor"/></svg></button>
@@ -373,16 +405,15 @@ svg{display:block}
       <div class="detail" id="detail"></div>
     </div>
     <div class="pb" id="tab-al" hidden>
-      <div class="sec">
-        <h3>얼러트 만들기</h3>
-        <form class="row" id="alertForm">
-          <input class="inp" id="alertPrice" inputmode="decimal" placeholder="가격" aria-label="얼러트 가격">
-          <button class="btn" type="submit">만들기</button>
-        </form>
-        <p class="note">왼쪽 시계 도구로 차트를 클릭해도 만들 수 있습니다.</p>
+      <div class="seg" role="tablist"><button data-sub="list" aria-pressed="true">얼러트</button><button data-sub="log" aria-pressed="false">기록 <span class="badge" id="logBadge" hidden></span></button></div>
+      <div id="al-list">
+        <div class="tbar"><button class="ib" id="alAdd" title="얼러트 만들기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 5v14M5 12h14"/></svg></button></div>
+        <ul class="alist" id="alertList"></ul>
       </div>
-      <div class="sec"><h3>활성 얼러트</h3><ul class="list" id="alertList"></ul></div>
-      <div class="sec"><h3>얼러트 기록</h3><ul class="list log" id="log"></ul></div>
+      <div id="al-log" hidden>
+        <div class="tbar"><button class="ib" id="logClear" title="기록 모두 지우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M14 4l6 6M11 7l6 6-5 6H6l-1-6z"/><path d="M8 13l4 4"/></svg></button><button class="ib" id="logRead" title="모두 읽음으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 12l4 4 8-9M10 16l1 1 9-10"/></svg></button></div>
+        <div id="logList"></div>
+      </div>
     </div>
   </aside>
 
@@ -459,6 +490,22 @@ svg{display:block}
         <li>크롬이 <b>로컬 네트워크 접근</b>을 물으면 <b>허용</b>을 누르세요.</li>
       </ul>
     </div>
+  </div>
+</div>
+<div class="modal" id="alModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="alTitle" style="width:min(560px,100%)">
+    <header><span id="alTitle">얼러트 만들기</span><select class="inp" id="alSym" style="flex:none;width:auto;margin-left:10px;font-weight:600" aria-label="종목"></select><span style="flex:1"></span><button class="tb" id="alClose" aria-label="닫기">✕</button></header>
+    <form id="alForm" style="gap:12px">
+      <div class="frow"><label>조건</label><div style="display:flex;flex-direction:column;gap:8px"><div id="alConds" style="display:flex;flex-direction:column;gap:8px"></div><button type="button" class="addc" id="alAddCond">+ 조건 추가 (모두 맞을 때 알림)</button></div></div>
+      <div class="frow"><label for="alTf">인터벌</label><select class="inp" id="alTf"></select></div>
+      <div class="frow"><label for="alTrig">트리거</label><select class="inp" id="alTrig"><option value="close">봉 마감마다 한번</option><option value="bar">봉마다 한번 (진행 중 봉 포함)</option><option value="once">한번만</option></select></div>
+      <div class="frow"><label for="alExp">만료</label><input class="inp" type="datetime-local" id="alExp"></div>
+      <div class="frow"><label for="alName">이름</label><input class="inp" id="alName" placeholder="예: 5분 돌파 더블비 하방 몸통 마감"></div>
+      <div class="frow"><label for="alMsg">메시지</label><textarea class="inp" id="alMsg" rows="2" style="height:auto;padding:6px 8px;resize:vertical"></textarea></div>
+      <div class="frow"><label>알림</label><div class="chk"><label><input type="checkbox" id="alToast" checked>앱 토스트</label><label><input type="checkbox" id="alSound" checked>소리</label><label><input type="checkbox" id="alTg" checked>텔레그램</label></div></div>
+      <p class="note" id="alNote"></p>
+    </form>
+    <footer><button class="btn sub" type="button" id="alDel" style="margin-right:auto;color:#f23645" hidden>삭제</button><button class="btn sub" type="button" id="alCancel">취소</button><button class="btn" type="submit" form="alForm">저장</button></footer>
   </div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -789,11 +836,11 @@ function renderMarkers(){
 }
 let refLines = [], lowLine = null;
 // 어제 미장 구간 고저 라인 (원본 Pine 로직 그대로: 한국시간 22:00~06:00, 끝난 직후 봉부터 오른쪽으로)
-function computeUsLine(){
-  if (S.tf[1] >= 86400) return null;
+function computeUsLine(bars = S.bars, tf = S.tf[1], upto = bars.length){
+  if (tf >= 86400) return null;
   let sh = null, sl = null, fin = null, prevIn = false;
-  for (let i = 0; i < S.bars.length; i++){
-    const b = S.bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
+  for (let i = 0; i < upto; i++){
+    const b = bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
     const inS = m >= 1320 || m < 360;
     if (inS){
       if (!prevIn){ sh = b.high; sl = b.low; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
@@ -960,7 +1007,7 @@ function drawOverlay(){
     }
   }
 
-  const shapes = S.trends.slice(); if (S.measure) shapes.push(S.measure);
+  const shapes = S.trends.slice(); if (S.measure) shapes.push(S.measure); if (S.stroke) shapes.push(S.stroke);
   if (S.draft && S.draft.b) shapes.push(S.draft);
   for (const t of shapes) drawShape(t, pw, h);
   ctx.restore();
@@ -991,7 +1038,18 @@ function shapeXY(t){
 }
 function handle(x, y){ ctx.setLineDash([]); ctx.lineWidth = 1; ctx.fillStyle = C.bg; ctx.strokeStyle = '#2962ff'; ctx.fillRect(x - 4, y - 4, 8, 8); ctx.strokeRect(x - 3.5, y - 3.5, 8, 8); }
 const textFont = t => `${12 + (t.width || 1) * 2}px -apple-system, "Malgun Gothic", sans-serif`;
+const bpXY = q => { const ts = chart.timeScale(); return [ts.logicalToCoordinate(timeToIdx(q.t) + (q.f || 0)), candle.priceToCoordinate(q.p)]; };
 function drawShape(t, pw, h){
+  if (t.type === 'brush'){
+    const pts = t.pts.map(bpXY).filter(([x, y]) => x != null && y != null); if (pts.length < 2) return;
+    ctx.strokeStyle = t.color; ctx.lineWidth = t.width || 2; ctx.setLineDash(DASH[t.style || 0]); ctx.lineJoin = ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let k = 1; k < pts.length - 1; k++){ const mx = (pts[k][0] + pts[k + 1][0]) / 2, my = (pts[k][1] + pts[k + 1][1]) / 2; ctx.quadraticCurveTo(pts[k][0], pts[k][1], mx, my); }
+    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]); ctx.stroke(); ctx.setLineDash([]); ctx.lineJoin = ctx.lineCap = 'butt';
+    if (t === S.sel || t === S.hover){ const a = pts[0], z = pts[pts.length - 1]; ctx.beginPath(); ctx.lineWidth = 1; ctx.strokeStyle = '#2962ff'; ctx.fillStyle = C.bg;
+      for (const [x, y] of [a, z]){ ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill(); ctx.stroke(); } }
+    return;
+  }
   const { xa, ya, xb, yb } = shapeXY(t); if (xa == null || ya == null) return;
   const type = t.type || 'trend', col = t.color || C.trend, on = t === S.sel || t === S.draft || t === S.hover;
   ctx.strokeStyle = col; ctx.lineWidth = t.width || 1; ctx.setLineDash(DASH[t.style || 0]);
@@ -1342,38 +1400,19 @@ function applyRange(){
 }
 
 /* ---------- 신호 / 얼러트 ---------- */
-function checkSignal(i){
-  if (i < 1) return;
-  const b = S.bars[i], I = S.ind, px = fmt(b.close);
-  if (S.show.bb){
-    if (I.dbUp[i]) fire(`↑ DB | ${S.sym.id} | 현재가: ${px} | BB1·BB2 상단 동시 터치!`, px);
-    if (I.dbDn[i]) fire(`↓ DB | ${S.sym.id} | 현재가: ${px} | BB1·BB2 하단 동시 터치!`, px);
-    if (P.bb.ob && I.obUp[i]) fire(`↑ 1B | ${S.sym.id} | 현재가: ${px} | BB 상단 터치!`, px);
-    if (P.bb.ob && I.obDn[i]) fire(`↓ 1B | ${S.sym.id} | 현재가: ${px} | BB 하단 터치!`, px);
-  }
-  if (S.show.db){
-    if (isDn(i)) fire(`${S.tf[2]} 돌파 더블비 하방 몸통 마감`, px);
-    if (isUp(i)) fire(`${S.tf[2]} 돌파 더블비 상방 몸통 마감`, px);
-  }
-}
+function checkSignal(){ /* 신호 알림은 얼러트 목록의 규칙으로만 보낸다 (트레이딩뷰와 같음) */ }
 function checkAlerts(prev, cur){
   let hit = false;
   S.alerts = S.alerts.filter(a => {
     if ((prev < a.price && cur >= a.price) || (prev > a.price && cur <= a.price)){
-      fire(`가격 ${fmt(a.price)} ${cur >= prev ? '상향' : '하향'} 돌파`, fmt(cur));
+      notify({ name:`${S.sym.id} 가격 ${fmt(a.price)} ${cur >= prev ? '상향' : '하향'} 돌파`, msg:`현재가 ${fmt(cur)}`, sym:S.sym.id, tf:S.tf[2], toast:true, sound:true, tg:true });
       candle.removePriceLine(a.line); hit = true; return false;
     }
     return true;
   });
   if (hit){ renderLists(); saveDrawings(); }
 }
-function fire(msg, price){
-  toast(S.sym.id, msg, true);
-  if (!S.rp) sendTelegram(/^[↑↓]/.test(msg) ? msg : `${S.sym.id} ${msg}\n현재가 ${price}`).catch(() => {});
-  const t = new Date().toLocaleTimeString('ko-KR', { hour12:false });
-  S.log.unshift({ t, msg:`${S.sym.id} ${msg} · ${price}` }); S.log = S.log.slice(0, 40);
-  $('#log').innerHTML = S.log.map(l => `<li><time>${l.t}</time><span>${l.msg}</span></li>`).join('');
-}
+function fire(msg, price){ notify({ name:msg, msg:`현재가 ${price}`, sym:S.sym.id, tf:S.tf[2], toast:true, sound:false, tg:true }); }
 function toast(title, msg, isAlert, action){
   const el = document.createElement('div'); el.className = 'toast';
   el.innerHTML = `<div class="ic">${CLOCK}</div><div class="bd"><div class="hd">${isAlert ? '얼러트' : ''}<span>${isAlert ? `<i class="coin" style="background:${S.sym.icon}"></i>` : ''}<b></b></span></div><div class="msg"></div></div><button class="cl" aria-label="닫기">×</button>`;
@@ -1401,21 +1440,12 @@ function makeLine(kind, d){
 function addAlert(price, d = {}){ S.alerts.push(makeLine('alert', { price, ...d })); renderLists(); saveDrawings(); }
 function addHLine(price, d = {}){ S.hlines.push(makeLine('hline', { price, t:ctxTime, ...d })); saveDrawings(); }
 let ctxTime = null;
-function renderLists(){
-  $('#alertList').innerHTML = S.alerts.length
-    ? S.alerts.map(a => `<li><span>${S.sym.id} 가격 ${fmt(a.price)} 교차</span><button class="x" data-a="${a.id}">삭제</button></li>`).join('')
-    : '<li class="empty">활성 얼러트가 없습니다.</li>';
-}
-$('#alertList').addEventListener('click', e => {
-  const id = e.target.dataset.a; if (!id) return;
-  const x = S.alerts.find(v => v.id === id); candle.removePriceLine(x.line);
-  S.alerts = S.alerts.filter(v => v !== x); renderLists(); saveDrawings();
-});
+function renderLists(){ renderAlertList(); }
 const dkey = () => `draw:${S.sym.id}`;
 const packLine = x => ({ p:x.price, c:x.color, w:x.width, s:x.style, x:x.text, t:x.t, l:x.locked ? 1 : undefined });
 const unpackLine = d => typeof d === 'number' ? { price:d } : { price:d.p, color:d.c, width:d.w, style:d.s, text:d.x, t:d.t, locked:!!d.l };
 function saveDrawings(){
-  const data = { a:S.alerts.map(packLine), h:S.hlines.map(packLine), t:S.trends.map(x => ({ y:x.type || 'trend', a:x.a, b:x.b, c:x.color, w:x.width, s:x.style, x:x.text, l:x.locked ? 1 : undefined })), d:S.diLines.map(x => x.price) };
+  const data = { a:S.alerts.map(packLine), h:S.hlines.map(packLine), t:S.trends.map(x => ({ y:x.type || 'trend', a:x.a, b:x.b, pts:x.pts, c:x.color, w:x.width, s:x.style, x:x.text, l:x.locked ? 1 : undefined })), d:S.diLines.map(x => x.price) };
   const snap = JSON.stringify(data);
   if (hist.cur !== null && hist.cur !== snap){ hist.undo.push(hist.cur); if (hist.undo.length > 60) hist.undo.shift(); hist.redo = []; }
   hist.cur = snap; store.set(dkey(), data); updUndo();
@@ -1429,7 +1459,7 @@ function restoreDrawings(){
   const d = store.get(dkey(), { a:[], h:[], t:[] });
   S.alerts = (d.a || []).map(v => { const u = unpackLine(v); return makeLine('alert', Object.fromEntries(Object.entries(u).filter(([, x]) => x != null))); });
   S.hlines = (d.h || []).map(v => { const u = unpackLine(v); return makeLine('hline', Object.fromEntries(Object.entries(u).filter(([, x]) => x != null))); });
-  S.trends = (d.t || []).map(x => ({ id:uid(), type:x.y || 'trend', a:x.a, b:x.b, color:x.c || C.trend, width:x.w || 1, style:x.s || 0, text:x.x || '', locked:!!x.l }));
+  S.trends = (d.t || []).map(x => ({ id:uid(), type:x.y || 'trend', a:x.a, b:x.b, pts:x.pts, color:x.c || C.trend, width:x.w || 1, style:x.s || 0, text:x.x || '', locked:!!x.l }));
   S.diLines.forEach(x => diSeries.removePriceLine(x.line));
   S.diLines = (d.d || []).map(addDiLineObj);
   renderLists();
@@ -1445,16 +1475,11 @@ $('#clearBtn').onclick = () => {
   S.hlines.forEach(x => candle.removePriceLine(x.line)); S.hlines = []; S.trends = []; S.draft = null;
   saveDrawings(); toast('지우기', `수평선과 추세선을 지웠습니다. 얼러트 ${keepAlerts.length}개는 남겨 두었습니다.`);
 };
-$('#alertForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const v = parseFloat($('#alertPrice').value.replace(/,/g, ''));
-  if (!isFinite(v)) return toast('가격을 확인하세요', '숫자로 된 가격을 입력해야 얼러트를 만들 수 있습니다.');
-  addAlert(v); $('#alertPrice').value = '';
-});
+
 
 const TWO = { trend:1, rect:1, measure:1 };
 const HINTS0 = 0;
-const HINTS = { hline:'수평선을 놓을 가격을 클릭하세요 (아래 DI 패널에도 그릴 수 있습니다)', ray:'레이를 시작할 곳을 클릭하세요', vline:'수직선을 놓을 곳을 클릭하세요', rect:'사각형의 한쪽 모서리를 클릭하세요', text:'글씨를 쓸 곳을 클릭하세요', measure:'측정을 시작할 곳을 클릭하세요',
+const HINTS = { brush:'누른 채로 끌어서 그리세요', hline:'수평선을 놓을 가격을 클릭하세요 (아래 DI 패널에도 그릴 수 있습니다)', ray:'레이를 시작할 곳을 클릭하세요', vline:'수직선을 놓을 곳을 클릭하세요', rect:'사각형의 한쪽 모서리를 클릭하세요', text:'글씨를 쓸 곳을 클릭하세요', measure:'측정을 시작할 곳을 클릭하세요',
   trend:'시작점을 클릭하세요 · 그린 선은 끌어서 옮기고, 클릭 후 Delete 로 지웁니다', alert:'얼러트 가격을 클릭하세요', replay:'리플레이를 시작할 봉을 클릭하세요' };
 function setMode(m){
   S.mode = m; S.draft = null;
@@ -1506,6 +1531,33 @@ function onChartClick(p){
   }, true);
 }
 
+/* ---------- 브러시 (자유 그리기) ---------- */
+{
+  const wrap = $('#mainWrap');
+  const toPt = e => { const r = wrap.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const l = chart.timeScale().coordinateToLogical(x), p = candle.coordinateToPrice(y); if (l == null || p == null) return null;
+    const fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p }; };
+  wrap.addEventListener('pointerdown', e => {
+    if (S.mode !== 'brush' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
+    const q = toPt(e); if (!q) return;
+    e.preventDefault(); e.stopPropagation(); wrap.setPointerCapture(e.pointerId);
+    chart.applyOptions({ handleScroll:false, handleScale:false });
+    S.stroke = { id:uid(), type:'brush', pts:[q], color:store.get('brushColor', '#00bcd4'), width:2, style:0, text:'' };
+  }, true);
+  wrap.addEventListener('pointermove', e => {
+    if (!S.stroke) return; e.stopPropagation();
+    const q = toPt(e); if (!q) return; const last = S.stroke.pts[S.stroke.pts.length - 1], a = bpXY(last), b = bpXY(q);
+    if (a[0] == null || Math.hypot(b[0] - a[0], b[1] - a[1]) >= 3) S.stroke.pts.push(q);
+  }, true);
+  const end = e => {
+    if (!S.stroke) return; e.stopPropagation();
+    chart.applyOptions({ handleScroll:true, handleScale:true });
+    const o = S.stroke; S.stroke = null;
+    if (o.pts.length > 1){ S.trends.push(o); saveDrawings(); setMode('cursor'); selectLine({ obj:o }); }
+  };
+  wrap.addEventListener('pointerup', end, true); wrap.addEventListener('pointercancel', end, true);
+}
+
 /* ---------- 선 옮기기 · 선택 · 지우기 ---------- */
 S.sel = null;
 const wrapEl = $('#mainWrap');
@@ -1517,6 +1569,13 @@ function trendXY(t){
 function hitTest(x, y){
   if (x > wrapEl.clientWidth - chart.priceScale('right').width()) return null;
   for (const t of S.trends.slice().reverse()){
+    if (t.type === 'brush'){
+      const pts = t.pts.map(bpXY);
+      for (let k = 1; k < pts.length; k++){ const [x1, y1] = pts[k - 1], [x2, y2] = pts[k]; if (x1 == null || x2 == null || y1 == null || y2 == null) continue;
+        const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy || 1, u = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / L2));
+        if (Math.hypot(x - (x1 + u * dx), y - (y1 + u * dy)) < 5 + (t.width || 2) / 2) return { kind:'trend', obj:t, end:null }; }
+      continue;
+    }
     const type = t.type || 'trend', c = shapeXY(t); if (c.xa == null || c.ya == null) continue;
     if (type === 'ray'){ if (Math.hypot(x - c.xa, y - c.ya) < 8 || (x >= c.xa - 4 && Math.abs(y - c.ya) < 5)) return { kind:'trend', obj:t, end:null }; continue; }
     if (type === 'vline'){ if (Math.abs(x - c.xa) < 5) return { kind:'trend', obj:t, end:null }; continue; }
@@ -1551,7 +1610,7 @@ let dpop = null;
 function renderDrawBar(){
   const o = S.sel, bar = $('#drawBar');
   if (!o){ bar.hidden = true; dpop = null; return; }
-  const canAlert = o.line || o.type === 'ray' || o.type === 'trend' || !o.type;
+  const canAlert = o.line || o.type === 'ray' || o.type === 'trend' || (!o.type && !o.pts);
   bar.innerHTML = `<span class="grip">${IC.grip}</span>`
     + `<button data-p="color" title="선 색" class="${dpop === 'color' ? 'open' : ''}">${IC.pen}<span class="cbar" style="background:${o.color}"></span></button>`
     + `<button data-p="text" title="글씨" class="${dpop === 'text' ? 'open' : ''}">${IC.txt}<span class="cbar" style="background:${o.text ? o.color : '#5d606b'}"></span></button>`
@@ -1588,7 +1647,7 @@ $('#drawBar').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !S.sel) return;
   const o = S.sel;
   if (b.dataset.p){ dpop = dpop === b.dataset.p ? null : b.dataset.p; renderDrawBar(); if (dpop === 'text'){ const t = $('#dbText'); t.focus(); t.select(); } return; }
-  if (b.dataset.c){ o.color = b.dataset.c; dpop = null; }
+  if (b.dataset.c){ o.color = b.dataset.c; dpop = null; if (o.type === 'brush') store.set('brushColor', o.color); }
   else if (b.dataset.w){ o.width = +b.dataset.w; dpop = null; }
   else if (b.dataset.s){ o.style = +b.dataset.s; dpop = null; }
   else if (b.dataset.a === 'del') return deleteSel();
@@ -1600,7 +1659,7 @@ $('#drawBar').addEventListener('click', e => {
   else if (b.dataset.a === 'clone'){
     dpop = null;
     if (o.line){ const c = o.kind === 'alert' ? null : makeLine('hline', { price:o.price, color:o.color, width:o.width, style:o.style, text:o.text, t:o.t }); if (c){ S.hlines.push(c); S.sel = c; } }
-    else { const shift = S.tf[1] * 5, mv = q => q && { t:q.t + shift, p:q.p }; const c = { ...o, id:uid(), a:mv(o.a), b:mv(o.b), locked:false }; S.trends.push(c); S.sel = c; }
+    else { const shift = S.tf[1] * 5, mv = q => q && { t:q.t + shift, p:q.p }; const c = { ...o, id:uid(), a:mv(o.a), b:mv(o.b), pts:o.pts && o.pts.map(q => ({ ...q, t:q.t + shift })), locked:false }; S.trends.push(c); S.sel = c; }
     saveDrawings(); renderDrawBar(); return;
   }
   applySel();
@@ -1634,7 +1693,7 @@ wrapEl.addEventListener('pointerdown', e => {
   chart.applyOptions({ handleScroll:false, handleScale:false });
   const ts = chart.timeScale();
   drag = { h, x0:x, y0:y, moved:false, p0:candle.coordinateToPrice(y), i0:ts.coordinateToLogical(x),
-    orig: h.kind === 'trend' ? { a:{ ...h.obj.a }, b:h.obj.b ? { ...h.obj.b } : null } : h.obj.price };
+    orig: h.kind === 'trend' ? (h.obj.type === 'brush' ? { pts:h.obj.pts.map(q => ({ ...q })) } : { a:{ ...h.obj.a }, b:h.obj.b ? { ...h.obj.b } : null }) : h.obj.price };
   wrapEl.setPointerCapture(e.pointerId);
 }, true);
 wrapEl.addEventListener('pointermove', e => {
@@ -1661,6 +1720,8 @@ wrapEl.addEventListener('pointermove', e => {
   const p = candle.coordinateToPrice(y), i = chart.timeScale().coordinateToLogical(x); if (p == null || i == null) return;
   const { h } = drag;
   if (h.kind !== 'trend'){ h.obj.price = roundP(p); h.obj.line.applyOptions({ price:h.obj.price }); return; }
+  if (h.obj.type === 'brush'){ const di = i - drag.i0, dp = p - drag.p0;
+    h.obj.pts = drag.orig.pts.map(q => { const l = timeToIdx(q.t) + (q.f || 0) + di, fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p:q.p + dp }; }); return; }
   if (h.end) h.obj[h.end] = { t:idxToTime(i), p:roundP(p) };
   else {
     const di = i - drag.i0, dp = p - drag.p0, o = drag.orig;
@@ -1812,6 +1873,189 @@ diChart.subscribeClick(p => {
     m.style.left = Math.max(8, r.right - mr.width) + 'px'; m.style.top = Math.min(r.bottom + 4, window.innerHeight - mr.height - 8) + 'px';
   });
 }
+
+/* ---------- 규칙 얼러트 (트레이딩뷰 얼러트처럼) ---------- */
+const COND = {
+  db:{ name:'더블 볼린저밴드', ops:[['dbUp','↑ DB (BB1·BB2 상단 동시 터치)'],['dbDn','↓ DB (BB1·BB2 하단 동시 터치)'],['obUp','↑ 1B (한쪽 상단 터치)'],['obDn','↓ 1B (한쪽 하단 터치)']] },
+  hhj:{ name:'돌파 더블비 (몸통 마감)', ops:[['up','돌파 더블비 상방'],['dn','돌파 더블비 하방']] },
+  price:{ name:'가격', ops:[['xup','위로 교차'],['xdn','아래로 교차']], val:true },
+  usl:{ name:'어제 미장 구간 고저 라인', ops:[['hiUp','고점 위로 돌파'],['loDn','저점 아래로 돌파']] },
+  ma:{ name:'이평선 (20MA·120MA)', ops:[['gold','정배열 전환 (20MA > 120MA)'],['dead','역배열 전환 (20MA < 120MA)']] },
+  di:{ name:'DI 이격도', ops:[['xup','값 위로 올라감'],['xdn','값 아래로 내려감']], val:true },
+  ses:{ name:'세션 시작', ops:[['asia','아시아 시작'],['eu','유로 시작'],['us','미장 시작']] },
+};
+const tfLabel = k => (tfBy(k) || [0, 0, k])[2];
+let ALERTS = store.get('ralerts', null);
+if (!ALERTS){
+  const now = Date.now();
+  ALERTS = [['dbUp','↑ DB'],['dbDn','↓ DB']].map(([op, n]) => ({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'db', op }], trig:'close', exp:null,
+    name:`5분 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:now }));
+}
+let ALOG = store.get('alog', []);
+const saveAlerts = () => store.set('ralerts', ALERTS), saveLog = () => store.set('alog', ALOG.slice(0, 300));
+function condText(c){ const d = COND[c.src]; if (!d) return '?'; const o = d.ops.find(x => x[0] === c.op); return `${d.name}: ${o ? o[1] : c.op}${d.val ? ' ' + c.val : ''}`; }
+function evalCond(c, bars, I, i, tf){
+  const b = bars[i], p = bars[i - 1]; if (!b || !p) return false;
+  switch (c.src){
+    case 'db': return !!I[c.op][i];
+    case 'hhj': return c.op === 'up' ? I.up[i] && !I.up[i - 1] : I.dn[i] && !I.dn[i - 1];
+    case 'price': { const v = +c.val; return c.op === 'xup' ? p.close < v && b.close >= v : p.close > v && b.close <= v; }
+    case 'usl': { const u = computeUsLine(bars, tf, i); if (!u) return false; return c.op === 'hiUp' ? p.close <= u.hi && b.close > u.hi : p.close >= u.lo && b.close < u.lo; }
+    case 'ma': { const a = I.bma20, z = I.bma120; if (a[i] == null || z[i] == null || a[i - 1] == null || z[i - 1] == null) return false;
+      return c.op === 'gold' ? a[i] > z[i] && a[i - 1] <= z[i - 1] : a[i] < z[i] && a[i - 1] >= z[i - 1]; }
+    case 'di': { const v = +c.val, x = I.di[i], y = I.di[i - 1]; if (x == null || y == null) return false; return c.op === 'xup' ? y < v && x >= v : y > v && x <= v; }
+    case 'ses': { const d = new Date(b.time * 1000), ud = usDst(d), ed = euDst(d), sh = c.op === 'asia' ? (ud ? 7 : 8) : c.op === 'eu' ? (ed ? 16 : 17) : (ud ? 22 : 23);
+      const st = d.getUTCHours() * 60 + d.getUTCMinutes(); let en = st + tf / 60, sm = sh * 60; if (sm < st) sm += 1440; return sm >= st && sm < en; }
+  }
+  return false;
+}
+const barCache = new Map();
+async function barsFor(symId, tfKey){
+  if (symId === S.sym.id && tfKey === S.tf[0] && S.bars.length) return { bars:S.bars, live:!!S.live };
+  const key = symId + '|' + tfKey, hit = barCache.get(key);
+  if (hit && Date.now() - hit.at < 8000) return hit.v;
+  const sym = SYMS.find(x => x.id === symId), tf = tfBy(tfKey); if (!sym || !tf) return null;
+  let bars = null;
+  try {
+    if (sym.feed === 'mt5' && S.mt5ok) bars = mapBars((await mt5Get(`/bars?symbol=${encodeURIComponent(sym.id)}&tf=${tf[0]}&count=300`)).bars);
+    else if (sym.bn || sym.feed === 'binance') bars = (await loadBinance(sym, tf)).slice(-300);
+  } catch {}
+  const v = bars ? { bars, live:true } : null; barCache.set(key, { at:Date.now(), v }); return v;
+}
+async function runAlerts(){
+  const now = Date.now(); let dirty = false;
+  for (const a of ALERTS){
+    if (!a.active) continue;
+    if (a.exp && now > a.exp){ a.active = false; dirty = true; continue; }
+    const r = await barsFor(a.sym, a.tf); if (!r || !r.live) continue;
+    const bars = r.bars, tf = tfBy(a.tf)[1], I = compute(bars);
+    const i = a.trig === 'bar' ? bars.length - 1 : bars.length - 2; if (i < 2) continue;
+    const bt = bars[i].time;
+    if (a.lastBar === bt) continue;
+    if (a.lastBar == null && a.trig !== 'bar'){ a.lastBar = bt; dirty = true; continue; } // 처음엔 지난 봉으로 울리지 않음
+    if (a.conds.every(c => evalCond(c, bars, I, i, tf))){
+      a.lastBar = bt; dirty = true;
+      notify({ name:a.name || a.conds.map(condText).join(' + '), msg:a.msg || `${a.sym} ${tfLabel(a.tf)} · ${a.conds.map(condText).join(' + ')} · 현재가 ${bars[bars.length - 1].close.toFixed(2)}`,
+        sym:a.sym, tf:tfLabel(a.tf), toast:a.toast, sound:a.sound, tg:a.tg });
+      if (a.trig === 'once') a.active = false;
+    } else if (a.trig !== 'bar'){ a.lastBar = bt; dirty = true; }
+  }
+  if (dirty){ saveAlerts(); renderAlertList(); }
+}
+setInterval(runAlerts, 10000); setTimeout(runAlerts, 3000);
+
+let audioCtx = null;
+function beep(){ try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + .25); } catch {} }
+function notify(n){
+  if (n.toast !== false) toast(n.sym, n.name + (n.msg ? '\n' + n.msg : ''), true);
+  if (n.sound) beep();
+  if (n.tg && !S.rp) sendTelegram(`${n.name}\n${n.msg || ''}`.trim()).catch(() => {});
+  ALOG.unshift({ ts:Date.now(), name:n.name, msg:n.msg || '', sym:n.sym, tf:n.tf, read:false }); saveLog(); renderLog();
+}
+
+/* 목록 · 기록 그리기 */
+const coinOf = id => (SYMS.find(x => x.id === id) || { icon:'#9598a1' }).icon;
+const kDate = ts => { const d = new Date(ts + KST * 1000); return `${DAYS[d.getUTCDay()]} ${d.getUTCFullYear()}-${p2(d.getUTCMonth() + 1)}-${p2(d.getUTCDate())}  ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())}`; };
+const ICON_PAUSE = '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10"/><rect x="9" y="3" width="3" height="10"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l8 5-8 5z"/></svg>';
+const ICON_EDIT = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>';
+const ICON_DEL = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 9h5.6l.7-9"/></svg>';
+function renderAlertList(){
+  const price = S.alerts.map(a => `<li data-pa="${a.id}"><div class="t">${S.sym.id} 가격 교차 ${fmt(a.price)}</div><div class="m"><i class="coin" style="background:${coinOf(S.sym.id)}"></i>${S.sym.id} · <span class="on">액티브</span> · 차트 가격선</div><span class="acts"><button data-act="pdel" title="삭제">${ICON_DEL}</button></span></li>`);
+  const rules = ALERTS.map(a => `<li data-ra="${a.id}"><div class="t">${a.name || a.conds.map(condText).join(' + ')}</div><div class="m"><i class="coin" style="background:${coinOf(a.sym)}"></i>${a.sym}, ${tfLabel(a.tf)} · <span class="${a.active ? 'on' : 'off'}">${a.active ? '액티브' : '중지됨'}</span> · ${a.conds.map(condText).join(' + ')}</div>
+    <span class="acts"><button data-act="toggle" title="${a.active ? '중지' : '다시 시작'}">${a.active ? ICON_PAUSE : ICON_PLAY}</button><button data-act="edit" title="편집">${ICON_EDIT}</button><button data-act="del" title="삭제">${ICON_DEL}</button></span></li>`);
+  const all = [...rules, ...price];
+  $('#alertList').innerHTML = all.length ? all.join('') : '<li class="empty">얼러트가 없습니다. + 를 눌러 규칙을 만드세요.</li>';
+}
+function renderLog(){
+  const un = ALOG.filter(x => !x.read).length, bd = $('#logBadge');
+  bd.hidden = !un; bd.textContent = un > 99 ? '99+' : un;
+  let day = '', html = '';
+  for (const [k, l] of ALOG.entries()){
+    const d = new Date(l.ts + KST * 1000), dl = `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
+    if (dl !== day){ html += `<div class="lg-day">${dl}</div>`; day = dl; }
+    html += `<ul class="alist"><li class="${l.read ? '' : 'unread'}" data-lg="${k}"><div class="t">${l.name}</div>${l.msg ? `<div class="m" style="color:var(--text)">${l.msg}</div>` : ''}<div class="m"><i class="coin" style="background:${coinOf(l.sym)}"></i>${l.sym}${l.tf ? ', ' + l.tf : ''} · ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())}</div><span class="acts"><button data-act="ldel" title="삭제">${ICON_DEL}</button></span></li></ul>`;
+  }
+  $('#logList').innerHTML = html || '<ul class="alist"><li class="empty">아직 울린 얼러트가 없습니다.</li></ul>';
+}
+document.querySelectorAll('.seg [data-sub]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.seg [data-sub]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  $('#al-list').hidden = b.dataset.sub !== 'list'; $('#al-log').hidden = b.dataset.sub !== 'log';
+});
+$('#alertList').addEventListener('click', e => {
+  const li = e.target.closest('li'); if (!li) return; const act = e.target.closest('[data-act]')?.dataset.act;
+  if (li.dataset.pa){ if (act === 'pdel'){ const x = S.alerts.find(v => v.id === li.dataset.pa); candle.removePriceLine(x.line); S.alerts = S.alerts.filter(v => v !== x); saveDrawings(); renderAlertList(); } return; }
+  const a = ALERTS.find(x => x.id === li.dataset.ra); if (!a) return;
+  if (act === 'toggle'){ a.active = !a.active; a.lastBar = null; saveAlerts(); renderAlertList(); }
+  else if (act === 'del'){ ALERTS = ALERTS.filter(x => x !== a); saveAlerts(); renderAlertList(); }
+  else openAlertDlg(a);
+});
+$('#logList').addEventListener('click', e => {
+  const li = e.target.closest('[data-lg]'); if (!li) return; const k = +li.dataset.lg;
+  if (e.target.closest('[data-act="ldel"]')) ALOG.splice(k, 1); else ALOG[k].read = true;
+  saveLog(); renderLog();
+});
+$('#logClear').onclick = () => { ALOG = []; saveLog(); renderLog(); };
+$('#logRead').onclick = () => { ALOG.forEach(x => x.read = true); saveLog(); renderLog(); };
+
+/* 얼러트 만들기 · 편집 창 */
+let editing = null;
+function condRow(c, idx){
+  const srcOpts = Object.entries(COND).map(([k, d]) => `<option value="${k}"${k === c.src ? ' selected' : ''}>${d.name}</option>`).join('');
+  const d = COND[c.src], opOpts = d.ops.map(([k, n]) => `<option value="${k}"${k === c.op ? ' selected' : ''}>${n}</option>`).join('');
+  return `<div class="cond" data-i="${idx}">${idx ? '<button type="button" class="ib rm" data-rm title="조건 빼기">✕</button>' : ''}
+    <select class="inp" data-f="src">${srcOpts}</select><select class="inp" data-f="op">${opOpts}</select>
+    ${d.val ? `<input class="inp" data-f="val" inputmode="decimal" placeholder="${c.src === 'di' ? '예: 1.0' : '가격'}" value="${c.val ?? ''}">` : ''}</div>`;
+}
+let dConds = [];
+function drawConds(){ $('#alConds').innerHTML = dConds.map(condRow).join(''); }
+$('#alConds').addEventListener('change', e => {
+  const box = e.target.closest('.cond'), i = +box.dataset.i, f = e.target.dataset.f;
+  if (f === 'src'){ dConds[i] = { src:e.target.value, op:COND[e.target.value].ops[0][0], val:'' }; drawConds(); }
+  else dConds[i][f] = e.target.value;
+  autoName();
+});
+$('#alConds').addEventListener('input', e => { const box = e.target.closest('.cond'); if (box && e.target.dataset.f === 'val') dConds[+box.dataset.i].val = e.target.value; });
+$('#alConds').addEventListener('click', e => { if (e.target.closest('[data-rm]')){ dConds.splice(+e.target.closest('.cond').dataset.i, 1); drawConds(); autoName(); } });
+$('#alAddCond').onclick = () => { dConds.push({ src:'ma', op:'gold', val:'' }); drawConds(); autoName(); };
+let nameTouched = false;
+$('#alName').addEventListener('input', () => { nameTouched = true; });
+function autoName(){
+  if (nameTouched) return;
+  const c = dConds[0], tf = tfLabel($('#alTf').value);
+  $('#alName').value = !c ? '' : c.src === 'hhj' ? `${tf} 돌파 더블비 ${c.op === 'up' ? '상방' : '하방'} 몸통 마감` : `${tf} ${condText(c).split(': ')[1]}`;
+}
+$('#alTf').addEventListener('change', autoName);
+function openAlertDlg(a){
+  editing = a || null; nameTouched = !!a;
+  $('#alSym').innerHTML = SYMS.map(x => `<option value="${x.id}">${x.id}</option>`).join('');
+  $('#alTf').innerHTML = TFS.filter(t => t[1] < 604800).map(t => `<option value="${t[0]}">${t[2]}</option>`).join('');
+  $('#alSym').value = a ? a.sym : S.sym.id; $('#alTf').value = a ? a.tf : S.tf[0];
+  dConds = a ? a.conds.map(c => ({ ...c })) : [{ src:'hhj', op:'dn', val:'' }];
+  $('#alTrig').value = a ? a.trig : 'close';
+  const exp = a ? a.exp : Date.now() + 30 * 86400000;
+  $('#alExp').value = exp ? new Date(exp + KST * 1000).toISOString().slice(0, 16) : '';
+  $('#alName').value = a ? a.name : ''; $('#alMsg').value = a ? a.msg : '';
+  $('#alToast').checked = a ? a.toast !== false : true; $('#alSound').checked = a ? !!a.sound : true; $('#alTg').checked = a ? a.tg !== false : true;
+  $('#alTitle').textContent = a ? '알림 편집' : '얼러트 만들기'; $('#alDel').hidden = !a;
+  $('#alNote').textContent = '차트에 띄운 타임프레임과 상관없이 이 종목·인터벌을 10초마다 확인합니다. 실시간 시세(한텍 MT5 또는 참고 시세)가 연결돼 있어야 울립니다. 돌파 더블비(몸통 마감)는 HHJ 원본 코드를 받기 전까지 추정 규칙입니다.';
+  drawConds(); autoName(); $('#alModal').hidden = false;
+}
+$('#alAdd').onclick = () => openAlertDlg(null);
+$('#alertBtn').onclick = () => { showTab('al'); openAlertDlg(null); };
+$('#alClose').onclick = $('#alCancel').onclick = () => { $('#alModal').hidden = true; };
+$('#alDel').onclick = () => { if (editing){ ALERTS = ALERTS.filter(x => x !== editing); saveAlerts(); renderAlertList(); } $('#alModal').hidden = true; };
+$('#alForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (dConds.some(c => COND[c.src].val && !isFinite(parseFloat(c.val)))) return toast('값을 넣어 주세요', '가격·DI 조건에는 숫자 값이 필요합니다.');
+  const ev = $('#alExp').value, exp = ev ? Date.parse(ev + ':00Z') - KST * 1000 : null;
+  const d = { sym:$('#alSym').value, tf:$('#alTf').value, conds:dConds.map(c => ({ ...c })), trig:$('#alTrig').value, exp,
+    name:$('#alName').value.trim(), msg:$('#alMsg').value.trim(), toast:$('#alToast').checked, sound:$('#alSound').checked, tg:$('#alTg').checked };
+  if (editing) Object.assign(editing, d, { lastBar:null, active:true }); else ALERTS.unshift({ id:uid(), ...d, active:true, created:Date.now() });
+  saveAlerts(); renderAlertList(); $('#alModal').hidden = true; toast('얼러트 저장됨', `${d.sym} ${tfLabel(d.tf)} · ${d.conds.map(condText).join(' + ')}`);
+});
+renderAlertList(); renderLog();
 
 /* ---------- 오른쪽 클릭 메뉴 ---------- */
 const RESET_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 7.5A6 6 0 1 1 4 12"/><path d="M4 3.5v4h4"/></svg>';
@@ -1988,7 +2232,6 @@ function showTab(t){
 }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 document.querySelectorAll('[data-strip]').forEach(b => b.onclick = () => showTab(b.dataset.strip));
-$('#alertBtn').onclick = () => { showTab('al'); $('#alertPrice').focus(); };
 
 /* ---------- 종목 / 타임프레임 / 관심종목 ---------- */
 $('#sym').innerHTML = SYMS.map(s => `<option value="${s.id}">${s.id}</option>`).join('');
