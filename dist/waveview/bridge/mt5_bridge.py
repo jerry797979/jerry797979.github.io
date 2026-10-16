@@ -36,7 +36,8 @@ DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
     "telegram_chat_id": "",
-    "watch": [["XAUUSD.b", "5m"], ["XAUUSD.b", "15m"]],
+    "watch": [],
+    "rules": [],
     "bb_len": 20,
     "bb_mult": 2.0,
     "bb2_len": 4,
@@ -141,8 +142,26 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
+
+    def do_POST(self):
+        u = urllib.parse.urlparse(self.path)
+        try:
+            n = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+            if u.path == "/config":
+                for k in ("telegram_token", "telegram_chat_id", "rules"):
+                    if k in body:
+                        cfg[k] = body[k]
+                with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                    json.dump(cfg, f, ensure_ascii=False, indent=2)
+                ensure_watcher()
+                return self._send(200, {"ok": True, "rules": len(cfg.get("rules", []))})
+            return self._send(404, {"error": "없는 주소"})
+        except Exception as e:  # noqa: BLE001
+            return self._send(500, {"error": str(e)})
 
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
@@ -157,7 +176,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"bars": rates(q["symbol"], tf, min(int(q.get("count", 1500)), 5000))})
             if u.path == "/quotes":
                 return self._send(200, {"quotes": quotes()})
-            return self._send(200, {"ok": True, "service": "waveview-mt5-bridge"})
+            return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": 2,
+                                    "telegram": bool(cfg.get("telegram_token") and cfg.get("telegram_chat_id")),
+                                    "rules": len(cfg.get("rules", []))})
         except Exception as e:  # noqa: BLE001
             return self._send(500, {"error": str(e)})
 
@@ -199,32 +220,57 @@ def db_signal(bars, i):
     return None
 
 
+TF_NAME = {"1m": "1분", "2m": "2분", "3m": "3분", "5m": "5분", "10m": "10분", "15m": "15분", "30m": "30분",
+           "1h": "1시간", "2h": "2시간", "3h": "3시간", "4h": "4시간", "8h": "8시간", "1D": "일봉"}
+_watcher_started = False
+
+
+def ensure_watcher():
+    global _watcher_started
+    if not _watcher_started:
+        _watcher_started = True
+        threading.Thread(target=watcher, daemon=True).start()
+
+
+def current_rules():
+    rules = list(cfg.get("rules") or [])
+    for symbol, tf in cfg.get("watch") or []:  # 예전 설정 호환
+        rules.append({"sym": symbol, "tf": tf, "dir": "both", "name": ""})
+    return rules
+
+
 def watcher():
+    """돌파 더블비(BB1·BB2 동시 돌파)를 봉 마감 때 확인해 텔레그램으로 보낸다."""
     done = {}
     while True:
-        for symbol, tf in cfg["watch"]:
-            key = f"{symbol}|{tf}"
-            try:
-                bars = rates(symbol, tf, 60)[:-1]  # 마지막 봉은 아직 진행 중
-                if not bars:
+        if cfg.get("telegram_token") and cfg.get("telegram_chat_id"):
+            for r in current_rules():
+                symbol, tf, way = r.get("sym"), r.get("tf"), r.get("dir", "both")
+                if tf not in TF:
                     continue
-                last_t = bars[-1]["t"]
-                if key not in done:
-                    done[key] = last_t  # 처음에는 지난 신호를 보내지 않는다
-                    continue
-                for i in range(len(bars)):
-                    if bars[i]["t"] <= done[key]:
+                key = f"{symbol}|{tf}|{way}"
+                try:
+                    bars = rates(symbol, tf, 60)[:-1]  # 마지막 봉은 아직 진행 중
+                    if not bars:
                         continue
-                    s = db_signal(bars, i)
-                    if s:
-                        b = bars[i]
-                        text = (f"{'↑' if s == 'up' else '↓'} DB | {symbol} {TF_KO.get(tf, tf)} | 현재가: {b['c']:,.2f} | "
-                                f"BB1·BB2 {'상단' if s == 'up' else '하단'} 동시 터치! (한텍 MT5)")
-                        send_telegram(text)
-                        print("알림:", text)
-                done[key] = last_t
-            except Exception as e:  # noqa: BLE001
-                print(f"{key} 확인 실패: {e}")
+                    last_t = bars[-1]["t"]
+                    if key not in done:
+                        done[key] = last_t  # 처음에는 지난 신호를 보내지 않는다
+                        continue
+                    for i in range(len(bars)):
+                        if bars[i]["t"] <= done[key]:
+                            continue
+                        s = db_signal(bars, i)
+                        if s and (way == "both" or way == s):
+                            b = bars[i]
+                            title = r.get("name") or f"{TF_NAME.get(tf, tf)} 돌파 더블비 {'상방' if s == 'up' else '하방'}"
+                            text = (f"{title}\n{'↑' if s == 'up' else '↓'} DB | {symbol} {TF_NAME.get(tf, tf)} | 종가 {b['c']:,.2f} | "
+                                    f"BB1·BB2 {'상단' if s == 'up' else '하단'} 동시 돌파 (한텍 MT5)")
+                            send_telegram(text)
+                            print("알림:", text.replace("\n", " / "))
+                    done[key] = last_t
+                except Exception as e:  # noqa: BLE001
+                    print(f"{key} 확인 실패: {e}")
         time.sleep(5)
 
 
@@ -236,11 +282,11 @@ def main():
     acc = mt5.account_info()
     detect_offset()
     print(f"MT5 연결됨: {acc.server if acc else '?'} · 서버시간 UTC{server_offset / 3600:+g}")
-    if cfg["telegram_token"] and cfg["telegram_chat_id"]:
-        threading.Thread(target=watcher, daemon=True).start()
-        print("텔레그램 신호 감시 시작:", ", ".join(f"{s} {t}" for s, t in cfg["watch"]))
+    ensure_watcher()
+    if cfg.get("telegram_token") and cfg.get("telegram_chat_id"):
+        print("텔레그램 신호 감시 중:", ", ".join(f"{r['sym']} {r['tf']}" for r in current_rules()) or "(규칙 없음)")
     else:
-        print(f"텔레그램 알림은 꺼져 있습니다. 켜려면 {CONFIG_FILE} 에 봇 토큰과 채팅 ID를 넣고 다시 실행하세요.")
+        print("텔레그램 설정 전입니다. 웨이브뷰 ⚙ 설정에서 봇 토큰과 채팅 ID를 저장하면 자동으로 켜집니다.")
     port = int(cfg["port"])
     print(f"웨이브뷰 연결 주소: http://127.0.0.1:{port}  (이 창을 닫으면 연결이 끊깁니다)")
     ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()

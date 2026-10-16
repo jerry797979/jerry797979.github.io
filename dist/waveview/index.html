@@ -466,7 +466,11 @@ svg{display:block}
       <div class="field"><label for="setPoll">시세 갱신 주기 (초)</label><input class="inp" id="setPoll" inputmode="numeric" placeholder="120"></div>
       <div class="field"><label for="setTg">텔레그램 봇 토큰</label><input class="inp" id="setTg" autocomplete="off" placeholder="123456:ABC-..."></div>
       <div class="field"><label for="setChat">텔레그램 채팅 ID</label><input class="inp" id="setChat" autocomplete="off" placeholder="봇에게 메시지를 보낸 뒤 '채팅 ID 찾기'"></div>
-      <p class="note">키와 토큰은 이 브라우저에만 저장됩니다. 이 페이지가 열려 있는 동안 얼러트가 텔레그램으로도 전송됩니다.</p>
+      <div class="note" style="line-height:1.7"><b style="color:var(--text)">텔레그램 봇 만들기 (처음 한 번)</b><br>
+        ① 텔레그램에서 <b>@BotFather</b> 검색 → 대화 시작 → <b>/newbot</b> 입력<br>
+        ② 봇 이름과 아이디(끝이 bot)를 정하면 <b>토큰</b>(123456:ABC… 모양)을 줍니다 → 위 칸에 붙여넣기<br>
+        ③ 만든 봇을 검색해서 아무 말이나 한 번 보내기 → 아래 <b>채팅 ID 찾기</b> → <b>텔레그램 테스트</b> → <b>저장</b><br>
+        한텍 MT5 가 연결돼 있으면 웨이브뷰 창을 닫아도 PC 연결 프로그램이 돌파 더블비를 24시간 보내 줍니다.</div>
       <p class="note">차트 엔진: <a href="https://www.tradingview.com/lightweight-charts/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a></p>
     </form>
     <footer>
@@ -564,7 +568,7 @@ const pText = {
   ses: p => `${p.lstyle} ${p.lwidth} ${p.tsize} ${p.ostyle} ${p.asiaOp} ${p.euOp} ${p.usOp}`, us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
-  ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['db','HHJ - 돌파 더블비 알람'], ['ses','세션박스'],
+  ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['ses','세션박스'],
   ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['di','DI 이격도'],
 ];
 const EYE = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/></svg>';
@@ -827,7 +831,7 @@ function renderMarkers(){
       if (P.bb.ob && I.obUp[i]) mk.push({ time:t, position:'aboveBar', color:'#4CAF50', shape:'arrowUp', size:0, text:'↑ 1B' });
       if (P.bb.ob && I.obDn[i]) mk.push({ time:t, position:'belowBar', color:'#F23645', shape:'arrowDown', size:0, text:'↓ 1B' });
     }
-    if (S.show.db && i < S.bars.length - 1){
+    if (false){
       if (isDn(i)) mk.push({ time:t, position:'belowBar', color:C.signal, shape:'arrowDown', size:0, text:'↓ 돌파' });
       if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ 돌파' });
     }
@@ -1315,6 +1319,7 @@ async function initMT5(){
     pollQuotes(); S.qtimer = setInterval(pollQuotes, 3000);
     if (S.mt5warned) toast('한텍 MT5 연결됨', 'MT5 시세로 차트를 다시 그립니다.');
     S.mt5ok = true; S.mt5warned = false;
+    setTimeout(syncBridge, 500);
     return true;
   } catch (e) {
     if (!S.mt5warned){
@@ -1876,8 +1881,8 @@ diChart.subscribeClick(p => {
 
 /* ---------- 규칙 얼러트 (트레이딩뷰 얼러트처럼) ---------- */
 const COND = {
-  db:{ name:'더블 볼린저밴드', ops:[['dbUp','↑ DB (BB1·BB2 상단 동시 터치)'],['dbDn','↓ DB (BB1·BB2 하단 동시 터치)'],['obUp','↑ 1B (한쪽 상단 터치)'],['obDn','↓ 1B (한쪽 하단 터치)']] },
-  hhj:{ name:'돌파 더블비 (몸통 마감)', ops:[['up','돌파 더블비 상방'],['dn','돌파 더블비 하방']] },
+  hhj:{ name:'돌파 더블비 (더블 볼린저 동시 돌파)', ops:[['up','상방 (BB1·BB2 상단 동시 돌파)'],['dn','하방 (BB1·BB2 하단 동시 돌파)']] },
+  db:{ name:'더블 볼린저 1B (한쪽 밴드만)', ops:[['obUp','↑ 1B (한쪽 상단 터치)'],['obDn','↓ 1B (한쪽 하단 터치)']] },
   price:{ name:'가격', ops:[['xup','위로 교차'],['xdn','아래로 교차']], val:true },
   usl:{ name:'어제 미장 구간 고저 라인', ops:[['hiUp','고점 위로 돌파'],['loDn','저점 아래로 돌파']] },
   ma:{ name:'이평선 (20MA·120MA)', ops:[['gold','정배열 전환 (20MA > 120MA)'],['dead','역배열 전환 (20MA < 120MA)']] },
@@ -1888,17 +1893,19 @@ const tfLabel = k => (tfBy(k) || [0, 0, k])[2];
 let ALERTS = store.get('ralerts', null);
 if (!ALERTS){
   const now = Date.now();
-  ALERTS = [['dbUp','↑ DB'],['dbDn','↓ DB']].map(([op, n]) => ({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'db', op }], trig:'close', exp:null,
-    name:`5분 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:now }));
+  ALERTS = [['up','상방'],['dn','하방']].map(([op, n]) => ({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'hhj', op }], trig:'close', exp:null,
+    name:`5분 돌파 더블비 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:now }));
 }
+// 예전 규칙(DB) → 돌파 더블비로 옮기기
+ALERTS.forEach(a => a.conds.forEach(c => { if (c.src === 'db' && (c.op === 'dbUp' || c.op === 'dbDn')){ c.src = 'hhj'; c.op = c.op === 'dbUp' ? 'up' : 'dn'; } }));
 let ALOG = store.get('alog', []);
-const saveAlerts = () => store.set('ralerts', ALERTS), saveLog = () => store.set('alog', ALOG.slice(0, 300));
+const saveAlerts = () => { store.set('ralerts', ALERTS); syncBridge(); }, saveLog = () => store.set('alog', ALOG.slice(0, 300));
 function condText(c){ const d = COND[c.src]; if (!d) return '?'; const o = d.ops.find(x => x[0] === c.op); return `${d.name}: ${o ? o[1] : c.op}${d.val ? ' ' + c.val : ''}`; }
 function evalCond(c, bars, I, i, tf){
   const b = bars[i], p = bars[i - 1]; if (!b || !p) return false;
   switch (c.src){
     case 'db': return !!I[c.op][i];
-    case 'hhj': return c.op === 'up' ? I.up[i] && !I.up[i - 1] : I.dn[i] && !I.dn[i - 1];
+    case 'hhj': return c.op === 'up' ? !!I.dbUp[i] : !!I.dbDn[i];
     case 'price': { const v = +c.val; return c.op === 'xup' ? p.close < v && b.close >= v : p.close > v && b.close <= v; }
     case 'usl': { const u = computeUsLine(bars, tf, i); if (!u) return false; return c.op === 'hiUp' ? p.close <= u.hi && b.close > u.hi : p.close >= u.lo && b.close < u.lo; }
     case 'ma': { const a = I.bma20, z = I.bma120; if (a[i] == null || z[i] == null || a[i - 1] == null || z[i - 1] == null) return false;
@@ -1935,7 +1942,7 @@ async function runAlerts(){
     if (a.lastBar == null && a.trig !== 'bar'){ a.lastBar = bt; dirty = true; continue; } // 처음엔 지난 봉으로 울리지 않음
     if (a.conds.every(c => evalCond(c, bars, I, i, tf))){
       a.lastBar = bt; dirty = true;
-      notify({ name:a.name || a.conds.map(condText).join(' + '), msg:a.msg || `${a.sym} ${tfLabel(a.tf)} · ${a.conds.map(condText).join(' + ')} · 현재가 ${bars[bars.length - 1].close.toFixed(2)}`,
+      notify({ alertId:a.id, name:a.name || a.conds.map(condText).join(' + '), msg:a.msg || `${a.sym} ${tfLabel(a.tf)} · ${a.conds.map(condText).join(' + ')} · 현재가 ${bars[bars.length - 1].close.toFixed(2)}`,
         sym:a.sym, tf:tfLabel(a.tf), toast:a.toast, sound:a.sound, tg:a.tg });
       if (a.trig === 'once') a.active = false;
     } else if (a.trig !== 'bar'){ a.lastBar = bt; dirty = true; }
@@ -1950,8 +1957,22 @@ function beep(){ try { audioCtx = audioCtx || new (window.AudioContext || window
 function notify(n){
   if (n.toast !== false) toast(n.sym, n.name + (n.msg ? '\n' + n.msg : ''), true);
   if (n.sound) beep();
-  if (n.tg && !S.rp) sendTelegram(`${n.name}\n${n.msg || ''}`.trim()).catch(() => {});
+  if (n.tg && !S.rp && !(n.alertId && S.bridgeIds.has(n.alertId) && S.cfg.tg && S.cfg.chat)) sendTelegram(`${n.name}\n${n.msg || ''}`.trim()).catch(() => {});
   ALOG.unshift({ ts:Date.now(), name:n.name, msg:n.msg || '', sym:n.sym, tf:n.tf, read:false }); saveLog(); renderLog();
+}
+
+/* 텔레그램 24시간: 한텍 종목의 돌파 더블비 규칙을 PC 연결 프로그램에 맡긴다 */
+S.bridgeIds = new Set();
+async function syncBridge(){
+  if (!S.mt5ok) return;
+  const mine = ALERTS.filter(a => a.active && a.tg !== false && a.conds.length === 1 && a.conds[0].src === 'hhj' && (SYMS.find(x => x.id === a.sym) || {}).feed === 'mt5');
+  const rules = mine.map(a => ({ sym:a.sym, tf:a.tf, dir:a.conds[0].op, name:a.name }));
+  try {
+    const r = await fetch(S.cfg.mt5url + '/config', { method:'POST', headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({ telegram_token:S.cfg.tg, telegram_chat_id:S.cfg.chat, rules }) });
+    const j = await r.json(); if (!j.ok) throw new Error(j.error);
+    S.bridgeIds = new Set(mine.map(a => a.id));
+  } catch { S.bridgeIds = new Set(); }
 }
 
 /* 목록 · 기록 그리기 */
@@ -2024,7 +2045,7 @@ $('#alName').addEventListener('input', () => { nameTouched = true; });
 function autoName(){
   if (nameTouched) return;
   const c = dConds[0], tf = tfLabel($('#alTf').value);
-  $('#alName').value = !c ? '' : c.src === 'hhj' ? `${tf} 돌파 더블비 ${c.op === 'up' ? '상방' : '하방'} 몸통 마감` : `${tf} ${condText(c).split(': ')[1]}`;
+  $('#alName').value = !c ? '' : c.src === 'hhj' ? `${tf} 돌파 더블비 ${c.op === 'up' ? '상방' : '하방'}` : `${tf} ${condText(c).split(': ')[1]}`;
 }
 $('#alTf').addEventListener('change', autoName);
 function openAlertDlg(a){
@@ -2039,7 +2060,7 @@ function openAlertDlg(a){
   $('#alName').value = a ? a.name : ''; $('#alMsg').value = a ? a.msg : '';
   $('#alToast').checked = a ? a.toast !== false : true; $('#alSound').checked = a ? !!a.sound : true; $('#alTg').checked = a ? a.tg !== false : true;
   $('#alTitle').textContent = a ? '알림 편집' : '얼러트 만들기'; $('#alDel').hidden = !a;
-  $('#alNote').textContent = '차트에 띄운 타임프레임과 상관없이 이 종목·인터벌을 10초마다 확인합니다. 실시간 시세(한텍 MT5 또는 참고 시세)가 연결돼 있어야 울립니다. 돌파 더블비(몸통 마감)는 HHJ 원본 코드를 받기 전까지 추정 규칙입니다.';
+  $('#alNote').textContent = '차트에 띄운 타임프레임과 상관없이 이 종목·인터벌을 10초마다 확인합니다. 한텍 종목의 "돌파 더블비" 규칙은 PC 연결 프로그램이 24시간 감시해서, 웨이브뷰 창을 닫아도 텔레그램이 갑니다.';
   drawConds(); autoName(); $('#alModal').hidden = false;
 }
 $('#alAdd').onclick = () => openAlertDlg(null);
@@ -2176,7 +2197,7 @@ function readSettings(){ S.cfg = { mt5:$('#setMt5').checked, mt5url:($('#setMt5U
 $('#setBtn').onclick = () => { fillSettings(); $('#setModal').hidden = false; $('#setTd').focus(); };
 $('#setClose').onclick = () => { $('#setModal').hidden = true; };
 $('#setModal').addEventListener('click', e => { if (e.target.id === 'setModal') $('#setModal').hidden = true; });
-$('#setForm').addEventListener('submit', async e => { e.preventDefault(); readSettings(); $('#setModal').hidden = true; toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); await initMT5(); load(); });
+$('#setForm').addEventListener('submit', async e => { e.preventDefault(); readSettings(); syncBridge(); $('#setModal').hidden = true; toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); await initMT5(); load(); });
 $('#tgFind').onclick = async () => {
   readSettings();
   if (!S.cfg.tg) return toast('봇 토큰이 필요합니다', '@BotFather 에서 받은 봇 토큰을 먼저 입력하세요.');

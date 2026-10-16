@@ -43,6 +43,7 @@ rem 4) 화면 없이 실행 + 컴퓨터 켤 때 자동 실행
 echo  [4/4] 자동 실행을 등록하는 중입니다...
 > "%WV%\run-bridge.vbs" echo CreateObject("WScript.Shell").Run """%PYW%"" ""%WV%\mt5_bridge.py""", 0, False
 copy /y "%WV%\run-bridge.vbs" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\WaveView-Bridge.vbs" >nul
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='pythonw.exe' OR Name='python.exe'\" | Where-Object { $_.CommandLine -like '*mt5_bridge.py*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" >nul 2>nul
 wscript "%WV%\run-bridge.vbs"
 
 echo.
