@@ -470,7 +470,7 @@ const $ = s => document.querySelector(s);
 const KST = 9 * 3600;
 const C = { bg:'#131313', grid:'#1e1e1e', text:'#e0e3eb', line:'#2a2a2a', up:'#089981', down:'#f23645', signal:'#f5c518',
   basis:'#4caf50', inner:'#f23645', outer:'#e8e8e8', ma1:'#7ee08a', ma2:'#42a5f5', ma3:'#ff9800', trend:'#2962ff',
-  asia:'41,98,255', eu:'255,152,0', us:'178,40,51' };
+  asia:'41,98,255', eu:'255,152,0', us:'242,54,69' };
 // [키, 초, 표시, Twelve Data 주기, 바이낸스 주기, 없을 때 합성할 원본]
 const TFS = [
   ['1m',60,'1분','1min','1m'], ['2m',120,'2분',null,null,'1m'], ['3m',180,'3분',null,'3m','1m'],
@@ -499,13 +499,13 @@ let SYMS = [
   { id:'ETHUSDT', name:'이더리움 / 테더', ex:'BINANCE', base:3450, dvol:.035, dp:2, feed:'binance', icon:'#627eea' },
 ];
 const DEF_P = { bb:{ ma120:true, ma20:true, bb1:true, bb2:true, len:20, k1:2, len2:4, k2:4, ob:false }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
-  ses:{ mode:'자동(서머타임)', asia:'0800-1700', eu:'1700-2330', us:'2330-0800' }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{},
+  ses:{ lstyle:'Solid', lwidth:1, tsize:'Small', ostyle:'Dashed', ocolor:'#ffffff', asiaOp:15, euOp:15, usOp:15 }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{},
   ktr:{ view:'현재장' } };
 const SCHEMA = {
   bb:[['ma120','120MA 표시','bool'],['ma20','20MA 표시','bool'],['bb1','BB1 표시 (종가기준, 빨간색)','bool'],['bb2','BB2 표시 (시가기준, 흰색)','bool'],['len','BB1 길이','int'],['k1','BB1 표준편차','num'],['len2','BB2 길이','int'],['k2','BB2 표준편차','num'],['ob','1B 신호 표시 (한쪽만 터치)','bool']],
   ma:[['l1','MA1 기간','int'],['l2','MA2 기간','int'],['l3','MA3 기간','int']],
   db:[['band','기준 밴드','sel',['안쪽','바깥']],['mode','마감 조건','sel',['몸통 전체','종가만']]],
-  ses:[['mode','세션 시간','sel',['자동(서머타임)','직접 입력']],['asia','아시아 (직접 입력 시)','text'],['eu','유로 (직접 입력 시)','text'],['us','미장 (직접 입력 시)','text']],
+  ses:[['lstyle','박스 테두리 스타일','sel',['Solid','Dashed','Dotted']],['lwidth','박스 선 두께','int'],['tsize','글씨 크기','sel',['Tiny','Small','Normal','Large']],['ostyle','아시아 시가선 모양','sel',['Solid','Dashed','Dotted']],['ocolor','아시아 시가선 색상','text'],['asiaOp','아시아 투명도','int'],['euOp','유로 투명도','int'],['usOp','미장 투명도','int']],
   ktr:[['view','표시할 세션','sel',['현재장','아시아','유로','미장']]],
   low:[['len','조회 봉 수','int']],
   di:[['len','기간','int'],['lv1','경계선 1','num'],['lv2','경계선 2','num']],
@@ -514,7 +514,7 @@ const P = {}; { const saved = (() => { try { return JSON.parse(localStorage.getI
   for (const k in DEF_P) P[k] = { ...DEF_P[k], ...(saved[k] || {}) }; }
 const pText = {
   bb: () => '', ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
-  ses: p => p.mode === '직접 입력' ? '직접 입력' : '서머타임 자동', us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
+  ses: p => `${p.lstyle} ${p.lwidth} ${p.tsize} ${p.ostyle} ${p.asiaOp} ${p.euOp} ${p.usOp}`, us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
   ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['db','HHJ - 돌파 더블비 알람'], ['ses','세션박스'],
@@ -616,7 +616,7 @@ function sessStarts(t){ // 그날의 시작 시각(분)
   return { asia:(u ? 7 : 8) * 60, eu:(e ? 16 : 17) * 60, us:(u ? 22 : 23) * 60 + usM };
 }
 function sessRanges(t){
-  if (P.ses.mode === '직접 입력'){
+  if (false){
     const out = {};
     for (const k of ['asia','eu','us']){
       const r = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(String(P.ses[k]).replace(/:/g, '')); if (r) out[k] = [+r[1] * 60 + +r[2], +r[3] * 60 + +r[4]];
@@ -699,7 +699,7 @@ const altData = k => k === 'bar' ? S.bars : S.bars.map(b => ({ time:b.time, valu
 function applyChartType(){
   const t = S.ctype, own = t === 'candle' || t === 'heikin', clr = 'rgba(0,0,0,0)';
   candle.applyOptions(own
-    ? { upColor:C.up, downColor:C.down, borderUpColor:C.up, borderDownColor:C.down, wickUpColor:C.up, wickDownColor:C.down, lastValueVisible:true, priceLineVisible:true }
+    ? { upColor:C.up, downColor:C.down, borderUpColor:C.up, borderDownColor:C.down, wickUpColor:C.up, wickDownColor:C.down, lastValueVisible:true, priceLineVisible:store.get('pline', true) }
     : { upColor:clr, downColor:clr, borderUpColor:clr, borderDownColor:clr, wickUpColor:clr, wickDownColor:clr, lastValueVisible:false, priceLineVisible:false });
   for (const k in alt){ alt[k].applyOptions({ visible:t === k }); if (t === k && S.bars.length) alt[k].setData(altData(k)); }
   if (S.bars.length) candle.setData(candleData());
@@ -749,7 +749,7 @@ function applyVisibility(){
 }
 function renderAll(){
   S.ind = compute(S.bars);
-  S.sess = sessions(S.bars, S.tf[1]);
+  S.sess = sessions(S.bars, S.tf[1]); S.sbox = computeSessionBoxes();
   candle.setData(candleData());
   for (const k in alt) if (S.ctype === k) alt[k].setData(altData(k));
   for (const k of Object.keys(L)) L[k].setData(lineData(S.ind[k]));
@@ -758,7 +758,7 @@ function renderAll(){
 }
 function renderLast(newBar){
   S.ind = compute(S.bars);
-  S.sess = sessions(S.bars, S.tf[1]);
+  S.sess = sessions(S.bars, S.tf[1]); S.sbox = computeSessionBoxes();
   const i = S.bars.length - 1, t = S.bars[i].time;
   candle.update(S.ctype === 'heikin' ? heikin(S.bars.slice(-300)).pop() : S.bars[i]);
   for (const k in alt) if (S.ctype === k){ const d = altData(k); alt[k].update(d[d.length - 1]); }
@@ -824,6 +824,36 @@ function lineLabel(text, y, color, pw){
   ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'start';
 }
 
+/* ---------- 세션박스 (원본 Pine 로직 그대로) ---------- */
+// 1시간봉 고가·저가·시가 (request.security "60", lookahead_on)
+function hourVal(i){
+  const tf = S.tf[1], b = S.bars[i];
+  if (tf === 3600) return { h:b.high, l:b.low, o:b.open };
+  if (tf > 3600){ const hb = S.h1 && S.h1.get(b.time + tf - 3600); return hb ? { h:hb.high, l:hb.low, o:hb.open } : { h:b.high, l:b.low, o:b.open }; }
+  const k = Math.floor(b.time / 3600) * 3600, g = S.hourAgg.get(k); return g || { h:b.high, l:b.low, o:b.open };
+}
+function computeSessionBoxes(){
+  const tf = S.tf[1], out = [];
+  if (tf >= 86400) return out;
+  if (tf < 3600){
+    S.hourAgg = new Map();
+    for (const b of S.bars){ const k = Math.floor(b.time / 3600) * 3600, g = S.hourAgg.get(k);
+      if (!g) S.hourAgg.set(k, { h:b.high, l:b.low, o:b.open }); else { g.h = Math.max(g.h, b.high); g.l = Math.min(g.l, b.low); } }
+  }
+  const SES = [['asia', 8], ['eu', 7], ['us', 8]], bph = 3600 / tf;
+  for (let i = 0; i < S.bars.length; i++){
+    const b = S.bars[i], d = new Date(b.time * 1000), ud = usDst(d), ed = euDst(d);
+    const st = d.getUTCHours() * 60 + d.getUTCMinutes(), ce = new Date((b.time + tf) * 1000);
+    let en = ce.getUTCHours() * 60 + ce.getUTCMinutes(); if (en <= st) en += 1440;
+    for (const [k, dur] of SES){
+      const sh = k === 'asia' ? (ud ? 7 : 8) : k === 'eu' ? (ed ? 16 : 17) : (ud ? 22 : 23);
+      let sm = sh * 60; if (sm < st) sm += 1440;
+      if (sm >= st && sm < en){ const v = hourVal(i); out.push({ s:k, i, ext:Math.min(Math.floor(dur * bph), 499), hi:v.h, lo:v.l, op:v.o }); }
+    }
+  }
+  return out;
+}
+
 /* ---------- KTR 전용 대시보드 (원본 Pine 로직 그대로) ---------- */
 function computeKTR(bars){
   let a = 0, e = 0, u = 0;
@@ -874,30 +904,29 @@ function drawOverlay(){
   const ts = chart.timeScale(), pw = w - chart.priceScale('right').width();
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h); ctx.clip();
 
-  if (S.show.ses && S.tf[1] <= 14400 && S.sess.length){
-    // 트레이딩뷰 세션박스: 세션 시가~종가 박스(실선 1px) + 가운데 점선 + 위쪽 흰 이름표
-    const half = (ts.options().barSpacing || 6) / 2, range = ts.getVisibleLogicalRange();
-    const names = { asia:'아시아', eu:'유로', us:'미장' };
-    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 1;
-    let labelEnd = -Infinity;
-    for (const b of S.sess){
-      if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1) && b.i1 !== S.bars.length - 1) continue;
-      let i1 = b.i1;
-      if (b.i1 === S.bars.length - 1){ const e = sessEnd(b.s, S.bars[b.i1].time); if (e) i1 = Math.max(b.i1, b.i1 + Math.ceil((e - S.bars[b.i1].time) / S.tf[1]) - 1); }
-      const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(i1);
-      const yt = candle.priceToCoordinate(Math.max(b.o, b.c)), yb = candle.priceToCoordinate(Math.min(b.o, b.c));
-      if ([x1, x2, yt, yb].some(v => v == null)) continue;
-      const rgb = C[b.s], x = Math.round(x1 - half) + .5, bw = Math.max(2, Math.round(x2 - x1 + half * 2) - 1);
-      const top = Math.round(yt) + .5, bh = Math.max(2, Math.round(yb - yt));
-      ctx.fillStyle = `rgba(${rgb},.18)`; ctx.fillRect(x, top, bw, bh);
-      ctx.setLineDash([]); ctx.strokeStyle = `rgba(${rgb},.9)`; ctx.strokeRect(x, top, bw, bh);
-      const mid = Math.round(top + bh / 2) + .5;
-      ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(255,255,255,.75)';
-      ctx.beginPath(); ctx.moveTo(x + 3, mid); ctx.lineTo(x + bw - 3, mid); ctx.stroke(); ctx.setLineDash([]);
-      const tw = ctx.measureText(names[b.s]).width, cx = x + bw / 2;
-      if (cx - tw / 2 > labelEnd - tw * .35){ ctx.lineWidth = 3; ctx.strokeStyle = C.bg; ctx.strokeText(names[b.s], cx, top - 8); ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8); ctx.lineWidth = 1; labelEnd = cx + tw / 2; }
+  if (S.show.ses && S.sbox && S.sbox.length){
+    // 세션박스 원본: 시작 1시간 고가~저가 박스(테두리 없음, 투명도 15) + 위·아래 선 + 아시아 시가선 + 오른쪽 끝 이름표
+    const range = ts.getVisibleLogicalRange(), ps = P.ses, names = { asia:'아시아', eu:'유로', us:'미장' };
+    const dash = st => st === 'Dashed' ? [6, 4] : st === 'Dotted' ? [2, 3] : [];
+    const op = { asia:ps.asiaOp, eu:ps.euOp, us:ps.usOp }, fsz = { Tiny:10, Small:12, Normal:14, Large:18 }[ps.tsize] || 12;
+    ctx.font = `${fsz}px -apple-system, "Malgun Gothic", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    for (const b of S.sbox){
+      if (range && (b.i + b.ext < range.from - 1 || b.i > range.to + 1)) continue;
+      const x1 = ts.logicalToCoordinate(b.i), x2 = ts.logicalToCoordinate(b.i + b.ext);
+      const yh = candle.priceToCoordinate(b.hi), yl = candle.priceToCoordinate(b.lo);
+      if ([x1, x2, yh, yl].some(v => v == null)) continue;
+      const rgb = C[b.s], top = Math.round(yh) + .5, bot = Math.round(yl) + .5;
+      ctx.fillStyle = `rgba(${rgb},${(op[b.s] ?? 15) / 100})`; ctx.fillRect(x1, top, x2 - x1, bot - top);
+      ctx.strokeStyle = `rgb(${rgb})`; ctx.lineWidth = ps.lwidth || 1; ctx.setLineDash(dash(ps.lstyle));
+      ctx.beginPath(); ctx.moveTo(x1, top); ctx.lineTo(x2, top); ctx.moveTo(x1, bot); ctx.lineTo(x2, bot); ctx.stroke();
+      if (b.s === 'asia'){
+        const yo = candle.priceToCoordinate(b.op);
+        if (yo != null){ ctx.strokeStyle = ps.ocolor || '#ffffff'; ctx.setLineDash(dash(ps.ostyle)); ctx.beginPath(); ctx.moveTo(x1, Math.round(yo) + .5); ctx.lineTo(x2, Math.round(yo) + .5); ctx.stroke(); }
+      }
+      ctx.setLineDash([]); ctx.lineWidth = 3; ctx.strokeStyle = C.bg; ctx.strokeText(names[b.s], x2, top - 4);
+      ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], x2, top - 4); ctx.lineWidth = 1;
     }
-    ctx.textAlign = 'start';
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
   }
 
   // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
@@ -1082,7 +1111,7 @@ function openParams(k){
     type === 'bool' ? `<label style="display:flex;gap:8px;align-items:center;color:var(--text)"><input type="checkbox" id="pm-${f}" ${P[k][f] ? 'checked' : ''}>사용</label>`
     : type === 'sel' ? `<select class="inp" id="pm-${f}">${opts.map(o => `<option${o === P[k][f] ? ' selected' : ''}>${o}</option>`).join('')}</select>`
     : `<input class="inp" id="pm-${f}" value="${P[k][f]}" ${type === 'text' ? 'placeholder="0900-1600"' : 'inputmode="decimal"'}>`}</div>`).join('')
-    + (k === 'ses' ? '<p class="note">자동: KTR 대시보드와 같은 기준(서머타임 반영). 아시아 07/08시, 유로 16/17시, 미장 22:30/23:30 시작 (1시간봉 이상은 22/23시). 직접 입력은 한국시간 0900-1600 처럼 적습니다.</p>' : '');
+    + (k === 'ses' ? '<p class="note">세션박스 원본 규칙: 아시아 07/08시(8시간), 유로 16/17시(7시간), 미장 22/23시(8시간) 시작, 서머타임 자동. 박스는 시작 1시간의 고가~저가입니다.</p>' : '');
   $('#pmForm').dataset.k = k; $('#pmModal').hidden = false;
 }
 $('#pmForm').addEventListener('submit', e => {
@@ -1274,6 +1303,16 @@ async function load(){
   if (id !== S.loadId) return;
   if (!bars && sym.feed === 'mt5'){ const q = S.quotes[sym.id]; sym.base = q ? q.p : 100; }
   S.bars = bars || genBars(sym, tf[1]);
+  S.h1 = null;
+  if (tf[1] > 3600 && tf[1] < 86400){
+    try {
+      let hb = null;
+      if (live && sym.feed === 'mt5') hb = await loadMT5(sym, tfBy('1h'));
+      else if (live) hb = await loadBinance(sym, tfBy('1h'));
+      if (id !== S.loadId) return;
+      if (hb) S.h1 = new Map(hb.map(b => [b.time, b]));
+    } catch {}
+  }
   S.live = live;
   applyFormat(); renderAll(); applyVisibility();
   applyRange();
@@ -1787,6 +1826,7 @@ wrapEl.addEventListener('contextmenu', e => {
     <button data-c="hline"><i></i>${px} 에 수평선 그리기<kbd>Alt + H</kbd></button><hr>
     <button data-c="clrd"><i></i>${nd} 드로잉 없애기</button>
     <button data-c="clri"><i></i>${ni} 인디케이터 없애기</button><hr>
+    <button data-c="pline"><i></i>현재가 점선 ${store.get('pline', true) ? '숨기기' : '보이기'}</button><hr>
     <button data-c="set"><i>${GEAR}</i>설정…</button>`;
   m.hidden = false;
   const r = m.getBoundingClientRect();
@@ -1803,6 +1843,7 @@ $('#ctxMenu').addEventListener('click', e => {
   else if (c === 'hline') addHLine(pr);
   else if (c === 'dbalert'){ if (!S.show.db) toggleInd('db'); toast('얼러트 켜짐', `${S.sym.id} ${S.tf[2]} 봉이 볼린저밴드 밖에서 몸통 마감하면 알립니다.`); }
   else if (c === 'clrd') clearAllDrawings();
+  else if (c === 'pline'){ store.set('pline', !store.get('pline', true)); applyChartType(); }
   else if (c === 'clri') hideAllInds();
   else if (c === 'set'){ fillSettings(); $('#setModal').hidden = false; }
 });
