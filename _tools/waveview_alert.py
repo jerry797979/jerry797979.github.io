@@ -2,7 +2,7 @@
 
 GitHub Actions(.github/workflows/waveview-alert.yml)가 5분마다 실행한다.
 Twelve Data에서 봉을 받아 더블 볼린저밴드(20, 2σ) 돌파를 확인하고,
-캔들 몸통 전체가 밴드 밖에서 마감한 첫 봉이면 텔레그램으로 보낸다.
+고가·저가가 BB1(종가 20,2)·BB2(시가 4,4)를 동시에 터치한 봉(DB)이면 텔레그램으로 보낸다.
 웹 차트(dist/waveview)의 DB 신호와 같은 규칙이다.
 
 필요한 저장소 Secrets
@@ -54,35 +54,27 @@ def fetch_bars(symbol, interval, key):
     return bars
 
 
-def bands(closes, i):
-    """i번째 봉의 (하단, 상단). 데이터가 모자라면 None."""
-    if i < BB_LEN - 1:
+def bands(vals, i, n, k):
+    if i < n - 1:
         return None
-    w = closes[i - BB_LEN + 1:i + 1]
-    m = sum(w) / BB_LEN
-    sd = math.sqrt(sum((x - m) ** 2 for x in w) / BB_LEN)
-    return m - BB_MULT * sd, m + BB_MULT * sd
+    w = vals[i - n + 1:i + 1]
+    m = sum(w) / n
+    sd = math.sqrt(sum((x - m) ** 2 for x in w) / n)
+    return m - k * sd, m + k * sd
 
 
 def signal_at(bars, i):
-    """i번째 봉의 신호: 'dn' / 'up' / None. 연속 돌파는 첫 봉만."""
-    closes = [b["c"] for b in bars]
-
-    def side(k):
-        bb = bands(closes, k)
-        if not bb:
-            return None
-        b = bars[k]
-        if max(b["o"], b["c"]) < bb[0]:
-            return "dn"
-        if min(b["o"], b["c"]) > bb[1]:
-            return "up"
+    """더블 볼린저밴드 원본: BB1(종가 20, 2) · BB2(시가 4, 4) 를 고가/저가가 동시에 터치하면 DB."""
+    b1 = bands([b["c"] for b in bars], i, BB_LEN, BB_MULT)
+    b2 = bands([b["o"] for b in bars], i, 4, 4.0)
+    if not b1 or not b2:
         return None
-
-    s = side(i)
-    if s and i > 0 and side(i - 1) == s:
-        return None
-    return s
+    b = bars[i]
+    if b["h"] >= b1[1] and b["h"] >= b2[1]:
+        return "up"
+    if b["l"] <= b1[0] and b["l"] <= b2[0]:
+        return "dn"
+    return None
 
 
 def fmt_price(x):
@@ -149,13 +141,9 @@ def main():
             if not s:
                 continue
             b = bars[i]
-            lo, up = bands([x["c"] for x in bars], i)
-            end = datetime.fromtimestamp(b["t"] + iv, KST).strftime("%m-%d %H:%M")
             name = symbol.replace("/", "")
-            way = "하방" if s == "dn" else "상방"
-            band = f"하단밴드 {fmt_price(lo)}" if s == "dn" else f"상단밴드 {fmt_price(up)}"
-            text = (f"{name} {INTERVAL_KO.get(interval, interval)} 돌파 더블비 {way} 몸통 마감\n"
-                    f"종가 {fmt_price(b['c'])} · {band}\n{end} KST 마감")
+            text = (f"{'↑' if s == 'up' else '↓'} DB | {name} {INTERVAL_KO.get(interval, interval)} | 현재가: {fmt_price(b['c'])} | "
+                    f"BB1·BB2 {'상단' if s == 'up' else '하단'} 동시 터치!")
             try:
                 send_telegram(token, chat, text)
                 print("전송:", text.replace("\n", " / "))

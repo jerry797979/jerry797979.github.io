@@ -39,6 +39,8 @@ DEFAULT_CONFIG = {
     "watch": [["XAUUSD.b", "5m"], ["XAUUSD.b", "15m"]],
     "bb_len": 20,
     "bb_mult": 2.0,
+    "bb2_len": 4,
+    "bb2_mult": 4.0,
     "utc_offset_hours": None,
 }
 KST = timezone(timedelta(hours=9))
@@ -172,28 +174,38 @@ def send_telegram(text):
         raise RuntimeError(j.get("description"))
 
 
-def side(bars, i, n, k):
+def bands(vals, i, n, k):
     if i < n - 1:
         return None
-    w = [b["c"] for b in bars[i - n + 1:i + 1]]
+    w = vals[i - n + 1:i + 1]
     m = sum(w) / n
     sd = math.sqrt(sum((x - m) ** 2 for x in w) / n)
+    return m - k * sd, m + k * sd
+
+
+def db_signal(bars, i):
+    """더블 볼린저밴드 원본: BB1(종가 20, 2) · BB2(시가 4, 4) 를 고가/저가가 동시에 터치하면 DB."""
+    c = [b["c"] for b in bars]
+    o = [b["o"] for b in bars]
+    b1 = bands(c, i, int(cfg["bb_len"]), float(cfg["bb_mult"]))
+    b2 = bands(o, i, int(cfg.get("bb2_len", 4)), float(cfg.get("bb2_mult", 4.0)))
+    if not b1 or not b2:
+        return None
     b = bars[i]
-    if max(b["o"], b["c"]) < m - k * sd:
-        return "dn", m - k * sd
-    if min(b["o"], b["c"]) > m + k * sd:
-        return "up", m + k * sd
+    if b["h"] >= b1[1] and b["h"] >= b2[1]:
+        return "up"
+    if b["l"] <= b1[0] and b["l"] <= b2[0]:
+        return "dn"
     return None
 
 
 def watcher():
     done = {}
-    n, k = int(cfg["bb_len"]), float(cfg["bb_mult"])
     while True:
         for symbol, tf in cfg["watch"]:
             key = f"{symbol}|{tf}"
             try:
-                bars = rates(symbol, tf, n + 30)[:-1]  # 마지막 봉은 아직 진행 중
+                bars = rates(symbol, tf, 60)[:-1]  # 마지막 봉은 아직 진행 중
                 if not bars:
                     continue
                 last_t = bars[-1]["t"]
@@ -203,16 +215,13 @@ def watcher():
                 for i in range(len(bars)):
                     if bars[i]["t"] <= done[key]:
                         continue
-                    s, prev = side(bars, i, n, k), side(bars, i - 1, n, k)
-                    if s and not (prev and prev[0] == s[0]):
+                    s = db_signal(bars, i)
+                    if s:
                         b = bars[i]
-                        way = "하방" if s[0] == "dn" else "상방"
-                        band = ("하단밴드 " if s[0] == "dn" else "상단밴드 ") + f"{s[1]:,.2f}"
-                        end = datetime.fromtimestamp(b["t"] + TF_SEC.get(tf, 0), KST).strftime("%m-%d %H:%M")
-                        text = (f"{symbol} {TF_KO.get(tf, tf)} 돌파 더블비 {way} 몸통 마감\n"
-                                f"종가 {b['c']:,.2f} · {band}\n{end} KST 마감 (한텍 MT5)")
+                        text = (f"{'↑' if s == 'up' else '↓'} DB | {symbol} {TF_KO.get(tf, tf)} | 현재가: {b['c']:,.2f} | "
+                                f"BB1·BB2 {'상단' if s == 'up' else '하단'} 동시 터치! (한텍 MT5)")
                         send_telegram(text)
-                        print("알림:", text.replace("\n", " / "))
+                        print("알림:", text)
                 done[key] = last_t
             except Exception as e:  # noqa: BLE001
                 print(f"{key} 확인 실패: {e}")

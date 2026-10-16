@@ -498,11 +498,11 @@ let SYMS = [
   { id:'BTCUSDT', name:'비트코인 / 테더', ex:'BINANCE', base:97500, dvol:.028, dp:1, feed:'binance', icon:'#f7931a' },
   { id:'ETHUSDT', name:'이더리움 / 테더', ex:'BINANCE', base:3450, dvol:.035, dp:2, feed:'binance', icon:'#627eea' },
 ];
-const DEF_P = { bb:{ len:20, k1:2, src1:'close', len2:4, k2:4, src2:'open' }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
+const DEF_P = { bb:{ ma120:true, ma20:true, bb1:true, bb2:true, len:20, k1:2, len2:4, k2:4, ob:false }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
   ses:{ mode:'자동(서머타임)', asia:'0800-1700', eu:'1700-2330', us:'2330-0800' }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{},
   ktr:{ view:'현재장' } };
 const SCHEMA = {
-  bb:[['len','안쪽 기간','int'],['k1','안쪽 배수(σ)','num'],['src1','안쪽 기준','sel',['close','open','high','low']],['len2','바깥 기간','int'],['k2','바깥 배수(σ)','num'],['src2','바깥 기준','sel',['open','close','high','low']]],
+  bb:[['ma120','120MA 표시','bool'],['ma20','20MA 표시','bool'],['bb1','BB1 표시 (종가기준, 빨간색)','bool'],['bb2','BB2 표시 (시가기준, 흰색)','bool'],['len','BB1 길이','int'],['k1','BB1 표준편차','num'],['len2','BB2 길이','int'],['k2','BB2 표준편차','num'],['ob','1B 신호 표시 (한쪽만 터치)','bool']],
   ma:[['l1','MA1 기간','int'],['l2','MA2 기간','int'],['l3','MA3 기간','int']],
   db:[['band','기준 밴드','sel',['안쪽','바깥']],['mode','마감 조건','sel',['몸통 전체','종가만']]],
   ses:[['mode','세션 시간','sel',['자동(서머타임)','직접 입력']],['asia','아시아 (직접 입력 시)','text'],['eu','유로 (직접 입력 시)','text'],['us','미장 (직접 입력 시)','text']],
@@ -513,12 +513,12 @@ const SCHEMA = {
 const P = {}; { const saved = (() => { try { return JSON.parse(localStorage.getItem('wv:params')) || {}; } catch { return {}; } })();
   for (const k in DEF_P) P[k] = { ...DEF_P[k], ...(saved[k] || {}) }; }
 const pText = {
-  bb: p => `${p.len} ${p.k1} ${p.src1} ${p.len2} ${p.k2} ${p.src2}`, ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
+  bb: () => '', ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
   ses: p => p.mode === '직접 입력' ? '직접 입력' : '서머타임 자동', us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
-  ['bb','더블 볼린저밴드'], ['ma','이동평균'], ['db','돌파 더블비 신호'], ['ses','세션'],
-  ['us','어제 미장 구간 고저 라인'], ['low','최저점꼬리'], ['ktr','KTR 전용 대시보드'], ['di','DI 이격도'],
+  ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['db','HHJ - 돌파 더블비 알람'], ['ses','세션박스'],
+  ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['di','DI 이격도'],
 ];
 const EYE = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/></svg>';
 const EYE_OFF = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/><path d="M3 15L15 3"/></svg>';
@@ -533,7 +533,7 @@ const S = {
   sym: SYMS.find(s => s.id === store.get('sym')) || SYMS[0],
   tf: TFS.find(t => t[0] === store.get('tf')) || tfBy('4h'), range: null,
   bars: [], ind: null, sess: [], mode: 'cursor', ticks: 0,
-  show: Object.assign({ bb:true, ma:true, db:true, ses:true, us:true, low:true, ktr:true, di:true }, store.get('show', {})),
+  show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
   removed: store.get('removed', []),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
   cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
@@ -577,8 +577,14 @@ function compute(bars){
     }
     return { m, u, l };
   };
-  const b1 = band(P.bb.src1, P.bb.len, P.bb.k1), b2 = band(P.bb.src2, P.bb.len2, P.bb.k2);
-  const m = b1.m, ui = b1.u, li = b1.l, uo = b2.u, lo = b2.l;
+  const b1 = band('close', P.bb.len, P.bb.k1), b2 = band('open', P.bb.len2, P.bb.k2);
+  const m = b1.m, ui = b1.u, li = b1.l, m2 = b2.m, uo = b2.u, lo = b2.l;
+  // 더블 볼린저밴드 원본 신호: 고가/저가가 두 밴드를 동시에 터치하면 DB, 한쪽만이면 1B
+  const dbUp = [], dbDn = [], obUp = [], obDn = [];
+  for (let i = 0; i < N; i++){
+    const b = bars[i], u1 = ui[i] != null && b.high >= ui[i], u2 = uo[i] != null && b.high >= uo[i], d1 = li[i] != null && b.low <= li[i], d2 = lo[i] != null && b.low <= lo[i];
+    dbUp.push(u1 && u2); dbDn.push(d1 && d2); obUp.push((u1 || u2) && !(u1 && u2)); obDn.push((d1 || d2) && !(d1 && d2));
+  }
   const m14 = sma(c, P.di.len);
   const di = c.map((x, i) => m14[i] == null ? null : (x - m14[i]) / m14[i] * 100);
   const dn = [], up = [];
@@ -589,7 +595,7 @@ function compute(bars){
     dn.push(lb != null && top < lb);
     up.push(ub != null && bot > ub);
   }
-  return { m, ui, li, uo, lo, ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up };
+  return { m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
 }
 const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
 const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
@@ -701,7 +707,7 @@ function applyChartType(){
   $('#ctBtn').innerHTML = CT_ICON[t] || CT_ICON.candle;
 }
 const ln = (color, width = 1) => chart.addLineSeries({ color, lineWidth:width, priceLineVisible:false, lastValueVisible:false, crosshairMarkerVisible:false });
-const L = { m: ln(C.basis), ui: ln(C.inner), li: ln(C.inner), uo: ln(C.outer), lo: ln(C.outer), ma1: ln(C.ma1), ma2: ln(C.ma2), ma3: ln(C.ma3, 1) };
+const L = { bma120: ln('#FF9800', 2), bma20: ln('#4CAF50', 1), m: ln('rgba(242,54,69,.5)'), ui: ln('#F23645'), li: ln('#F23645'), m2: ln('rgba(255,255,255,.5)'), uo: ln('#FFFFFF'), lo: ln('#FFFFFF'), ma1: ln(C.ma1), ma2: ln(C.ma2), ma3: ln(C.ma3, 1) };
 const diSeries = diChart.addBaselineSeries({ baseValue:{ type:'price', price:0 }, lineWidth:2,
   topLineColor:'#22c522', topFillColor1:'rgba(76,175,80,0)', topFillColor2:'rgba(76,175,80,0)',
   bottomLineColor:'#ff2424', bottomFillColor1:'rgba(242,54,69,0)', bottomFillColor2:'rgba(242,54,69,0)', priceLineVisible:false });
@@ -732,7 +738,10 @@ function applyFormat(){
 }
 function applyVisibility(){
   const v = S.show;
-  ['m','ui','li','uo','lo'].forEach(k => L[k].applyOptions({ visible:v.bb }));
+  const pb = P.bb;
+  ['m','ui','li'].forEach(k => L[k].applyOptions({ visible:v.bb && pb.bb1 }));
+  ['m2','uo','lo'].forEach(k => L[k].applyOptions({ visible:v.bb && pb.bb2 }));
+  L.bma20.applyOptions({ visible:v.bb && pb.ma20 }); L.bma120.applyOptions({ visible:v.bb && pb.ma120 });
   ['ma1','ma2','ma3'].forEach(k => L[k].applyOptions({ visible:v.ma }));
   $('#diWrap').hidden = !v.di;
   chart.applyOptions({ timeScale:{ visible:!v.di } });
@@ -755,18 +764,25 @@ function renderLast(newBar){
   for (const k in alt) if (S.ctype === k){ const d = altData(k); alt[k].update(d[d.length - 1]); }
   for (const k of Object.keys(L)) L[k].update(S.ind[k][i] == null ? { time:t } : { time:t, value:S.ind[k][i] });
   diSeries.update(S.ind.di[i] == null ? { time:t } : { time:t, value:S.ind.di[i] });
-  if (newBar){ renderMarkers(); renderRefLines(); } else renderLowLine();
+  if (newBar){ renderRefLines(); } else renderLowLine();
+  renderMarkers();
   renderKTR();
   renderOhlc(); updateQuote();
 }
 function renderMarkers(){
   if (!S.ind) return;
-  const mk = [];
-  if (S.show.db){
-    for (let i = 1; i < S.bars.length - 1; i++){
-      const t = S.bars[i].time;
-      if (isDn(i)) mk.push({ time:t, position:'belowBar', color:C.signal, shape:'arrowDown', size:0, text:'↓ DB' });
-      if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ DB' });
+  const mk = [], I = S.ind;
+  for (let i = 1; i < S.bars.length; i++){
+    const t = S.bars[i].time;
+    if (S.show.bb){
+      if (I.dbUp[i]) mk.push({ time:t, position:'aboveBar', color:'#FFEB3B', shape:'arrowUp', size:0, text:'↑ DB' });
+      if (I.dbDn[i]) mk.push({ time:t, position:'belowBar', color:'#FFEB3B', shape:'arrowDown', size:0, text:'↓ DB' });
+      if (P.bb.ob && I.obUp[i]) mk.push({ time:t, position:'aboveBar', color:'#4CAF50', shape:'arrowUp', size:0, text:'↑ 1B' });
+      if (P.bb.ob && I.obDn[i]) mk.push({ time:t, position:'belowBar', color:'#F23645', shape:'arrowDown', size:0, text:'↓ 1B' });
+    }
+    if (S.show.db && i < S.bars.length - 1){
+      if (isDn(i)) mk.push({ time:t, position:'belowBar', color:C.signal, shape:'arrowDown', size:0, text:'↓ 돌파' });
+      if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ 돌파' });
     }
   }
   candle.setMarkers(mk);
@@ -782,12 +798,18 @@ function renderRefLines(){
   }
   renderLowLine();
 }
-function renderLowLine(){
-  if (lowLine){ candle.removePriceLine(lowLine); lowLine = null; }
-  S.lowPrice = null;
-  if (!S.show.low || !S.bars.length) return;
-  S.lowPrice = Math.min(...S.bars.slice(-P.low.len).map(b => b.low));
-  lowLine = candle.createPriceLine({ price:S.lowPrice, color:'#9598a1', lineWidth:1, lineStyle:2, title:'', axisLabelColor:'#4caf50', axisLabelTextColor:'#ffffff' });
+function renderLowLine(){ S.lowPrice = null; }
+// 최저점꼬리: 처음 한 번만 일반 수평선으로 만들어 준다 (그다음은 옮기기·지우기 자유)
+function lowestWick(){
+  const seg = S.bars.slice(-P.low.len); if (!seg.length) return null;
+  let k = 0; seg.forEach((b, j) => { if (b.low < seg[k].low) k = j; });
+  return seg[k];
+}
+function seedLowLine(){
+  const key = 'lowSeed:' + S.sym.id; if (store.get(key) || !S.live) return;
+  const b = lowestWick(); if (!b) return;
+  S.hlines.push(makeLine('hline', { price:b.low, t:b.time, color:'#4caf50', width:1, style:2, text:'최저점꼬리' }));
+  store.set(key, 1); saveDrawings(); hist.undo = []; updUndo();
 }
 // 선 이름표: 가까운 이름표와 겹치면 왼쪽으로 비켜 놓는다
 const placedLabels = [];
@@ -888,7 +910,8 @@ function drawOverlay(){
       lineLabel(name, y, col, pw); axisTags.push({ text:fmt(pr), y, col });
     }
   }
-  if (S.lowPrice != null){ const y = candle.priceToCoordinate(S.lowPrice); if (y != null) lineLabel('최저점꼬리', y, '#4caf50', pw); }
+  if (S.lowPrice != null){ const y = candle.priceToCoordinate(S.lowPrice); if (y != null){ lineLabel('최저점꼬리', y, '#4caf50', pw);
+    const x = ts.logicalToCoordinate(S.lowIdx); if (x != null && x < pw){ ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = '#2962ff'; ctx.fillStyle = C.bg; ctx.fillRect(x - 4, y - 4, 8, 8); ctx.strokeRect(x - 3.5, y - 3.5, 8, 8); } } }
   // 사용자 수평선 · 얼러트: 글씨와 선택 손잡이
   for (const o of [...S.hlines, ...S.alerts]){
     const y = candle.priceToCoordinate(o.price); if (y == null) continue;
@@ -999,7 +1022,7 @@ function renderOhlc(){
   if (S.ind && i >= 0){
     const v = (k, c) => S.ind[k][i] == null ? '' : `<em style="color:${c}">${fmt(S.ind[k][i])}</em>`;
     const set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
-    set('v-bb', v('m', C.basis) + v('ui', C.inner) + v('li', C.inner) + v('uo', C.outer) + v('lo', C.outer));
+    set('v-bb', (P.bb.ma120 ? v('bma120', '#FF9800') : '') + (P.bb.ma20 ? v('bma20', '#4CAF50') : '') + (P.bb.bb1 ? v('ui', '#F23645') + v('m', 'rgba(242,54,69,.7)') + v('li', '#F23645') : '') + (P.bb.bb2 ? v('uo', '#FFFFFF') + v('m2', 'rgba(255,255,255,.6)') + v('lo', '#FFFFFF') : ''));
     set('v-ma', v('ma1', C.ma1) + v('ma2', C.ma2) + v('ma3', C.ma3));
     set('v-low', S.lowPrice != null ? `<em style="color:#4caf50">${fmt(S.lowPrice)}</em>` : '');
   }
@@ -1024,7 +1047,7 @@ const lgEl = document.querySelector('.legend');
 lgEl.classList.toggle('folded', !!store.get('lgFold', false));
 $('#lgFold').onclick = () => { const f = !lgEl.classList.contains('folded'); lgEl.classList.toggle('folded', f); store.set('lgFold', f); fitLegend();
   $('#lgFold').setAttribute('aria-label', f ? '지표 목록 펼치기' : '지표 목록 접기'); };
-function toggleInd(k){ S.show[k] = !S.show[k]; store.set('show', S.show); applyVisibility(); }
+function toggleInd(k){ S.show[k] = !S.show[k]; store.set('show', S.show); store.set('showv', 2); applyVisibility(); }
 function removeInd(k){ S.removed = [...S.removed, k]; S.show[k] = false; store.set('removed', S.removed); store.set('show', S.show); applyVisibility();
   toast('지표 지움', `${IND.find(x => x[0] === k)[1]} 를 지웠습니다. 상단 '지표' 메뉴에서 다시 켤 수 있습니다.`); }
 $('#lgInds').addEventListener('click', e => {
@@ -1056,7 +1079,8 @@ function openParams(k){
   const name = IND.find(x => x[0] === k)[1];
   $('#pmTitle').textContent = name;
   $('#pmBody').innerHTML = SCHEMA[k].map(([f, label, type, opts]) => `<div class="field"><label for="pm-${f}">${label}</label>${
-    type === 'sel' ? `<select class="inp" id="pm-${f}">${opts.map(o => `<option${o === P[k][f] ? ' selected' : ''}>${o}</option>`).join('')}</select>`
+    type === 'bool' ? `<label style="display:flex;gap:8px;align-items:center;color:var(--text)"><input type="checkbox" id="pm-${f}" ${P[k][f] ? 'checked' : ''}>사용</label>`
+    : type === 'sel' ? `<select class="inp" id="pm-${f}">${opts.map(o => `<option${o === P[k][f] ? ' selected' : ''}>${o}</option>`).join('')}</select>`
     : `<input class="inp" id="pm-${f}" value="${P[k][f]}" ${type === 'text' ? 'placeholder="0900-1600"' : 'inputmode="decimal"'}>`}</div>`).join('')
     + (k === 'ses' ? '<p class="note">자동: KTR 대시보드와 같은 기준(서머타임 반영). 아시아 07/08시, 유로 16/17시, 미장 22:30/23:30 시작 (1시간봉 이상은 22/23시). 직접 입력은 한국시간 0900-1600 처럼 적습니다.</p>' : '');
   $('#pmForm').dataset.k = k; $('#pmModal').hidden = false;
@@ -1064,6 +1088,7 @@ function openParams(k){
 $('#pmForm').addEventListener('submit', e => {
   e.preventDefault(); const k = e.currentTarget.dataset.k;
   for (const [f, , type] of SCHEMA[k]){
+    if (type === 'bool'){ P[k][f] = $('#pm-' + f).checked; continue; }
     const v = $('#pm-' + f).value.trim();
     if (type === 'int'){ const n = parseInt(v, 10); if (n > 0) P[k][f] = n; }
     else if (type === 'num'){ const n = parseFloat(v); if (isFinite(n)) P[k][f] = n; }
@@ -1252,7 +1277,7 @@ async function load(){
   S.live = live;
   applyFormat(); renderAll(); applyVisibility();
   applyRange();
-  restoreDrawings(); resetHistory();
+  restoreDrawings(); resetHistory(); seedLowLine();
   if (live && sym.feed === 'mt5'){ setFeed(true, '한텍 MT5 · 실시간'); startMT5Poll(sym, tf, id); }
   else if (live && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
   else if (live === 'paxg'){ setFeed(true, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 참고 시세(PAXG)' : '실시간 참고 시세(PAXG)'); openSocket(sym, tf, id); }
@@ -1271,10 +1296,18 @@ function applyRange(){
 
 /* ---------- 신호 / 얼러트 ---------- */
 function checkSignal(i){
-  if (i < 1 || !S.show.db) return;
-  const b = S.bars[i];
-  if (isDn(i)) fire(`${S.tf[2]} 돌파 더블비 하방 몸통 마감`, fmt(b.close));
-  if (isUp(i)) fire(`${S.tf[2]} 돌파 더블비 상방 몸통 마감`, fmt(b.close));
+  if (i < 1) return;
+  const b = S.bars[i], I = S.ind, px = fmt(b.close);
+  if (S.show.bb){
+    if (I.dbUp[i]) fire(`↑ DB | ${S.sym.id} | 현재가: ${px} | BB1·BB2 상단 동시 터치!`, px);
+    if (I.dbDn[i]) fire(`↓ DB | ${S.sym.id} | 현재가: ${px} | BB1·BB2 하단 동시 터치!`, px);
+    if (P.bb.ob && I.obUp[i]) fire(`↑ 1B | ${S.sym.id} | 현재가: ${px} | BB 상단 터치!`, px);
+    if (P.bb.ob && I.obDn[i]) fire(`↓ 1B | ${S.sym.id} | 현재가: ${px} | BB 하단 터치!`, px);
+  }
+  if (S.show.db){
+    if (isDn(i)) fire(`${S.tf[2]} 돌파 더블비 하방 몸통 마감`, px);
+    if (isUp(i)) fire(`${S.tf[2]} 돌파 더블비 상방 몸통 마감`, px);
+  }
 }
 function checkAlerts(prev, cur){
   let hit = false;
@@ -1289,7 +1322,7 @@ function checkAlerts(prev, cur){
 }
 function fire(msg, price){
   toast(S.sym.id, msg, true);
-  if (!S.rp) sendTelegram(`${S.sym.id} ${msg}\n현재가 ${price}`).catch(() => {});
+  if (!S.rp) sendTelegram(/^[↑↓]/.test(msg) ? msg : `${S.sym.id} ${msg}\n현재가 ${price}`).catch(() => {});
   const t = new Date().toLocaleTimeString('ko-KR', { hour12:false });
   S.log.unshift({ t, msg:`${S.sym.id} ${msg} · ${price}` }); S.log = S.log.slice(0, 40);
   $('#log').innerHTML = S.log.map(l => `<li><time>${l.t}</time><span>${l.msg}</span></li>`).join('');
