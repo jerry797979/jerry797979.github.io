@@ -788,14 +788,22 @@ function renderMarkers(){
   candle.setMarkers(mk);
 }
 let refLines = [], lowLine = null;
-function renderRefLines(){
-  S.usLine = null;
-  if (S.show.us){
-    const last = S.bars.length - 1;
-    const us = sessions(S.bars, Math.min(S.tf[1], 14400)).filter(b => b.s === 'us' && b.i1 < last);
-    const y = us[us.length - 1];
-    if (y) S.usLine = { hi:y.hi, lo:y.lo, i1:y.i1 };
+// 어제 미장 구간 고저 라인 (원본 Pine 로직 그대로: 한국시간 22:00~06:00, 끝난 직후 봉부터 오른쪽으로)
+function computeUsLine(){
+  if (S.tf[1] >= 86400) return null;
+  let sh = null, sl = null, fin = null, prevIn = false;
+  for (let i = 0; i < S.bars.length; i++){
+    const b = S.bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
+    const inS = m >= 1320 || m < 360;
+    if (inS){
+      if (!prevIn){ sh = b.high; sl = b.low; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
+    } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i }; }
+    prevIn = inS;
   }
+  return fin;
+}
+function renderRefLines(){
+  S.usLine = S.show.us ? computeUsLine() : null;
   renderLowLine();
 }
 function renderLowLine(){ S.lowPrice = null; }
@@ -931,8 +939,8 @@ function drawOverlay(){
 
   // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
   if (S.usLine){
-    const x0 = ts.logicalToCoordinate(S.usLine.i1 + 1);
-    for (const [pr, col, name] of [[S.usLine.hi, '#00e676', '어제 미장 고점'], [S.usLine.lo, C.down, '어제 미장 저점']]){
+    const x0 = ts.logicalToCoordinate(S.usLine.i0);
+    for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', '어제 미장 고점'], [S.usLine.lo, '#FF0000', '어제 미장 저점']]){
       const y = candle.priceToCoordinate(pr); if (x0 == null || y == null) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
       ctx.beginPath(); ctx.moveTo(Math.max(0, x0), Math.round(y) + .5); ctx.lineTo(pw, Math.round(y) + .5); ctx.stroke();
@@ -957,7 +965,7 @@ function drawOverlay(){
   for (const t of shapes) drawShape(t, pw, h);
   ctx.restore();
   // 가격축: 수평 레이 가격표, 봉 마감 카운트다운
-  for (const g of axisTags){ ctx.fillStyle = g.col; ctx.fillRect(pw + 1, g.y - 9, w - pw - 1, 18); ctx.fillStyle = g.col === '#00e676' ? '#131313' : '#fff'; ctx.font = '12px -apple-system, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(g.text, pw + 6, g.y); ctx.textBaseline = 'alphabetic'; }
+  for (const g of axisTags){ ctx.fillStyle = g.col; ctx.fillRect(pw + 1, g.y - 9, w - pw - 1, 18); ctx.fillStyle = g.col === '#00FF00' ? '#131313' : '#fff'; ctx.font = '12px -apple-system, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(g.text, pw + 6, g.y); ctx.textBaseline = 'alphabetic'; }
   axisTags.length = 0;
   const lb = S.bars[S.bars.length - 1];
   if (lb && !S.rp && S.tf[1] < 604800 && S.ctype !== 'line' && S.ctype !== 'area'){
