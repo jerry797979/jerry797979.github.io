@@ -699,7 +699,7 @@ const altData = k => k === 'bar' ? S.bars : S.bars.map(b => ({ time:b.time, valu
 function applyChartType(){
   const t = S.ctype, own = t === 'candle' || t === 'heikin', clr = 'rgba(0,0,0,0)';
   candle.applyOptions(own
-    ? { upColor:C.up, downColor:C.down, borderUpColor:C.up, borderDownColor:C.down, wickUpColor:C.up, wickDownColor:C.down, lastValueVisible:true, priceLineVisible:store.get('pline', true) }
+    ? { upColor:C.up, downColor:C.down, borderUpColor:C.up, borderDownColor:C.down, wickUpColor:C.up, wickDownColor:C.down, lastValueVisible:true, priceLineVisible:store.get('pline', true), priceLineColor:'#9598a1', priceLineStyle:1, priceLineWidth:1 }
     : { upColor:clr, downColor:clr, borderUpColor:clr, borderDownColor:clr, wickUpColor:clr, wickDownColor:clr, lastValueVisible:false, priceLineVisible:false });
   for (const k in alt){ alt[k].applyOptions({ visible:t === k }); if (t === k && S.bars.length) alt[k].setData(altData(k)); }
   if (S.bars.length) candle.setData(candleData());
