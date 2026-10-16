@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>웨이브뷰 차트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+/* Layout: toolbar row on top, chart column (price pane + DI pane) beside a watchlist/alert sidebar */
+:root{
+  --bg:#101318; --panel:#161a21; --raise:#1e232c; --line:#272d38; --grid:#1a1f27;
+  --fg:#d8dde6; --muted:#8992a3; --accent:#4d8dff;
+  --up:#22ab94; --down:#f23645; --signal:#f5c518;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:13px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.brand i{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,var(--up),var(--accent));display:inline-block}
+.grp{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.sep{width:1px;height:20px;background:var(--line)}
+select#sym{background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-weight:600}
+.tb{background:none;border:1px solid transparent;border-radius:6px;padding:5px 8px;color:var(--muted)}
+.tb:hover{background:var(--raise);color:var(--fg)}
+.tb[aria-pressed="true"]{background:var(--raise);color:var(--fg);border-color:var(--line)}
+.feed{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);font-family:var(--mono)}
+.feed.live{color:var(--up);border-color:color-mix(in srgb,var(--up) 50%,transparent)}
+.hint{color:var(--signal);font-size:12px}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;min-height:0;
+  padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.charts{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+#mainWrap{position:relative;flex:1;min-height:0}
+#mainChart,#diChart{position:absolute;inset:0}
+#overlay{position:absolute;left:0;top:0;pointer-events:none;z-index:2}
+#diWrap{position:relative;height:150px;border-top:1px solid var(--line);flex:none}
+#diWrap[hidden]{display:none!important}
+.legend{position:absolute;left:10px;top:8px;z-index:3;display:flex;flex-direction:column;gap:3px;pointer-events:none;max-width:calc(100% - 100px)}
+.legend .head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.legend .name{font-weight:600;font-size:14px}
+.ohlc{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;gap:10px;flex-wrap:wrap}
+.ohlc b{font-weight:500}
+.ind{pointer-events:auto;display:flex;align-items:center;gap:6px;background:none;border:0;padding:1px 0;text-align:left;font-size:12px;color:var(--fg)}
+.ind small{color:var(--muted);font-family:var(--mono)}
+.ind .eye{width:8px;height:8px;border-radius:50%;border:1px solid currentColor}
+.ind[aria-pressed="true"] .eye{background:currentColor}
+.ind[aria-pressed="false"]{color:var(--muted);opacity:.6}
+.dilabel{position:absolute;left:10px;top:6px;z-index:3;font-size:12px;color:var(--muted);pointer-events:none;font-family:var(--mono)}
+
+.side{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.card h2{margin:0;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.wl{display:flex;flex-direction:column}
+.wl button{display:grid;grid-template-columns:1fr auto;gap:0 8px;background:none;border:0;border-radius:6px;padding:7px 8px;text-align:left}
+.wl button:hover{background:var(--raise)}
+.wl button[aria-current="true"]{background:var(--raise)}
+.wl .s{font-weight:600}
+.wl .n{color:var(--muted);font-size:11px}
+.wl .p{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.wl .c{font-family:var(--mono);text-align:right;font-size:11px;font-variant-numeric:tabular-nums}
+.upc{color:var(--up)} .dnc{color:var(--down)}
+.row{display:flex;gap:6px}
+.row input{flex:1;min-width:0;background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:var(--mono)}
+.btn{background:var(--accent);border:0;border-radius:6px;padding:6px 10px;color:#fff;font-weight:500}
+.list{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;padding:4px 0;border-bottom:1px solid var(--grid)}
+.list li span{min-width:0;overflow-wrap:anywhere}
+.list .x{background:none;border:0;color:var(--muted);padding:2px 6px}
+.list .x:hover{color:var(--down)}
+.empty{color:var(--muted);font-size:12px}
+.log li{flex-direction:column;align-items:flex-start;gap:1px;font-family:var(--sans)}
+.log time{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+.replay{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--raise);font-size:12px}
+.replay strong{color:var(--signal);font-weight:600;margin-right:4px}
+.replay select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.replay .pos{font-family:var(--mono);color:var(--muted);margin-left:auto}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:var(--muted)}
+.field input{background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:var(--mono);min-width:0}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn.sub{background:var(--raise);border:1px solid var(--line);color:var(--fg)}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.toasts{position:fixed;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;flex-direction:column;gap:8px;max-width:min(360px,calc(100vw - 32px))}
+.toast{background:#eef1f6;color:#141820;border-radius:8px;padding:10px 36px 10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.4);position:relative;animation:in .2s ease-out}
+.toast strong{display:block;margin-bottom:2px}
+.toast button{position:absolute;right:6px;top:6px;background:none;border:0;color:#5a6270;font-size:16px}
+@keyframes in{from{transform:translateY(8px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+
+@media (max-width:860px){
+  .app{height:auto}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .charts{height:68vh;min-height:440px}
+  .legend .ind small{display:none}
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><i></i>웨이브뷰</div>
+    <select id="sym" aria-label="종목"></select>
+    <div class="grp" id="tfs" role="group" aria-label="타임프레임"></div>
+    <span class="sep"></span>
+    <div class="grp" role="group" aria-label="도구">
+      <button class="tb" id="t-cursor" aria-pressed="true">커서</button>
+      <button class="tb" id="t-hline" aria-pressed="false">수평선</button>
+      <button class="tb" id="t-alert" aria-pressed="false">가격 알림</button>
+      <button class="tb" id="t-fit">최근으로</button>
+      <button class="tb" id="t-replay" aria-pressed="false">리플레이</button>
+    </div>
+    <span class="feed" id="feed">연결 중</span>
+    <span class="hint" id="hint" hidden></span>
+  </header>
+
+  <main class="main">
+    <section class="charts">
+      <div class="replay" id="replayBar" hidden>
+        <strong>리플레이</strong>
+        <button class="tb" id="rp-play">재생</button>
+        <button class="tb" id="rp-step">한 봉 앞으로</button>
+        <select id="rp-speed" aria-label="재생 속도"><option value="1000">1배속</option><option value="333">3배속</option><option value="100">10배속</option></select>
+        <button class="tb" id="rp-exit">종료</button>
+        <span class="pos" id="rp-pos"></span>
+      </div>
+      <div id="mainWrap">
+        <div id="mainChart"></div>
+        <canvas id="overlay"></canvas>
+        <div class="legend">
+          <div class="head"><span class="name" id="lgName"></span><span class="ohlc" id="lgOhlc"></span></div>
+          <div id="lgInds"></div>
+        </div>
+      </div>
+      <div id="diWrap">
+        <div id="diChart"></div>
+        <div class="dilabel" id="diLabel">DI 14 close</div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card">
+        <h2>관심 종목</h2>
+        <div class="wl" id="wl"></div>
+      </div>
+      <div class="card">
+        <h2>가격 알림</h2>
+        <form class="row" id="alertForm">
+          <input id="alertPrice" inputmode="decimal" placeholder="가격 입력" aria-label="알림 가격">
+          <button class="btn" type="submit">추가</button>
+        </form>
+        <ul class="list" id="alertList"></ul>
+      </div>
+      <div class="card">
+        <h2>수평선</h2>
+        <ul class="list" id="hlineList"></ul>
+      </div>
+      <div class="card">
+        <h2>시세 · 텔레그램 설정</h2>
+        <form id="setForm" style="display:flex;flex-direction:column;gap:8px">
+          <div class="field"><label for="setTd">Twelve Data API 키 (금·나스닥 실시간)</label><input id="setTd" autocomplete="off" placeholder="twelvedata.com 에서 무료 발급"></div>
+          <div class="field"><label for="setPoll">시세 갱신 주기 (초)</label><input id="setPoll" inputmode="numeric" placeholder="120"></div>
+          <div class="field"><label for="setTg">텔레그램 봇 토큰</label><input id="setTg" autocomplete="off" placeholder="123456:ABC-..."></div>
+          <div class="field"><label for="setChat">텔레그램 채팅 ID</label><input id="setChat" autocomplete="off" placeholder="봇에게 말을 건 뒤 '채팅 ID 찾기'"></div>
+          <div class="btns">
+            <button class="btn" type="submit">저장</button>
+            <button class="btn sub" type="button" id="tgFind">채팅 ID 찾기</button>
+            <button class="btn sub" type="button" id="tgTest">텔레그램 테스트</button>
+          </div>
+          <p class="note">키와 토큰은 이 브라우저에만 저장되고 서버로 보내지지 않습니다. 텔레그램 알림은 이 페이지가 열려 있는 동안 보내집니다.</p>
+        </form>
+      </div>
+      <div class="card">
+        <h2>알림 기록</h2>
+        <ul class="list log" id="log"></ul>
+      </div>
+    </aside>
+  </main>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+const LW = window.LightweightCharts;
+const $ = s => document.querySelector(s);
+const KST = 9 * 3600;
+const C = { bg:'#101318', grid:'#1a1f27', line:'#272d38', muted:'#8992a3', up:'#22ab94', down:'#f23645', signal:'#f5c518',
+  basis:'#5fbf6a', inner:'#d9534f', outer:'#c9ced8', ma20:'#7ee08a', ma60:'#5bc0de', ma200:'#f0a030',
+  asia:'232,197,71', eu:'79,195,247', us:'211,110,232' };
+const TFS = [['1m',60,'1분'],['5m',300,'5분'],['15m',900,'15분'],['1h',3600,'1시간'],['4h',14400,'4시간'],['1D',86400,'일']];
+const BI = { '1m':'1m','5m':'5m','15m':'15m','1h':'1h','4h':'4h','1D':'1d' };
+const TDI = { '1m':'1min','5m':'5min','15m':'15min','1h':'1h','4h':'4h','1D':'1day' };
+const SYMS = [
+  { id:'XAUUSD', name:'금 현물 / 미국 달러', base:4165.91, dvol:.011, dp:2, feed:'td', td:'XAU/USD' },
+  { id:'NAS100', name:'나스닥 100 지수', base:24850, dvol:.012, dp:1, feed:'td', td:'NDX' },
+  { id:'BTCUSDT', name:'비트코인 / 테더', base:97500, dvol:.028, dp:1, feed:'binance' },
+  { id:'ETHUSDT', name:'이더리움 / 테더', base:3450, dvol:.035, dp:2, feed:'binance' },
+];
+const IND = [
+  ['bb','더블 볼린저밴드','20 2 4', C.inner],
+  ['ma','이동평균','20 60 200', C.ma200],
+  ['db','돌파 더블비 신호','몸통 마감', C.signal],
+  ['ses','세션 박스','아시아 유로 미장', `rgb(${C.us})`],
+  ['us','어제 미장 고저 라인','', C.up],
+  ['low','최저점 꼬리','500', C.basis],
+  ['di','DI 이격도','14 close', C.ma60],
+];
+
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('wv:'+k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v){ try { localStorage.setItem('wv:'+k, JSON.stringify(v)); } catch {} },
+};
+
+const S = {
+  sym: SYMS.find(s => s.id === store.get('sym')) || SYMS[0],
+  tf: TFS.find(t => t[0] === store.get('tf')) || TFS[4],
+  bars: [], ind: null, sess: [], mode: 'cursor', ticks: 0,
+  show: Object.assign({ bb:true, ma:true, db:true, ses:true, us:true, low:true, di:true }, store.get('show', {})),
+  hlines: [], alerts: [], log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
+  cfg: Object.assign({ td:'', poll:120, tg:'', chat:'' }, store.get('cfg', {})), rp: null,
+};
+
+/* ---------- 데이터 ---------- */
+function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hash(s){ let h = 2166136261; for (const c of s){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function gauss(R){ let u = 0, v = 0; while (!u) u = R(); while (!v) v = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+function genBars(sym, tf, n = 1200){
+  const R = rng(hash(sym.id + tf));
+  const sig = sym.dvol * Math.sqrt(tf / 86400);
+  const logs = [0]; let drift = 0;
+  for (let i = 1; i <= n; i++){
+    drift = drift * .985 + gauss(R) * sig * .02;
+    logs.push(logs[i-1] + drift + gauss(R) * sig);
+  }
+  const shift = Math.log(sym.base) - logs[n];
+  const end = Math.floor((Date.now() / 1000 + KST) / tf) * tf;
+  const bars = [];
+  for (let i = 0; i < n; i++){
+    const o = Math.exp(logs[i] + shift), c = Math.exp(logs[i+1] + shift);
+    const h = Math.max(o, c) * Math.exp(Math.abs(gauss(R)) * sig * .45);
+    const l = Math.min(o, c) * Math.exp(-Math.abs(gauss(R)) * sig * .45);
+    bars.push({ time: end - (n - 1 - i) * tf, open:o, high:h, low:l, close:c });
+  }
+  return bars;
+}
+
+/* ---------- 지표 ---------- */
+function sma(v, n){ const o = Array(v.length).fill(null); let s = 0; for (let i = 0; i < v.length; i++){ s += v[i]; if (i >= n) s -= v[i-n]; if (i >= n-1) o[i] = s / n; } return o; }
+function compute(bars){
+  const c = bars.map(b => b.close), N = c.length;
+  const m = sma(c, 20), ui = [], li = [], uo = [], lo = [];
+  for (let i = 0; i < N; i++){
+    if (m[i] == null){ ui.push(null); li.push(null); uo.push(null); lo.push(null); continue; }
+    let s = 0; for (let j = i - 19; j <= i; j++) s += (c[j] - m[i]) ** 2;
+    const sd = Math.sqrt(s / 20);
+    ui.push(m[i] + 2*sd); li.push(m[i] - 2*sd); uo.push(m[i] + 4*sd); lo.push(m[i] - 4*sd);
+  }
+  const m14 = sma(c, 14);
+  const di = c.map((x, i) => m14[i] == null ? null : (x - m14[i]) / m14[i] * 100);
+  const dn = [], up = [];
+  for (let i = 0; i < N; i++){
+    const b = bars[i];
+    dn.push(li[i] != null && Math.max(b.open, b.close) < li[i]);
+    up.push(ui[i] != null && Math.min(b.open, b.close) > ui[i]);
+  }
+  return { m, ui, li, uo, lo, ma20: m, ma60: sma(c, 60), ma200: sma(c, 200), di, dn, up };
+}
+const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
+const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
+
+function sessOf(t){
+  const d = new Date(t * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
+  if (m >= 540 && m < 960) return 'asia';
+  if (m >= 960 && m < 1350) return 'eu';
+  if (m >= 1350 || m < 300) return 'us';
+  return null;
+}
+function sessions(bars, tf){
+  if (tf >= 86400) return [];
+  const out = []; let cur = null;
+  bars.forEach((b, i) => {
+    const s = sessOf(b.time);
+    if (s && cur && cur.s === s && b.time - cur.t1 <= tf){
+      cur.i1 = i; cur.t1 = b.time; cur.hi = Math.max(cur.hi, b.high); cur.lo = Math.min(cur.lo, b.low);
+    } else {
+      if (cur) out.push(cur);
+      cur = s ? { s, i0:i, i1:i, t1:b.time, hi:b.high, lo:b.low } : null;
+    }
+  });
+  if (cur) out.push(cur);
+  return out;
+}
+
+/* ---------- 차트 ---------- */
+const base = {
+  autoSize: true,
+  layout: { background:{ type:'solid', color:C.bg }, textColor:C.muted, fontFamily:'JetBrains Mono, monospace', fontSize:11 },
+  grid: { vertLines:{ color:C.grid }, horzLines:{ color:C.grid } },
+  rightPriceScale: { borderColor:C.line, minimumWidth:84 },
+  crosshair: { mode: LW.CrosshairMode.Normal },
+};
+const chart = LW.createChart($('#mainChart'), { ...base,
+  rightPriceScale: { ...base.rightPriceScale, scaleMargins:{ top:.12, bottom:.06 } },
+  timeScale: { borderColor:C.line, timeVisible:true, secondsVisible:false, rightOffset:10, barSpacing:7 } });
+const diChart = LW.createChart($('#diChart'), { ...base,
+  timeScale: { borderColor:C.line, timeVisible:true, secondsVisible:false, rightOffset:10, barSpacing:7 } });
+
+const candle = chart.addCandlestickSeries({ upColor:C.up, downColor:C.down, borderUpColor:C.up, borderDownColor:C.down, wickUpColor:C.up, wickDownColor:C.down });
+const ln = (color, width = 1, style = 0) => chart.addLineSeries({ color, lineWidth:width, lineStyle:style, priceLineVisible:false, lastValueVisible:false, crosshairMarkerVisible:false });
+const L = {
+  m: ln(C.basis), ui: ln(C.inner), li: ln(C.inner), uo: ln(C.outer), lo: ln(C.outer),
+  ma60: ln(C.ma60), ma200: ln(C.ma200, 2),
+};
+const diSeries = diChart.addBaselineSeries({ baseValue:{ type:'price', price:0 }, lineWidth:2,
+  topLineColor:C.up, topFillColor1:'rgba(34,171,148,.18)', topFillColor2:'rgba(34,171,148,0)',
+  bottomLineColor:C.down, bottomFillColor1:'rgba(242,54,69,0)', bottomFillColor2:'rgba(242,54,69,.18)',
+  priceLineVisible:false });
+[1, -1].forEach(p => diSeries.createPriceLine({ price:p, color:C.muted, lineStyle:2, lineWidth:1, axisLabelVisible:true, title:'' }));
+
+let syncing = false;
+const sync = (a, b) => a.timeScale().subscribeVisibleLogicalRangeChange(r => {
+  if (syncing || !r) return; syncing = true; b.timeScale().setVisibleLogicalRange(r); syncing = false;
+});
+sync(chart, diChart); sync(diChart, chart);
+
+const fmt = (v, dp = S.sym.dp) => v == null || isNaN(v) ? '—' : v.toLocaleString('en-US', { minimumFractionDigits:dp, maximumFractionDigits:dp });
+const lineData = arr => S.bars.map((b, i) => arr[i] == null ? { time:b.time } : { time:b.time, value:arr[i] });
+
+function applyFormat(){
+  const pf = { type:'price', precision:S.sym.dp, minMove: 10 ** -S.sym.dp };
+  candle.applyOptions({ priceFormat:pf });
+  Object.values(L).forEach(s => s.applyOptions({ priceFormat:pf }));
+  diSeries.applyOptions({ priceFormat:{ type:'price', precision:2, minMove:.01 } });
+}
+
+function applyVisibility(){
+  const v = S.show;
+  ['m','ui','li','uo','lo'].forEach(k => L[k].applyOptions({ visible:v.bb }));
+  ['ma60','ma200'].forEach(k => L[k].applyOptions({ visible:v.ma }));
+  $('#diWrap').hidden = !v.di;
+  renderMarkers(); renderRefLines(); renderLegend();
+}
+
+function renderAll(){
+  S.ind = compute(S.bars);
+  S.sess = sessions(S.bars, S.tf[1]);
+  candle.setData(S.bars);
+  for (const k of Object.keys(L)) L[k].setData(lineData(S.ind[k]));
+  diSeries.setData(lineData(S.ind.di));
+  renderMarkers(); renderRefLines(); renderLegend(); updateQuote();
+}
+
+function renderLast(newBar){
+  S.ind = compute(S.bars);
+  S.sess = sessions(S.bars, S.tf[1]);
+  const i = S.bars.length - 1, t = S.bars[i].time;
+  candle.update(S.bars[i]);
+  for (const k of Object.keys(L)) L[k].update(S.ind[k][i] == null ? { time:t } : { time:t, value:S.ind[k][i] });
+  diSeries.update(S.ind.di[i] == null ? { time:t } : { time:t, value:S.ind.di[i] });
+  if (newBar){ renderMarkers(); renderRefLines(); }
+  else renderLowLine();
+  renderLegend(); updateQuote();
+}
+
+function renderMarkers(){
+  if (!S.ind) return;
+  const mk = [];
+  if (S.show.db){
+    for (let i = 1; i < S.bars.length - 1; i++){
+      const t = S.bars[i].time;
+      if (isDn(i)) mk.push({ time:t, position:'belowBar', color:C.signal, shape:'arrowDown', text:'DB' });
+      if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', text:'DB' });
+    }
+  }
+  candle.setMarkers(mk);
+}
+
+let refLines = [], lowLine = null;
+function renderRefLines(){
+  refLines.forEach(l => candle.removePriceLine(l)); refLines = [];
+  if (S.show.us){
+    const last = S.bars.length - 1;
+    const us = S.sess.filter(b => b.s === 'us' && b.i1 < last);
+    const y = us[us.length - 1];
+    if (y){
+      refLines.push(candle.createPriceLine({ price:y.hi, color:C.up, lineWidth:2, lineStyle:0, title:'어제 미장 고' }));
+      refLines.push(candle.createPriceLine({ price:y.lo, color:C.down, lineWidth:2, lineStyle:0, title:'어제 미장 저' }));
+    }
+  }
+  renderLowLine();
+}
+function renderLowLine(){
+  if (lowLine){ candle.removePriceLine(lowLine); lowLine = null; }
+  if (!S.show.low || !S.bars.length) return;
+  const lo = Math.min(...S.bars.slice(-500).map(b => b.low));
+  lowLine = candle.createPriceLine({ price:lo, color:C.basis, lineWidth:1, lineStyle:2, title:'최저점꼬리' });
+}
+
+/* ---------- 세션 박스 오버레이 ---------- */
+const cv = $('#overlay'), ctx = cv.getContext('2d');
+function drawOverlay(){
+  const wrap = $('#mainWrap'), w = wrap.clientWidth, h = wrap.clientHeight, dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!S.show.ses || !S.sess.length) return requestAnimationFrame(drawOverlay);
+  const ts = chart.timeScale(), pw = ts.width(), half = (ts.options().barSpacing || 6) / 2;
+  const range = ts.getVisibleLogicalRange();
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h - 28); ctx.clip();
+  ctx.font = '11px "IBM Plex Sans KR", sans-serif';
+  const names = { asia:'아시아', eu:'유로', us:'미장' };
+  for (const b of S.sess){
+    if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1)) continue;
+    const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(b.i1);
+    const y1 = candle.priceToCoordinate(b.hi), y2 = candle.priceToCoordinate(b.lo);
+    if ([x1, x2, y1, y2].some(v => v == null)) continue;
+    const rgb = C[b.s], x = x1 - half, bw = x2 - x1 + half * 2;
+    ctx.fillStyle = `rgba(${rgb},.07)`; ctx.fillRect(x, y1, bw, y2 - y1);
+    ctx.setLineDash([4, 3]); ctx.strokeStyle = `rgba(${rgb},.6)`; ctx.lineWidth = 1;
+    ctx.strokeRect(Math.round(x) + .5, Math.round(y1) + .5, Math.round(bw), Math.round(y2 - y1));
+    if (bw > 26){ ctx.fillStyle = `rgba(${rgb},.95)`; ctx.fillText(names[b.s], x + 3, y1 - 4); }
+  }
+  ctx.restore();
+  requestAnimationFrame(drawOverlay);
+}
+
+/* ---------- 범례 ---------- */
+let hoverBar = null;
+chart.subscribeCrosshairMove(p => {
+  hoverBar = p && p.time ? p.seriesData.get(candle) || null : null;
+  renderOhlc();
+  if (p && p.time && diChart.setCrosshairPosition){
+    const i = S.bars.findIndex(b => b.time === p.time);
+    const v = i >= 0 ? S.ind.di[i] : null;
+    if (v != null) diChart.setCrosshairPosition(v, p.time, diSeries); else diChart.clearCrosshairPosition();
+  } else if (diChart.clearCrosshairPosition) diChart.clearCrosshairPosition();
+});
+function renderOhlc(){
+  const b = hoverBar || S.bars[S.bars.length - 1]; if (!b) return;
+  const i = S.bars.findIndex(x => x.time === b.time);
+  const prev = i > 0 ? S.bars[i-1].close : b.open;
+  const ch = b.close - prev, pct = ch / prev * 100, cls = ch >= 0 ? 'upc' : 'dnc';
+  $('#lgOhlc').innerHTML = `<span>시<b class="${cls}">${fmt(b.open)}</b></span><span>고<b class="${cls}">${fmt(b.high)}</b></span><span>저<b class="${cls}">${fmt(b.low)}</b></span><span>종<b class="${cls}">${fmt(b.close)}</b></span><span class="${cls}">${ch >= 0 ? '+' : ''}${fmt(ch)} (${ch >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span>`;
+  const di = S.ind && S.ind.di[i];
+  $('#diLabel').innerHTML = `DI 14 close <span class="${di >= 0 ? 'upc' : 'dnc'}">${di == null ? '—' : di.toFixed(2)}</span>`;
+}
+function renderLegend(){
+  $('#lgName').textContent = `${S.sym.name} · ${S.tf[2]}`;
+  $('#lgInds').innerHTML = IND.map(([k, n, p, c]) =>
+    `<button class="ind" data-k="${k}" aria-pressed="${S.show[k]}" style="color:${S.show[k] ? c : ''}"><span class="eye"></span><span style="color:var(--fg)">${n}</span><small>${p}</small></button>`).join('');
+  renderOhlc();
+}
+$('#lgInds').addEventListener('click', e => {
+  const b = e.target.closest('.ind'); if (!b) return;
+  S.show[b.dataset.k] = !S.show[b.dataset.k]; store.set('show', S.show); applyVisibility();
+});
+
+/* ---------- 실시간 / 시뮬레이션 ---------- */
+function stopFeed(){ clearInterval(S.timer); S.timer = null; if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; } }
+function setFeed(live, label){ S.live = live; const f = $('#feed'); f.textContent = label || (live ? '실시간' : '시뮬레이션'); f.classList.toggle('live', live); }
+
+function onBar(bar){
+  const bars = S.bars, last = bars[bars.length - 1], prevPrice = last.close;
+  let newBar = false;
+  if (bar.time === last.time) bars[bars.length - 1] = bar;
+  else if (bar.time > last.time){ bars.push(bar); if (bars.length > 1500) bars.shift(); newBar = true; }
+  else return;
+  if (newBar){ S.ind = compute(bars); checkSignal(bars.length - 2); }
+  renderLast(newBar);
+  checkAlerts(prevPrice, bar.close);
+}
+
+function startSim(){
+  const sigTick = S.sym.dvol * Math.sqrt(S.tf[1] / 86400) / Math.sqrt(30);
+  S.ticks = 0;
+  S.timer = setInterval(() => {
+    const last = S.bars[S.bars.length - 1];
+    if (++S.ticks >= 30){
+      S.ticks = 0; const o = last.close;
+      onBar({ time:last.time + S.tf[1], open:o, high:o, low:o, close:o });
+    } else {
+      const c = last.close * Math.exp(gauss(Math.random) * sigTick);
+      onBar({ ...last, close:c, high:Math.max(last.high, c), low:Math.min(last.low, c) });
+    }
+  }, 500);
+}
+
+async function loadTD(sym, tf){
+  const u = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym.td)}&interval=${TDI[tf[0]]}&outputsize=1000&timezone=UTC&apikey=${encodeURIComponent(S.cfg.td)}`;
+  const r = await fetch(u); const j = await r.json();
+  if (j.status === 'error' || !j.values) throw new Error(j.message || 'no data');
+  return j.values.slice().reverse().map(v => {
+    const d = v.datetime.length === 10 ? v.datetime + 'T00:00:00Z' : v.datetime.replace(' ', 'T') + 'Z';
+    return { time:Date.parse(d) / 1000 + KST, open:+v.open, high:+v.high, low:+v.low, close:+v.close };
+  });
+}
+function startTDPoll(sym, tf, id){
+  const sec = Math.max(15, +S.cfg.poll || 120);
+  const tick = async () => {
+    try {
+      const r = await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(sym.td)}&apikey=${encodeURIComponent(S.cfg.td)}`);
+      const j = await r.json(); if (id !== S.loadId || S.rp) return;
+      const p = +j.price; if (!isFinite(p)) return;
+      const last = S.bars[S.bars.length - 1], now = Date.now() / 1000 + KST;
+      const k = Math.floor((now - last.time) / tf[1]);
+      if (k >= 1) onBar({ time:last.time + k * tf[1], open:last.close, high:Math.max(last.close, p), low:Math.min(last.close, p), close:p });
+      else onBar({ ...last, close:p, high:Math.max(last.high, p), low:Math.min(last.low, p) });
+    } catch {}
+  };
+  S.timer = setInterval(tick, sec * 1000);
+}
+async function loadBinance(sym, tf){
+  const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 4000);
+  const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym.id}&interval=${BI[tf[0]]}&limit=1000`, { signal:ac.signal });
+  clearTimeout(to);
+  if (!r.ok) throw new Error('http ' + r.status);
+  const j = await r.json();
+  return j.map(k => ({ time:k[0] / 1000 + KST, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+}
+function openSocket(sym, tf, id){
+  try {
+    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${sym.id.toLowerCase()}@kline_${BI[tf[0]]}`);
+    ws.onmessage = e => { if (id !== S.loadId) return; const k = JSON.parse(e.data).k;
+      onBar({ time:k.t / 1000 + KST, open:+k.o, high:+k.h, low:+k.l, close:+k.c }); };
+    ws.onclose = () => { if (id === S.loadId){ setFeed(false); startSim(); } };
+    S.ws = ws;
+  } catch { startSim(); setFeed(false); }
+}
+
+async function load(){
+  const id = ++S.loadId; stopFeed(); exitReplayUI();
+  $('#feed').textContent = '연결 중'; $('#feed').classList.remove('live');
+  const { sym, tf } = S;
+  let live = false, bars;
+  if (sym.feed === 'td'){
+    if (S.cfg.td){
+      try { bars = await loadTD(sym, tf); live = true; }
+      catch (e) { toast('실시간 시세 연결 안 됨', `${sym.id}: ${e.message}. 시뮬레이션 데이터로 표시합니다.`); }
+    }
+  } else if (sym.feed === 'binance'){
+    try { bars = await loadBinance(sym, tf); live = true; }
+    catch { toast('실시간 시세 연결 안 됨', `${sym.id} 시세 서버에 연결하지 못해 시뮬레이션 데이터로 표시합니다.`); }
+  }
+  if (id !== S.loadId) return;
+  if (!bars) bars = genBars(sym, tf[1]);
+  S.bars = bars;
+  applyFormat(); renderAll(); applyVisibility();
+  chart.timeScale().setVisibleLogicalRange({ from:bars.length - 140, to:bars.length + 10 });
+  restoreLines();
+  if (live && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
+  else if (live){ setFeed(true); openSocket(sym, tf, id); }
+  else { setFeed(false); startSim(); }
+}
+
+/* ---------- 신호 / 알림 ---------- */
+function checkSignal(i){
+  if (i < 1 || !S.show.db) return;
+  const b = S.bars[i];
+  if (isDn(i)) fire('얼러트 · ' + S.sym.id, `${S.tf[2]} 돌파 더블비 하방 몸통 마감 @ ${fmt(b.close)}`);
+  if (isUp(i)) fire('얼러트 · ' + S.sym.id, `${S.tf[2]} 돌파 더블비 상방 몸통 마감 @ ${fmt(b.close)}`);
+}
+function checkAlerts(prev, cur){
+  S.alerts = S.alerts.filter(a => {
+    if ((prev < a.price && cur >= a.price) || (prev > a.price && cur <= a.price)){
+      fire('가격 알림 · ' + S.sym.id, `${fmt(a.price)} ${cur >= prev ? '상향' : '하향'} 돌파 (현재 ${fmt(cur)})`);
+      candle.removePriceLine(a.line); return false;
+    }
+    return true;
+  });
+  renderLists(); saveLines();
+}
+function fire(title, msg){
+  toast(title, msg);
+  if (!S.rp) sendTelegram(`${title}\n${msg}`).catch(() => {});
+  const t = new Date(Date.now()).toLocaleTimeString('ko-KR', { hour12:false });
+  S.log.unshift({ t, msg:`${title} — ${msg}` }); S.log = S.log.slice(0, 30);
+  $('#log').innerHTML = S.log.map(l => `<li><time>${l.t}</time><span>${l.msg}</span></li>`).join('');
+}
+function toast(title, msg){
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = `<strong></strong><span></span><button aria-label="닫기">×</button>`;
+  el.querySelector('strong').textContent = title; el.querySelector('span').textContent = msg;
+  el.querySelector('button').onclick = () => el.remove();
+  $('#toasts').prepend(el);
+  while ($('#toasts').children.length > 3) $('#toasts').lastChild.remove();
+  setTimeout(() => el.remove(), 7000);
+}
+
+function addAlert(price){
+  const line = candle.createPriceLine({ price, color:C.signal, lineWidth:1, lineStyle:1, title:'알림' });
+  S.alerts.push({ id:Math.random().toString(36).slice(2), price, line });
+  renderLists(); saveLines();
+}
+function addHLine(price){
+  const line = candle.createPriceLine({ price, color:'#9aa4b5', lineWidth:1, lineStyle:0, title:'' });
+  S.hlines.push({ id:Math.random().toString(36).slice(2), price, line });
+  renderLists(); saveLines();
+}
+function renderLists(){
+  $('#alertList').innerHTML = S.alerts.length ? S.alerts.map(a => `<li><span>${fmt(a.price)}</span><button class="x" data-a="${a.id}" aria-label="알림 삭제">삭제</button></li>`).join('') : '<li class="empty">차트를 클릭하거나 가격을 입력해 알림을 추가하세요.</li>';
+  $('#hlineList').innerHTML = S.hlines.length ? S.hlines.map(a => `<li><span>${fmt(a.price)}</span><button class="x" data-h="${a.id}" aria-label="수평선 삭제">삭제</button></li>`).join('') : '<li class="empty">상단의 수평선 도구로 차트를 클릭하세요.</li>';
+}
+$('.side').addEventListener('click', e => {
+  const a = e.target.dataset.a, h = e.target.dataset.h;
+  if (a){ const x = S.alerts.find(v => v.id === a); candle.removePriceLine(x.line); S.alerts = S.alerts.filter(v => v !== x); }
+  if (h){ const x = S.hlines.find(v => v.id === h); candle.removePriceLine(x.line); S.hlines = S.hlines.filter(v => v !== x); }
+  if (a || h){ renderLists(); saveLines(); }
+});
+function saveLines(){ store.set('lines:' + S.sym.id, { a:S.alerts.map(x => x.price), h:S.hlines.map(x => x.price) }); }
+function restoreLines(){
+  S.alerts.forEach(x => candle.removePriceLine(x.line)); S.hlines.forEach(x => candle.removePriceLine(x.line));
+  S.alerts = []; S.hlines = [];
+  const d = store.get('lines:' + S.sym.id, { a:[], h:[] });
+  d.a.forEach(addAlert); d.h.forEach(addHLine); renderLists();
+}
+$('#alertForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = parseFloat($('#alertPrice').value.replace(/,/g, ''));
+  if (!isFinite(v)) return toast('가격을 확인하세요', '숫자로 된 가격을 입력해야 알림을 추가할 수 있습니다.');
+  addAlert(v); $('#alertPrice').value = '';
+});
+
+/* ---------- 텔레그램 / 설정 ---------- */
+async function sendTelegram(text){
+  if (!S.cfg.tg || !S.cfg.chat) return false;
+  const r = await fetch(`https://api.telegram.org/bot${S.cfg.tg}/sendMessage`, { method:'POST', body:new URLSearchParams({ chat_id:S.cfg.chat, text }) });
+  const j = await r.json(); if (!j.ok) throw new Error(j.description || 'send failed'); return true;
+}
+function fillSettings(){ $('#setTd').value = S.cfg.td; $('#setPoll').value = S.cfg.poll; $('#setTg').value = S.cfg.tg; $('#setChat').value = S.cfg.chat; }
+function readSettings(){ S.cfg = { td:$('#setTd').value.trim(), poll:Math.max(15, parseInt($('#setPoll').value, 10) || 120), tg:$('#setTg').value.trim(), chat:$('#setChat').value.trim() }; store.set('cfg', S.cfg); }
+$('#setForm').addEventListener('submit', e => { e.preventDefault(); readSettings(); fillSettings(); toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); load(); });
+$('#tgFind').onclick = async () => {
+  readSettings();
+  if (!S.cfg.tg) return toast('봇 토큰이 필요합니다', '@BotFather 에서 받은 봇 토큰을 먼저 입력하세요.');
+  try {
+    const j = await (await fetch(`https://api.telegram.org/bot${S.cfg.tg}/getUpdates`)).json();
+    if (!j.ok) throw new Error(j.description);
+    const m = j.result.map(u => u.message || u.channel_post || u.my_chat_member).filter(Boolean).pop();
+    if (!m) return toast('메시지를 찾지 못했습니다', '텔레그램에서 봇에게 아무 메시지나 보낸 뒤 다시 누르세요.');
+    S.cfg.chat = String(m.chat.id); store.set('cfg', S.cfg); fillSettings();
+    toast('채팅 ID 저장됨', `${m.chat.title || m.chat.first_name || ''} (${m.chat.id})`);
+  } catch (e) { toast('텔레그램 연결 실패', e.message || '봇 토큰을 확인하세요.'); }
+};
+$('#tgTest').onclick = async () => {
+  readSettings();
+  try { const ok = await sendTelegram(`웨이브뷰 테스트 알림 · ${S.sym.id} ${fmt(S.bars[S.bars.length - 1].close)}`);
+    toast(ok ? '텔레그램 전송됨' : '설정이 비어 있습니다', ok ? '휴대폰에서 메시지를 확인하세요.' : '봇 토큰과 채팅 ID를 입력하세요.'); }
+  catch (e) { toast('텔레그램 전송 실패', e.message || '봇 토큰과 채팅 ID를 확인하세요.'); }
+};
+
+/* ---------- 리플레이 ---------- */
+function startReplay(idx){
+  S.loadId++; stopFeed();
+  const full = S.bars.slice();
+  idx = Math.max(60, Math.min(full.length - 2, idx));
+  S.rp = { full, i:idx, timer:null };
+  S.bars = full.slice(0, idx + 1);
+  renderAll();
+  chart.timeScale().setVisibleLogicalRange({ from:idx - 120, to:idx + 20 });
+  $('#replayBar').hidden = false; $('#t-replay').setAttribute('aria-pressed', true);
+  setFeed(false, '리플레이'); rpPos();
+}
+function rpStep(){
+  const r = S.rp; if (!r) return;
+  if (r.i + 1 >= r.full.length){ rpPause(); return toast('리플레이 끝', '마지막 봉까지 재생했습니다.'); }
+  r.i++; onBar(r.full[r.i]); rpPos();
+}
+function rpPos(){ const r = S.rp; const d = new Date((r.full[r.i].time) * 1000); $('#rp-pos').textContent = `${d.toISOString().slice(0, 16).replace('T', ' ')} · ${r.i + 1}/${r.full.length}`; }
+function rpPlay(){ const r = S.rp; if (!r) return; rpPause(); r.timer = setInterval(rpStep, +$('#rp-speed').value); $('#rp-play').textContent = '일시정지'; }
+function rpPause(){ const r = S.rp; if (r && r.timer){ clearInterval(r.timer); r.timer = null; } $('#rp-play').textContent = '재생'; }
+function exitReplayUI(){ if (S.rp){ rpPause(); S.rp = null; } $('#replayBar').hidden = true; $('#t-replay').setAttribute('aria-pressed', false); }
+$('#rp-play').onclick = () => S.rp && S.rp.timer ? rpPause() : rpPlay();
+$('#rp-step').onclick = () => { rpPause(); rpStep(); };
+$('#rp-speed').onchange = () => { if (S.rp && S.rp.timer) rpPlay(); };
+$('#rp-exit').onclick = () => load();
+$('#t-replay').onclick = () => { if (S.rp) return load(); setMode('replay'); };
+
+/* ---------- 도구 ---------- */
+function setMode(m){
+  S.mode = m;
+  ['cursor','hline','alert'].forEach(k => $('#t-' + k).setAttribute('aria-pressed', k === m));
+  if (!S.rp) $('#t-replay').setAttribute('aria-pressed', m === 'replay');
+  const hint = $('#hint');
+  hint.hidden = m === 'cursor';
+  hint.textContent = m === 'hline' ? '차트를 클릭해 수평선을 그리세요 (Esc 취소)' : m === 'replay' ? '리플레이를 시작할 봉을 클릭하세요 (Esc 취소)' : '차트를 클릭해 알림 가격을 정하세요 (Esc 취소)';
+}
+$('#t-cursor').onclick = () => setMode('cursor');
+$('#t-hline').onclick = () => setMode('hline');
+$('#t-alert').onclick = () => setMode('alert');
+$('#t-fit').onclick = () => chart.timeScale().scrollToRealTime();
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setMode('cursor'); });
+chart.subscribeClick(p => {
+  if (!p.point || S.mode === 'cursor') return;
+  if (S.mode === 'replay'){ if (p.logical != null){ setMode('cursor'); startReplay(Math.round(p.logical)); } return; }
+  const price = candle.coordinateToPrice(p.point.y); if (price == null) return;
+  const r = Math.round(price * 10 ** S.sym.dp) / 10 ** S.sym.dp;
+  if (S.mode === 'hline') addHLine(r); else addAlert(r);
+  setMode('cursor');
+});
+
+/* ---------- 종목 / 타임프레임 / 관심종목 ---------- */
+$('#sym').innerHTML = SYMS.map(s => `<option value="${s.id}">${s.id}</option>`).join('');
+$('#sym').value = S.sym.id;
+$('#sym').onchange = e => selectSym(e.target.value);
+function selectSym(id){ S.sym = SYMS.find(s => s.id === id); $('#sym').value = id; store.set('sym', id); renderWL(); load(); }
+
+$('#tfs').innerHTML = TFS.map(t => `<button class="tb" data-tf="${t[0]}" aria-pressed="${t === S.tf}">${t[2]}</button>`).join('');
+$('#tfs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tf]'); if (!b) return;
+  S.tf = TFS.find(t => t[0] === b.dataset.tf); store.set('tf', S.tf[0]);
+  $('#tfs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  load();
+});
+
+function quoteFrom(bars, tf){
+  const last = bars[bars.length - 1], back = Math.min(bars.length - 1, Math.max(1, Math.round(86400 / tf)));
+  const ref = bars[bars.length - 1 - back].close;
+  return { p:last.close, c:(last.close - ref) / ref * 100 };
+}
+function updateQuote(){ S.quotes[S.sym.id] = quoteFrom(S.bars, S.tf[1]); renderWL(); }
+function renderWL(){
+  $('#wl').innerHTML = SYMS.map(s => {
+    const q = S.quotes[s.id];
+    return `<button data-s="${s.id}" aria-current="${s === S.sym}"><span class="s">${s.id}</span><span class="p">${q ? fmt(q.p, s.dp) : '—'}</span><span class="n">${s.name}</span><span class="c ${q && q.c < 0 ? 'dnc' : 'upc'}">${q ? (q.c >= 0 ? '+' : '') + q.c.toFixed(2) + '%' : ''}</span></button>`;
+  }).join('');
+}
+$('#wl').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (b && b.dataset.s !== S.sym.id) selectSym(b.dataset.s); });
+SYMS.filter(s => s.feed === 'td').forEach(s => { S.quotes[s.id] = quoteFrom(genBars(s, 14400), 14400); });
+
+fillSettings(); renderWL(); renderLists(); load(); requestAnimationFrame(drawOverlay);
+})();
+</script>
+
+</body>
+</html>
