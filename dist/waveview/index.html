@@ -338,7 +338,7 @@ const $ = s => document.querySelector(s);
 const KST = 9 * 3600;
 const C = { bg:'#131313', grid:'#1e1e1e', text:'#e0e3eb', line:'#2a2a2a', up:'#089981', down:'#f23645', signal:'#f5c518',
   basis:'#4caf50', inner:'#f23645', outer:'#e8e8e8', ma1:'#7ee08a', ma2:'#42a5f5', ma3:'#ff9800', trend:'#2962ff',
-  asia:'41,98,255', eu:'255,152,0', us:'242,54,69' };
+  asia:'41,98,255', eu:'255,152,0', us:'178,40,51' };
 // [키, 초, 표시, Twelve Data 주기, 바이낸스 주기, 없을 때 합성할 원본]
 const TFS = [
   ['1m',60,'1분','1min','1m'], ['2m',120,'2분',null,null,'1m'], ['3m',180,'3분',null,'3m','1m'],
@@ -470,10 +470,10 @@ function sessions(bars, tf){
   bars.forEach((b, i) => {
     const s = tf <= 14400 ? sessOf(b.time) : null;
     if (s && cur && cur.s === s && b.time - cur.t1 <= tf){
-      cur.i1 = i; cur.t1 = b.time; cur.hi = Math.max(cur.hi, b.high); cur.lo = Math.min(cur.lo, b.low);
+      cur.i1 = i; cur.t1 = b.time; cur.hi = Math.max(cur.hi, b.high); cur.lo = Math.min(cur.lo, b.low); cur.c = b.close;
     } else {
       if (cur) out.push(cur);
-      cur = s ? { s, i0:i, i1:i, t1:b.time, hi:b.high, lo:b.low } : null;
+      cur = s ? { s, i0:i, i1:i, t1:b.time, hi:b.high, lo:b.low, o:b.open, c:b.close } : null;
     }
   });
   if (cur) out.push(cur);
@@ -605,21 +605,27 @@ function drawOverlay(){
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h); ctx.clip();
 
   if (S.show.ses && S.tf[1] <= 14400 && S.sess.length){
-    // 세션: 배경을 옅게 칠하고, 차트 맨 아래에 색 띠 + 이름을 둔다 (캔들을 가리지 않음)
+    // 트레이딩뷰 세션박스: 세션 시가~종가 박스(실선 1px) + 가운데 점선 + 위쪽 흰 이름표
     const half = (ts.options().barSpacing || 6) / 2, range = ts.getVisibleLogicalRange();
     const names = { asia:'아시아', eu:'유로', us:'미장' };
-    const bottom = h - (ts.options().visible ? ts.height() : 0), ry = bottom - 20;
-    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
+    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 1;
+    let labelEnd = -Infinity;
     for (const b of S.sess){
       if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1)) continue;
       const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(b.i1);
-      if (x1 == null || x2 == null) continue;
-      const rgb = C[b.s], x = Math.round(x1 - half), bw = Math.max(1, Math.round(x2 - x1 + half * 2));
-      if (S.tf[1] <= 3600){ ctx.fillStyle = `rgba(${rgb},.035)`; ctx.fillRect(x, 0, bw, ry); }
-      ctx.fillStyle = `rgba(${rgb},.6)`; ctx.fillRect(x, ry + 4, bw - 1, 10);
-      if (bw > 34){ ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], x + 3, ry - 4); }
+      const yt = candle.priceToCoordinate(Math.max(b.o, b.c)), yb = candle.priceToCoordinate(Math.min(b.o, b.c));
+      if ([x1, x2, yt, yb].some(v => v == null)) continue;
+      const rgb = C[b.s], x = Math.round(x1 - half) + .5, bw = Math.max(2, Math.round(x2 - x1 + half * 2) - 1);
+      const top = Math.round(yt) + .5, bh = Math.max(2, Math.round(yb - yt));
+      ctx.fillStyle = `rgba(${rgb},.18)`; ctx.fillRect(x, top, bw, bh);
+      ctx.setLineDash([]); ctx.strokeStyle = `rgba(${rgb},.9)`; ctx.strokeRect(x, top, bw, bh);
+      const mid = Math.round(top + bh / 2) + .5;
+      ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(255,255,255,.75)';
+      ctx.beginPath(); ctx.moveTo(x + 3, mid); ctx.lineTo(x + bw - 3, mid); ctx.stroke(); ctx.setLineDash([]);
+      const tw = ctx.measureText(names[b.s]).width, cx = x + bw / 2;
+      if (cx - tw / 2 > labelEnd + 4){ ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8); labelEnd = cx + tw / 2; }
     }
-    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'start';
   }
 
   const lines = S.trends.slice(); if (S.draft && S.draft.b) lines.push(S.draft);
@@ -734,7 +740,7 @@ function fitLegend(){
   const h = $('#mainWrap').clientHeight; if (!h) return;
   const lg = document.querySelector('.legend'), need = lg.offsetTop + lg.offsetHeight + 12;
   const top = Math.min(.35, Math.max(.08, need / h));
-  chart.priceScale('right').applyOptions({ scaleMargins:{ top, bottom: S.show.ses ? .09 : .06 } });
+  chart.priceScale('right').applyOptions({ scaleMargins:{ top, bottom:.06 } });
 }
 new ResizeObserver(fitLegend).observe($('#mainWrap'));
 
