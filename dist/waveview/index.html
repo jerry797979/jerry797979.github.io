@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-wv="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,6 +16,10 @@
   --font:-apple-system,BlinkMacSystemFont,"Trebuchet MS","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",Roboto,Ubuntu,sans-serif;
   color-scheme:light;
 }
+:root[data-wv="dark"]{
+  --gap:#2a2e39; --chrome:#0f0f0f; --hover:#2a2e39; --border:#2a2e39;
+  --text:#d1d4dc; --sub:#787b86; --blue-soft:#142e61; color-scheme:dark;
+}
 html,body{height:100%}
 body{margin:0;background:var(--gap);color:var(--text);font-family:var(--font);font-size:13px}
 [hidden]{display:none!important}
@@ -25,7 +29,7 @@ button{cursor:pointer;background:none;border:0}
 svg{display:block}
 
 .app{height:100%;display:grid;gap:4px;
-  grid-template-columns:44px minmax(0,1fr) 300px 44px;grid-template-rows:38px minmax(0,1fr);
+  grid-template-columns:44px minmax(0,1fr) var(--panel-w,340px) 44px;grid-template-rows:38px minmax(0,1fr);position:relative;
   grid-template-areas:"top top top top" "tools chart panel strip";
   padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);box-sizing:border-box}
 
@@ -47,7 +51,7 @@ svg{display:block}
 .feed.live i{background:var(--up)}
 
 /* 지표 메뉴 */
-.menu{position:fixed;z-index:30;background:var(--chrome);border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.18);padding:6px 0;min-width:240px}
+.menu{position:fixed;z-index:30;background:var(--chrome);color:var(--text);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.18);padding:6px 0;min-width:240px}
 .menu label{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer}
 .menu label:hover{background:var(--hover)}
 .menu small{color:var(--sub);margin-left:auto}
@@ -58,7 +62,7 @@ svg{display:block}
 .tfmenu .it{display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 10px 0 16px;height:32px;font-size:13.5px;text-align:left}
 .tfmenu .it:hover{background:var(--hover)}
 .tfmenu .it.on{background:#2a2e39;color:#fff}
-.tfmenu .star{width:26px;height:26px;display:grid;place-items:center;border-radius:4px;color:#c1c4cd}
+.tfmenu .star{width:26px;height:26px;display:grid;place-items:center;border-radius:4px;color:var(--sub)}
 .tfmenu .star.fav{color:var(--text)}
 .tfmenu .it.on .star{color:#fff}
 .tfmenu .star:hover{background:rgba(0,0,0,.08)}
@@ -70,6 +74,37 @@ svg{display:block}
 .ctx button i svg{width:20px;height:20px}
 .ctx kbd{margin-left:auto;font:inherit;font-size:12px;color:var(--sub)}
 .ctx hr{border:0;border-top:1px solid var(--border);margin:5px 0}
+
+.dbar{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:5;background:var(--chrome);border:1px solid var(--border);color:var(--text);border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.4);display:flex;align-items:center;gap:2px;padding:3px 4px;white-space:nowrap}
+.dbar .sw{width:20px;height:20px;border-radius:4px;border:2px solid var(--chrome);box-shadow:0 0 0 1px var(--border)}
+.dbar .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--blue)}
+.dbar button{height:28px;min-width:28px;padding:0 5px;border-radius:4px;display:grid;place-items:center;font-size:12.5px}
+.dbar button:hover{background:var(--hover)}
+.dbar button[aria-pressed="true"]{background:var(--blue-soft);color:var(--blue)}
+.dbar .sep{height:20px;margin:0 3px}
+.dbar input{width:110px;height:26px;background:var(--chrome);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-size:12.5px}
+.dbar .wv{display:block;width:16px;background:currentColor;border-radius:2px}
+
+.appmenu{width:250px;padding:0 0 6px}
+.appmenu .who{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 0 12px;border-bottom:1px solid var(--border);font-weight:700}
+.appmenu .who i{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#089981,#2962ff);display:grid;place-items:center;color:#fff;font-style:normal;font-size:16px}
+.appmenu .row2{display:flex;align-items:center;gap:10px;width:100%;padding:0 14px;height:36px;font-size:13.5px;text-align:left}
+.appmenu button.row2:hover{background:var(--hover)}
+.appmenu .row2 svg{width:20px;height:20px;flex:none}
+.appmenu kbd{margin-left:auto;font:inherit;font-size:12px;color:var(--sub)}
+.appmenu .zoom{margin-left:auto;display:flex;align-items:center;gap:4px}
+.appmenu .zoom button{width:26px;height:26px;border-radius:4px;border:1px solid var(--border);display:grid;place-items:center}
+.appmenu .zoom button:hover{background:var(--hover)}
+.appmenu .zoom span{min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
+.appmenu hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 12px}
+.themes button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px}
+.themes .pv{width:100%;height:40px;border-radius:6px;border:2px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:4px;box-sizing:border-box;overflow:hidden}
+.themes button[aria-pressed="true"] .pv{border-color:var(--text)}
+.themes .pv span{border-radius:2px}
+.pv.dk{background:#0f0f0f}.pv.dk span{background:#2a2e39}
+.pv.lt{background:#e0e3eb}.pv.lt span{background:#fff}
+.pv.sy{background:linear-gradient(90deg,#0f0f0f 50%,#e0e3eb 50%)}.pv.sy span:nth-child(1){background:#2a2e39}.pv.sy span:nth-child(2){background:linear-gradient(90deg,#2a2e39 50%,#fff 50%)}.pv.sy span:nth-child(3){background:#fff}
 
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
@@ -134,12 +169,16 @@ svg{display:block}
 .replay .pos{font-size:12px;color:var(--sub);padding:0 8px;font-variant-numeric:tabular-nums}
 
 /* 오른쪽 패널 */
+.split{position:absolute;top:42px;bottom:0;width:10px;margin-left:-7px;cursor:col-resize;z-index:6}
+.split:hover::after,.split.on::after{content:"";position:absolute;left:3px;top:0;bottom:0;width:4px;background:var(--blue);opacity:.6}
 .panel{grid-area:panel;background:var(--chrome);display:flex;flex-direction:column;min-height:0;min-width:0}
 .ph{display:flex;align-items:center;gap:2px;padding:6px 8px;border-bottom:1px solid var(--border)}
 .ph button{padding:6px 10px;border-radius:4px;font-weight:600;color:var(--sub)}
 .ph button[aria-selected="true"]{color:var(--text);background:var(--hover)}
 .pb{overflow:auto;min-height:0;flex:1}
-.wl-head,.wl-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 64px;gap:4px;align-items:center;padding:0 12px}
+.wl-head,.wl-row{display:grid;grid-template-columns:minmax(0,1fr) 86px 64px 62px;gap:4px;align-items:center;padding:0 12px}
+.panel.narrow .wl-head,.panel.narrow .wl-row{grid-template-columns:minmax(0,1fr) 84px 62px}
+.panel.narrow .wl-chg{display:none}
 .wl-head{height:28px;font-size:12px;color:var(--sub)}
 .wl-head span:not(:first-child),.wl-row span:not(:first-child){text-align:right}
 .wl-row{height:34px;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
@@ -155,12 +194,12 @@ svg{display:block}
 .sec{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)}
 .sec h3{margin:0;font-size:12.5px;color:var(--sub);font-weight:600}
 .row{display:flex;gap:6px}
-.inp{flex:1;min-width:0;height:32px;border:1px solid var(--border);border-radius:4px;padding:0 8px;background:#fff}
+.inp{flex:1;min-width:0;height:32px;border:1px solid var(--border);border-radius:4px;padding:0 8px;background:var(--chrome);color:var(--text)}
 .inp:focus{border-color:var(--blue);outline:0}
 .btn{height:32px;padding:0 14px;border-radius:4px;background:var(--blue);color:#fff;font-weight:600;flex:none}
-.btn.sub{background:#fff;border:1px solid var(--border);color:var(--text);font-weight:500}
+.btn.sub{background:var(--chrome);border:1px solid var(--border);color:var(--text);font-weight:500}
 .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #f0f3fa;font-variant-numeric:tabular-nums}
+.list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
 .list li:last-child{border-bottom:0}
 .list .x{color:var(--sub);font-size:12px;padding:2px 6px;border-radius:3px}
 .list .x:hover{color:var(--down);background:var(--hover)}
@@ -173,7 +212,7 @@ svg{display:block}
 
 /* 설정 창 */
 .modal{position:fixed;inset:0;z-index:40;background:rgba(19,23,34,.45);display:grid;place-items:center;padding:16px}
-.dlg{background:#fff;border-radius:8px;width:min(440px,100%);box-shadow:0 10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:calc(100% - 32px)}
+.dlg{background:var(--chrome);color:var(--text);border-radius:8px;width:min(440px,100%);box-shadow:0 10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:calc(100% - 32px)}
 .dlg header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);font-size:17px;font-weight:600}
 .dlg form{padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow:auto}
 .field{display:flex;flex-direction:column;gap:5px}
@@ -183,8 +222,8 @@ svg{display:block}
 
 /* 알림 토스트 (트레이딩뷰 얼러트 모양) */
 .toasts{position:fixed;left:calc(56px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;flex-direction:column;gap:8px;width:min(380px,calc(100vw - 32px))}
-.toast{background:#fff;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.25);display:grid;grid-template-columns:56px 1fr;position:relative;overflow:hidden;animation:in .18s ease-out}
-.toast .ic{background:#f0f3fa;display:grid;place-items:center;color:#4a6b8a}
+.toast{background:var(--chrome);color:var(--text);border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.4);display:grid;grid-template-columns:56px 1fr;position:relative;overflow:hidden;animation:in .18s ease-out}
+.toast .ic{background:var(--hover);display:grid;place-items:center;color:#4a6b8a}
 .toast .ic svg{width:28px;height:28px}
 .toast .bd{padding:12px 34px 12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .toast .hd{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
@@ -202,6 +241,7 @@ svg{display:block}
   .tools hr{width:1px;height:24px;border:0;border-left:1px solid var(--border);margin:0 4px}
   .charts{height:64vh;min-height:420px}
   .strip{display:none}
+  .split{display:none}
   .panel{min-height:360px}
   .toasts{left:calc(16px + env(safe-area-inset-left,0px))}
   .ind small{display:none}
@@ -224,6 +264,7 @@ svg{display:block}
     <button class="tb" id="replayBtn" aria-pressed="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M13 8l-6 6 6 6M21 8l-6 6 6 6"/></svg>리플레이</button>
     <span class="spacer"></span>
     <span class="feed" id="feed"><i></i><span>연결 중</span></span>
+    <button class="tb" id="appBtn" title="메뉴" aria-haspopup="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5" y="7" width="18" height="11" rx="1.5"/><path d="M14 18v4M10 22h8"/></svg></button>
     <button class="tb" id="setBtn" title="시세 · 텔레그램 설정"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="14" cy="14" r="3.5"/><path d="M14 4.5v3M14 20.5v3M4.5 14h3M20.5 14h3M7.3 7.3l2.1 2.1M18.6 18.6l2.1 2.1M7.3 20.7l2.1-2.1M18.6 9.4l2.1-2.1"/></svg></button>
   </header>
 
@@ -246,6 +287,7 @@ svg{display:block}
         <button class="lgfold" id="lgFold" aria-label="지표 목록 접기"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 11l4-4 4 4"/></svg></button>
       </div>
       <div class="drawhint" id="hint" hidden></div>
+      <div class="dbar" id="drawBar" hidden></div>
       <div class="replay" id="replayBar" hidden>
         <button class="tb" id="rp-play">재생</button>
         <button class="tb" id="rp-step">한 봉 앞으로</button>
@@ -261,13 +303,14 @@ svg{display:block}
     <div class="bottom"><div class="ranges" id="ranges" role="group" aria-label="기간"></div><span class="clock" id="clock"></span></div>
   </section>
 
+  <div class="split" id="split" role="separator" aria-orientation="vertical" aria-label="패널 너비 조절" tabindex="0"></div>
   <aside class="panel">
     <div class="ph" role="tablist">
-      <button role="tab" data-tab="wl" aria-selected="true">관심종목</button>
+      <button role="tab" data-tab="wl" aria-selected="true">왓치리스트</button>
       <button role="tab" data-tab="al" aria-selected="false">얼러트</button>
     </div>
     <div class="pb" id="tab-wl">
-      <div class="wl-head"><span>심볼</span><span>현재가</span><span>변동%</span></div>
+      <div class="wl-head"><span>심볼</span><span>현재가</span><span class="wl-chg">체인지</span><span>변동%</span></div>
       <div id="wl"></div>
       <div class="detail" id="detail"></div>
     </div>
@@ -295,6 +338,21 @@ svg{display:block}
 <div class="menu tfmenu" id="tfMenu" hidden></div>
 <div class="more" id="moreMenu" hidden></div>
 <div class="menu ctx" id="ctxMenu" hidden role="menu"></div>
+<div class="menu appmenu" id="appMenu" hidden role="menu">
+  <div class="who"><i>W</i>웨이브뷰</div>
+  <div style="padding-top:6px">
+    <button class="row2" data-app="set"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 1.8l6.2 3.6v7.2L9 16.2 2.8 12.6V5.4z"/><circle cx="9" cy="9" r="2.4"/></svg>세팅<kbd>Ctrl + ,</kbd></button>
+  </div>
+  <hr>
+  <div class="row2"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>줌
+    <span class="zoom"><button data-app="zout" aria-label="축소">−</button><span id="zoomVal">100%</span><button data-app="zin" aria-label="확대">+</button></span></div>
+  <hr>
+  <div class="themes" role="group" aria-label="테마">
+    <button data-theme="system"><span class="pv sy"><span></span><span></span><span></span></span>시스템</button>
+    <button data-theme="dark"><span class="pv dk"><span></span><span></span><span></span></span>다크테마</button>
+    <button data-theme="light"><span class="pv lt"><span></span><span></span><span></span></span>라이트테마</button>
+  </div>
+</div>
 
 <div class="modal" id="pmModal" hidden>
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
@@ -468,7 +526,7 @@ function sessOf(t){
 function sessions(bars, tf){
   const out = []; let cur = null;
   bars.forEach((b, i) => {
-    const s = tf <= 14400 ? sessOf(b.time) : null;
+    const s = tf <= 14400 ? sessOf(b.time + (tf >= 3600 ? tf / 2 : 0)) : null;
     if (s && cur && cur.s === s && b.time - cur.t1 <= tf){
       cur.i1 = i; cur.t1 = b.time; cur.hi = Math.max(cur.hi, b.high); cur.lo = Math.min(cur.lo, b.low); cur.c = b.close;
     } else {
@@ -565,27 +623,33 @@ function renderMarkers(){
 }
 let refLines = [], lowLine = null;
 function renderRefLines(){
-  refLines.forEach(l => candle.removePriceLine(l)); refLines = [];
+  S.usLine = null;
   if (S.show.us){
     const last = S.bars.length - 1;
     const us = sessions(S.bars, Math.min(S.tf[1], 14400)).filter(b => b.s === 'us' && b.i1 < last);
     const y = us[us.length - 1];
-    if (y){
-      refLines.push(candle.createPriceLine({ price:y.hi, color:'#00e676', lineWidth:1, lineStyle:0, title:'' }));
-      refLines.push(candle.createPriceLine({ price:y.lo, color:C.down, lineWidth:1, lineStyle:0, title:'' }));
-    }
+    if (y) S.usLine = { hi:y.hi, lo:y.lo, i1:y.i1 };
   }
   renderLowLine();
 }
 function renderLowLine(){
   if (lowLine){ candle.removePriceLine(lowLine); lowLine = null; }
+  S.lowPrice = null;
   if (!S.show.low || !S.bars.length) return;
-  const lo = Math.min(...S.bars.slice(-P.low.len).map(b => b.low));
-  lowLine = candle.createPriceLine({ price:lo, color:'#4caf50', lineWidth:1, lineStyle:2, title:'최저점꼬리' });
+  S.lowPrice = Math.min(...S.bars.slice(-P.low.len).map(b => b.low));
+  lowLine = candle.createPriceLine({ price:S.lowPrice, color:'#9598a1', lineWidth:1, lineStyle:2, title:'', axisLabelColor:'#4caf50', axisLabelTextColor:'#ffffff' });
+}
+function lineLabel(text, y, color, pw){
+  ctx.font = '12px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  const tw = ctx.measureText(text).width;
+  ctx.fillStyle = C.bg; ctx.fillRect(pw - tw - 14, y - 8, tw + 8, 16);
+  ctx.fillStyle = color; ctx.fillText(text, pw - 10, y);
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'start';
 }
 
 /* ---------- 오버레이: 세션박스 + 추세선 ---------- */
 const cv = $('#overlay'), ctx = cv.getContext('2d');
+const DASH = { 0:[], 1:[2, 3], 2:[7, 5] };
 function timeToIdx(t){
   const b = S.bars, n = b.length; if (!n) return null;
   if (t >= b[n-1].time) return n - 1 + (t - b[n-1].time) / S.tf[1];
@@ -628,14 +692,38 @@ function drawOverlay(){
     ctx.textAlign = 'start';
   }
 
+  // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
+  if (S.usLine){
+    const x0 = ts.logicalToCoordinate(S.usLine.i1 + 1);
+    for (const [pr, col] of [[S.usLine.hi, '#00e676'], [S.usLine.lo, C.down]]){
+      const y = candle.priceToCoordinate(pr); if (x0 == null || y == null) continue;
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(Math.max(0, x0), Math.round(y) + .5); ctx.lineTo(pw, Math.round(y) + .5); ctx.stroke();
+    }
+  }
+  if (S.lowPrice != null){ const y = candle.priceToCoordinate(S.lowPrice); if (y != null) lineLabel('최저점꼬리', y, '#4caf50', pw); }
+  // 사용자 수평선 · 얼러트: 글씨와 선택 손잡이
+  for (const o of [...S.hlines, ...S.alerts]){
+    const y = candle.priceToCoordinate(o.price); if (y == null) continue;
+    if (o.text) lineLabel(o.text, y, o.color, pw);
+    if (o === S.sel || o === S.hover){
+      let x = o.t != null ? ts.logicalToCoordinate(timeToIdx(o.t)) : null; if (x == null) x = pw * .6;
+      ctx.fillStyle = C.bg; ctx.strokeStyle = '#2962ff'; ctx.lineWidth = 1; ctx.setLineDash([]);
+      ctx.fillRect(x - 4, y - 4, 8, 8); ctx.strokeRect(x - 3.5, y - 3.5, 8, 8);
+    }
+  }
+
   const lines = S.trends.slice(); if (S.draft && S.draft.b) lines.push(S.draft);
   for (const t of lines){
     const xa = ts.logicalToCoordinate(timeToIdx(t.a.t)), xb = ts.logicalToCoordinate(timeToIdx(t.b.t));
     const ya = candle.priceToCoordinate(t.a.p), yb = candle.priceToCoordinate(t.b.p);
     if ([xa, xb, ya, yb].some(v => v == null)) continue;
-    ctx.strokeStyle = C.trend; ctx.lineWidth = t === S.sel ? 2 : 1; ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke();
+    ctx.strokeStyle = t.color || C.trend; ctx.lineWidth = t.width || 1; ctx.setLineDash(DASH[t.style || 0]);
+    ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke(); ctx.setLineDash([]);
+    if (t.text){ ctx.font = '12px -apple-system, "Malgun Gothic", sans-serif'; ctx.fillStyle = t.color || C.trend; ctx.fillText(t.text, xb + 6, yb - 6); }
+    ctx.lineWidth = 1; ctx.strokeStyle = '#2962ff';
     ctx.fillStyle = C.bg;
-    if (t === S.sel || t === S.draft) for (const [x, y] of [[xa, ya], [xb, yb]]){ ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill(); ctx.stroke(); }
+    if (t === S.sel || t === S.draft || t === S.hover) for (const [x, y] of [[xa, ya], [xb, yb]]){ ctx.fillRect(x - 4, y - 4, 8, 8); ctx.strokeRect(x - 3.5, y - 3.5, 8, 8); }
   }
   ctx.restore();
   requestAnimationFrame(drawOverlay);
@@ -889,7 +977,7 @@ function openSocket(sym, tf, id){
   } catch { setFeed(false); startSim(); }
 }
 async function load(){
-  const id = ++S.loadId; stopFeed(); exitReplayUI(); S.draft = null;
+  const id = ++S.loadId; stopFeed(); exitReplayUI(); S.draft = null; S.sel = null; S.yPan = null; renderDrawBar();
   setFeed(false, '연결 중');
   const { sym, tf } = S;
   let live = false, bars;
@@ -965,14 +1053,19 @@ function toast(title, msg, isAlert){
 
 /* ---------- 그리기 (수평선 · 추세선 · 가격 얼러트) ---------- */
 const uid = () => Math.random().toString(36).slice(2);
-function addAlert(price){
-  const line = candle.createPriceLine({ price, color:C.signal, lineWidth:1, lineStyle:2, title:'얼러트' });
-  S.alerts.push({ id:uid(), price, line }); renderLists(); saveDrawings();
+function lineOpts(o){
+  return { price:o.price, color:o.color, lineWidth:o.width, lineStyle:o.style, title:'', axisLabelVisible:true,
+    axisLabelColor:o.color, axisLabelTextColor: /^#f/i.test(o.color) && o.color.length === 7 && parseInt(o.color.slice(1, 3), 16) > 200 && parseInt(o.color.slice(3, 5), 16) > 180 ? '#131313' : '#ffffff' };
 }
-function addHLine(price){
-  const line = candle.createPriceLine({ price, color:C.trend, lineWidth:1, lineStyle:0, title:'' });
-  S.hlines.push({ id:uid(), price, line }); saveDrawings();
+function makeLine(kind, d){
+  const def = kind === 'alert' ? { color:C.signal, width:1, style:2, text:'얼러트' } : { color:C.trend, width:1, style:0, text:'' };
+  const o = { id:uid(), kind, ...def, ...d };
+  o.line = candle.createPriceLine(lineOpts(o));
+  return o;
 }
+function addAlert(price, d = {}){ S.alerts.push(makeLine('alert', { price, ...d })); renderLists(); saveDrawings(); }
+function addHLine(price, d = {}){ S.hlines.push(makeLine('hline', { price, t:ctxTime, ...d })); saveDrawings(); }
+let ctxTime = null;
 function renderLists(){
   $('#alertList').innerHTML = S.alerts.length
     ? S.alerts.map(a => `<li><span>${S.sym.id} 가격 ${fmt(a.price)} 교차</span><button class="x" data-a="${a.id}">삭제</button></li>`).join('')
@@ -984,8 +1077,10 @@ $('#alertList').addEventListener('click', e => {
   S.alerts = S.alerts.filter(v => v !== x); renderLists(); saveDrawings();
 });
 const dkey = () => `draw:${S.sym.id}`;
+const packLine = x => ({ p:x.price, c:x.color, w:x.width, s:x.style, x:x.text, t:x.t });
+const unpackLine = d => typeof d === 'number' ? { price:d } : { price:d.p, color:d.c, width:d.w, style:d.s, text:d.x, t:d.t };
 function saveDrawings(){
-  store.set(dkey(), { a:S.alerts.map(x => x.price), h:S.hlines.map(x => x.price), t:S.trends.map(x => ({ a:x.a, b:x.b })) });
+  store.set(dkey(), { a:S.alerts.map(packLine), h:S.hlines.map(packLine), t:S.trends.map(x => ({ a:x.a, b:x.b, c:x.color, w:x.width, s:x.style, x:x.text })) });
 }
 function clearDrawingObjects(){
   S.alerts.forEach(x => candle.removePriceLine(x.line)); S.hlines.forEach(x => candle.removePriceLine(x.line));
@@ -994,8 +1089,9 @@ function clearDrawingObjects(){
 function restoreDrawings(){
   clearDrawingObjects();
   const d = store.get(dkey(), { a:[], h:[], t:[] });
-  (d.a || []).forEach(addAlert); (d.h || []).forEach(addHLine);
-  S.trends = (d.t || []).map(x => ({ ...x, id:uid() }));
+  S.alerts = (d.a || []).map(v => { const u = unpackLine(v); return makeLine('alert', Object.fromEntries(Object.entries(u).filter(([, x]) => x != null))); });
+  S.hlines = (d.h || []).map(v => { const u = unpackLine(v); return makeLine('hline', Object.fromEntries(Object.entries(u).filter(([, x]) => x != null))); });
+  S.trends = (d.t || []).map(x => ({ id:uid(), a:x.a, b:x.b, color:x.c || C.trend, width:x.w || 1, style:x.s || 0, text:x.x || '' }));
   renderLists();
 }
 $('#clearBtn').onclick = () => {
@@ -1028,9 +1124,9 @@ chart.subscribeClick(p => {
     if (p.logical == null) return;
     const pt = { t:idxToTime(p.logical), p:r };
     if (!S.draft){ S.draft = { a:pt, b:null }; $('#hint').textContent = '끝점을 클릭하세요 · Esc 취소'; return; }
-    S.trends.push({ id:uid(), a:S.draft.a, b:pt }); saveDrawings(); setMode('cursor'); return;
+    S.trends.push({ id:uid(), a:S.draft.a, b:pt, color:C.trend, width:1, style:0, text:'' }); saveDrawings(); setMode('cursor'); return;
   }
-  if (S.mode === 'hline') addHLine(r); else addAlert(r);
+  if (S.mode === 'hline') addHLine(r, { t:p.time ?? null }); else addAlert(r);
   setMode('cursor');
 });
 
@@ -1056,17 +1152,60 @@ function hitTest(x, y){
     for (const o of arr){ const yy = candle.priceToCoordinate(o.price); if (yy != null && Math.abs(yy - y) < 5) return { kind, obj:o }; }
   return null;
 }
-function selectLine(h){
-  if (S.sel && S.sel.line) S.sel.line.applyOptions({ lineWidth:1 });
-  S.sel = h ? h.obj : null;
-  if (S.sel && S.sel.line) S.sel.line.applyOptions({ lineWidth:2 });
+const SWATCH = ['#2962ff', '#f23645', '#089981', '#ff9800', '#f5c518', '#ffffff', '#9598a1', '#9c27b0'];
+function selectLine(h){ S.sel = h ? h.obj : null; renderDrawBar(); }
+function renderDrawBar(){
+  const o = S.sel, bar = $('#drawBar');
+  if (!o){ bar.hidden = true; return; }
+  const wIc = w => `<span class="wv" style="height:${w}px"></span>`;
+  const stIc = st => `<svg viewBox="0 0 24 8" width="24" height="8"><line x1="1" y1="4" x2="23" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="${st === 1 ? '2 3' : st === 2 ? '6 4' : ''}"/></svg>`;
+  bar.innerHTML = SWATCH.map(c => `<button class="sw" data-c="${c}" style="background:${c}" aria-pressed="${o.color === c}" title="색"></button>`).join('')
+    + '<span class="sep"></span>' + [1, 2, 3, 4].map(w => `<button data-w="${w}" aria-pressed="${o.width === w}" title="${w}px">${wIc(w)}</button>`).join('')
+    + '<span class="sep"></span>' + [[0, '실선'], [2, '파선'], [1, '점선']].map(([st, n]) => `<button data-s="${st}" aria-pressed="${o.style === st}" title="${n}">${stIc(st)}</button>`).join('')
+    + `<span class="sep"></span><input id="dbText" placeholder="글씨 (예: 지지선)" value="${(o.text || '').replace(/"/g, '&quot;')}" aria-label="선에 표시할 글씨">`
+    + `<span class="sep"></span><button data-del title="지우기 (Delete)">${TRASH}</button>`;
+  bar.hidden = false;
 }
-let drag = null;
+function applySel(){
+  const o = S.sel; if (!o) return;
+  if (o.line) o.line.applyOptions(lineOpts(o));
+  saveDrawings(); renderDrawBar();
+}
+function deleteSel(){
+  const o = S.sel; if (!o) return;
+  if (o.line){ candle.removePriceLine(o.line); S.alerts = S.alerts.filter(x => x !== o); S.hlines = S.hlines.filter(x => x !== o); }
+  else S.trends = S.trends.filter(x => x !== o);
+  S.sel = null; renderDrawBar(); saveDrawings(); renderLists();
+}
+$('#drawBar').addEventListener('pointerdown', e => e.stopPropagation());
+$('#drawBar').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !S.sel) return;
+  if (b.dataset.c) S.sel.color = b.dataset.c;
+  else if (b.dataset.w) S.sel.width = +b.dataset.w;
+  else if (b.dataset.s) S.sel.style = +b.dataset.s;
+  else if ('del' in b.dataset) return deleteSel();
+  applySel();
+});
+$('#drawBar').addEventListener('input', e => { if (e.target.id === 'dbText' && S.sel){ S.sel.text = e.target.value; saveDrawings(); } });
+let drag = null, pan = null;
+S.yPan = null;
+const panProvider = orig => S.yPan ? { priceRange:{ minValue:S.yPan.min, maxValue:S.yPan.max } } : orig();
+[candle, ...Object.values(L)].forEach(sr => sr.applyOptions({ autoscaleInfoProvider:panProvider }));
+function paneH(){ const ts = chart.timeScale(); return wrapEl.clientHeight - (ts.options().visible ? ts.height() : 0); }
+function clearPan(){ S.yPan = null; chart.priceScale('right').applyOptions({ autoScale:true }); }
 const roundP = p => Math.round(p * 10 ** S.sym.dp) / 10 ** S.sym.dp;
 wrapEl.addEventListener('pointerdown', e => {
-  if (S.mode !== 'cursor' || e.button !== 0) return;
+  if (S.mode !== 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
   const { x, y } = ptOf(e), h = hitTest(x, y);
-  if (!h){ selectLine(null); return; }
+  if (!h){
+    selectLine(null);
+    if (x < wrapEl.clientWidth - chart.priceScale('right').width()){
+      const H = paneH(), sm = chart.priceScale('right').options().scaleMargins;
+      const max0 = candle.coordinateToPrice(H * sm.top), min0 = candle.coordinateToPrice(H * (1 - sm.bottom));
+      if (max0 != null && min0 != null) pan = { y0:y, min0, max0, k:(max0 - min0) / (H * (1 - sm.top - sm.bottom)), on:false };
+    }
+    return;
+  }
   e.preventDefault(); e.stopPropagation();
   selectLine(h);
   chart.applyOptions({ handleScroll:false, handleScale:false });
@@ -1077,9 +1216,18 @@ wrapEl.addEventListener('pointerdown', e => {
 }, true);
 wrapEl.addEventListener('pointermove', e => {
   const { x, y } = ptOf(e);
+  if (pan){
+    const dy = y - pan.y0;
+    if (!pan.on && Math.abs(dy) < 4) return;
+    pan.on = true;
+    S.yPan = { min:pan.min0 + dy * pan.k, max:pan.max0 + dy * pan.k };
+    chart.priceScale('right').applyOptions({ autoScale:true });
+    return;
+  }
   if (!drag){
     if (S.mode !== 'cursor') return;
     const h = hitTest(x, y);
+    S.hover = h ? h.obj : null;
     wrapEl.classList.toggle('grab-ns', !!h && h.kind !== 'trend');
     wrapEl.classList.toggle('grab-move', !!h && h.kind === 'trend' && !h.end);
     wrapEl.classList.toggle('grab-pt', !!h && h.kind === 'trend' && !!h.end);
@@ -1098,6 +1246,7 @@ wrapEl.addEventListener('pointermove', e => {
   }
 }, true);
 const endDrag = e => {
+  pan = null;
   if (!drag) return;
   e.stopPropagation();
   chart.applyOptions({ handleScroll:true, handleScale:true });
@@ -1107,26 +1256,25 @@ const endDrag = e => {
 wrapEl.addEventListener('pointerup', endDrag, true);
 wrapEl.addEventListener('pointercancel', endDrag, true);
 wrapEl.addEventListener('mousedown', e => { if (drag) e.stopPropagation(); }, true);
+wrapEl.addEventListener('dblclick', e => { const { x } = ptOf(e); if (x > wrapEl.clientWidth - chart.priceScale('right').width()) clearPan(); });
 document.addEventListener('keydown', e => {
   if (!S.sel || !['Delete', 'Backspace'].includes(e.key) || e.target.closest('input,select,textarea')) return;
-  const o = S.sel;
-  if (o.line){ candle.removePriceLine(o.line); S.alerts = S.alerts.filter(x => x !== o); S.hlines = S.hlines.filter(x => x !== o); }
-  else S.trends = S.trends.filter(x => x !== o);
-  S.sel = null; saveDrawings(); renderLists();
+  deleteSel();
 });
 
 /* ---------- 오른쪽 클릭 메뉴 ---------- */
 const RESET_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 7.5A6 6 0 1 1 4 12"/><path d="M4 3.5v4h4"/></svg>';
 let ctxPrice = null;
-function resetView(){ const n = S.bars.length; chart.timeScale().setVisibleLogicalRange({ from:n - 140, to:n + 12 }); chart.priceScale('right').applyOptions({ autoScale:true }); fitLegend(); }
+function resetView(){ clearPan(); const n = S.bars.length; chart.timeScale().setVisibleLogicalRange({ from:n - 140, to:n + 12 }); chart.priceScale('right').applyOptions({ autoScale:true }); fitLegend(); }
 function priceAtCrosshair(){ return ctxPrice ?? S.bars[S.bars.length - 1].close; }
 async function copyText(t){ try { await navigator.clipboard.writeText(t); toast('복사됨', t); } catch { toast('복사하지 못했습니다', `직접 선택해 복사하세요: ${t}`); } }
-function clearAllDrawings(){ S.hlines.forEach(x => candle.removePriceLine(x.line)); S.hlines = []; S.trends = []; S.sel = null; saveDrawings(); }
+function clearAllDrawings(){ S.hlines.forEach(x => candle.removePriceLine(x.line)); S.hlines = []; S.trends = []; S.sel = null; renderDrawBar(); saveDrawings(); }
 function hideAllInds(){ IND.forEach(([k]) => { S.show[k] = false; }); store.set('show', S.show); applyVisibility(); }
 wrapEl.addEventListener('contextmenu', e => {
   e.preventDefault();
   const { y } = ptOf(e), pr = candle.coordinateToPrice(y);
   ctxPrice = pr == null ? null : roundP(pr);
+  { const lg = chart.timeScale().coordinateToLogical(ptOf(e).x); ctxTime = lg == null ? null : idxToTime(lg); }
   const px = fmt(priceAtCrosshair()), nd = S.hlines.length + S.trends.length, ni = IND.filter(([k]) => S.show[k]).length;
   const m = $('#ctxMenu');
   m.innerHTML = `<button data-c="reset"><i>${RESET_IC}</i>차트 보기 재설정<kbd>Alt + R</kbd></button><hr>
@@ -1162,6 +1310,56 @@ document.addEventListener('keydown', e => {
   else if (k === 'a'){ e.preventDefault(); const pr = priceAtCrosshair(); addAlert(pr); toast('얼러트 만듦', `${S.sym.id} ${fmt(pr)} 교차 시 알립니다.`); }
   else if (k === 'h'){ e.preventDefault(); addHLine(priceAtCrosshair()); }
 });
+
+/* ---------- 앱 메뉴: 테마 · 줌 · 세팅 ---------- */
+const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const t = store.get('theme', 'dark'), dark = t === 'dark' || (t === 'system' && mqDark.matches);
+  document.documentElement.setAttribute('data-wv', dark ? 'dark' : 'light');
+  document.querySelectorAll('[data-theme]').forEach(b => b.setAttribute('aria-pressed', b.dataset.theme === t));
+}
+mqDark.addEventListener('change', applyTheme);
+let zoom = store.get('zoom', 1);
+function applyZoom(){ document.body.style.zoom = zoom; $('#zoomVal').textContent = Math.round(zoom * 100) + '%'; }
+$('#appBtn').onclick = e => {
+  e.stopPropagation(); const m = $('#appMenu');
+  if (!m.hidden){ m.hidden = true; return; }
+  m.hidden = false; const r = $('#appBtn').getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(r.right - 250, window.innerWidth - 258)) + 'px'; m.style.top = (r.bottom + 4) + 'px';
+};
+$('#appMenu').addEventListener('click', e => {
+  e.stopPropagation();
+  const th = e.target.closest('[data-theme]'); if (th){ store.set('theme', th.dataset.theme); applyTheme(); return; }
+  const a = e.target.closest('[data-app]')?.dataset.app;
+  if (a === 'set'){ $('#appMenu').hidden = true; fillSettings(); $('#setModal').hidden = false; }
+  else if (a === 'zin' || a === 'zout'){ zoom = Math.min(1.5, Math.max(.7, Math.round((zoom + (a === 'zin' ? .1 : -.1)) * 10) / 10)); store.set('zoom', zoom); applyZoom(); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('#appMenu')) $('#appMenu').hidden = true; });
+document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === ','){ e.preventDefault(); fillSettings(); $('#setModal').hidden = false; } });
+applyTheme(); applyZoom();
+
+/* ---------- 차트 / 패널 경계 끌기 ---------- */
+{
+  const app = document.querySelector('.app'), sp = $('#split'), panel = document.querySelector('.panel');
+  let pw = store.get('panelW', 340);
+  const place = () => {
+    app.style.setProperty('--panel-w', pw + 'px');
+    const r = panel.getBoundingClientRect(), a = app.getBoundingClientRect();
+    sp.style.left = (r.left - a.left) + 'px';
+    panel.classList.toggle('narrow', pw < 320);
+  };
+  sp.addEventListener('pointerdown', e => {
+    e.preventDefault(); sp.setPointerCapture(e.pointerId); sp.classList.add('on');
+    const x0 = e.clientX, w0 = pw;
+    const mv = ev => { pw = Math.round(Math.min(700, Math.max(220, w0 - (ev.clientX - x0)) )); place(); };
+    const up = () => { sp.classList.remove('on'); sp.removeEventListener('pointermove', mv); sp.removeEventListener('pointerup', up); store.set('panelW', pw); };
+    sp.addEventListener('pointermove', mv); sp.addEventListener('pointerup', up);
+  });
+  sp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight'){ pw = Math.min(700, Math.max(220, pw + (e.key === 'ArrowLeft' ? 20 : -20))); place(); store.set('panelW', pw); }
+  });
+  new ResizeObserver(place).observe(app); place();
+}
 
 /* ---------- 텔레그램 / 설정 ---------- */
 async function sendTelegram(text){
@@ -1294,7 +1492,7 @@ function updateQuote(){
 function renderWL(){
   $('#wl').innerHTML = SYMS.map(s => {
     const q = S.quotes[s.id], cls = q && q.c < 0 ? 'dnc' : 'upc';
-    return `<button class="wl-row" data-s="${s.id}" aria-current="${s === S.sym}"><span class="s"><i style="background:${s.icon}"></i>${s.id}</span><span>${q ? fmt(q.p, s.dp) : '—'}</span><span class="${cls}">${q ? (q.c >= 0 ? '+' : '') + q.c.toFixed(2) + '%' : ''}</span></button>`;
+    return `<button class="wl-row" data-s="${s.id}" aria-current="${s === S.sym}"><span class="s"><i style="background:${s.icon}"></i>${s.id}</span><span>${q ? fmt(q.p, s.dp) : '—'}</span><span class="wl-chg ${cls}">${q ? (q.ch >= 0 ? '+' : '') + fmt(q.ch, s.dp) : ''}</span><span class="${cls}">${q ? (q.c >= 0 ? '+' : '') + q.c.toFixed(2) + '%' : ''}</span></button>`;
   }).join('');
   const q = S.quotes[S.sym.id];
   if (q) $('#detail').innerHTML = `<div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px"><i class="coin" style="background:${S.sym.icon}"></i>${S.sym.id}</div><div class="nm">${S.sym.name} · ${S.sym.ex}</div><div class="px">${fmt(q.p)}</div><div class="ch ${q.c < 0 ? 'dnc' : 'upc'}">${q.ch >= 0 ? '+' : ''}${fmt(q.ch)} (${q.c >= 0 ? '+' : ''}${q.c.toFixed(2)}%) <span style="color:var(--sub)">${q.day ? '전일 대비' : '24시간'}</span></div>`;
