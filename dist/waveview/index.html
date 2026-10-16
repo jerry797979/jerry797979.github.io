@@ -687,7 +687,7 @@ function drawOverlay(){
       ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(255,255,255,.75)';
       ctx.beginPath(); ctx.moveTo(x + 3, mid); ctx.lineTo(x + bw - 3, mid); ctx.stroke(); ctx.setLineDash([]);
       const tw = ctx.measureText(names[b.s]).width, cx = x + bw / 2;
-      if (cx - tw / 2 > labelEnd + 4){ ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8); labelEnd = cx + tw / 2; }
+      ctx.fillStyle = '#ffffff'; ctx.fillText(names[b.s], cx, top - 8);
     }
     ctx.textAlign = 'start';
   }
