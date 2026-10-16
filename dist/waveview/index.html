@@ -491,10 +491,10 @@ let SYMS = [
   { id:'BTCUSDT', name:'비트코인 / 테더', ex:'BINANCE', base:97500, dvol:.028, dp:1, feed:'binance', icon:'#f7931a' },
   { id:'ETHUSDT', name:'이더리움 / 테더', ex:'BINANCE', base:3450, dvol:.035, dp:2, feed:'binance', icon:'#627eea' },
 ];
-const DEF_P = { bb:{ len:20, k1:2, k2:4 }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
+const DEF_P = { bb:{ len:20, k1:2, src1:'close', len2:4, k2:4, src2:'open' }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
   ses:{ asia:'0900-1600', eu:'1600-2230', us:'2230-0500' }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{} };
 const SCHEMA = {
-  bb:[['len','기간','int'],['k1','안쪽 배수(σ)','num'],['k2','바깥 배수(σ)','num']],
+  bb:[['len','안쪽 기간','int'],['k1','안쪽 배수(σ)','num'],['src1','안쪽 기준','sel',['close','open','high','low']],['len2','바깥 기간','int'],['k2','바깥 배수(σ)','num'],['src2','바깥 기준','sel',['open','close','high','low']]],
   ma:[['l1','MA1 기간','int'],['l2','MA2 기간','int'],['l3','MA3 기간','int']],
   db:[['band','기준 밴드','sel',['안쪽','바깥']],['mode','마감 조건','sel',['몸통 전체','종가만']]],
   ses:[['asia','아시아 (한국시간)','text'],['eu','유로 (한국시간)','text'],['us','미장 (한국시간)','text']],
@@ -504,7 +504,7 @@ const SCHEMA = {
 const P = {}; { const saved = (() => { try { return JSON.parse(localStorage.getItem('wv:params')) || {}; } catch { return {}; } })();
   for (const k in DEF_P) P[k] = { ...DEF_P[k], ...(saved[k] || {}) }; }
 const pText = {
-  bb: p => `${p.len} ${p.k1} ${p.k2}`, ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
+  bb: p => `${p.len} ${p.k1} ${p.src1} ${p.len2} ${p.k2} ${p.src2}`, ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
   ses: () => '아시아 유로 미장', us: () => '', low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
@@ -559,13 +559,17 @@ function genBars(sym, tf, n = 1500){
 function sma(v, n){ const o = Array(v.length).fill(null); let s = 0; for (let i = 0; i < v.length; i++){ s += v[i]; if (i >= n) s -= v[i-n]; if (i >= n-1) o[i] = s / n; } return o; }
 function compute(bars){
   const c = bars.map(b => b.close), N = c.length;
-  const n = P.bb.len, m = sma(c, n), ui = [], li = [], uo = [], lo = [];
-  for (let i = 0; i < N; i++){
-    if (m[i] == null){ ui.push(null); li.push(null); uo.push(null); lo.push(null); continue; }
-    let s = 0; for (let j = i - n + 1; j <= i; j++) s += (c[j] - m[i]) ** 2;
-    const sd = Math.sqrt(s / n), k1 = P.bb.k1, k2 = P.bb.k2;
-    ui.push(m[i] + k1*sd); li.push(m[i] - k1*sd); uo.push(m[i] + k2*sd); lo.push(m[i] - k2*sd);
-  }
+  const band = (src, n, k) => {
+    const v = bars.map(b => b[src] ?? b.close), m = sma(v, n), u = [], l = [];
+    for (let i = 0; i < N; i++){
+      if (m[i] == null){ u.push(null); l.push(null); continue; }
+      let s2 = 0; for (let j = i - n + 1; j <= i; j++) s2 += (v[j] - m[i]) ** 2;
+      const sd = Math.sqrt(s2 / n); u.push(m[i] + k * sd); l.push(m[i] - k * sd);
+    }
+    return { m, u, l };
+  };
+  const b1 = band(P.bb.src1, P.bb.len, P.bb.k1), b2 = band(P.bb.src2, P.bb.len2, P.bb.k2);
+  const m = b1.m, ui = b1.u, li = b1.l, uo = b2.u, lo = b2.l;
   const m14 = sma(c, P.di.len);
   const di = c.map((x, i) => m14[i] == null ? null : (x - m14[i]) / m14[i] * 100);
   const dn = [], up = [];
@@ -581,6 +585,12 @@ function compute(bars){
 const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
 const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
 
+// 진행 중인 세션이 끝나는 시각 (한국시간 기준 초)
+function sessEnd(k, t){
+  const r = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(String(P.ses[k]).replace(/:/g, '')); if (!r) return null;
+  const a = +r[1] * 60 + +r[2], z = +r[3] * 60 + +r[4], day = Math.floor(t / 86400) * 86400, m = (t - day) / 60;
+  return day + z * 60 + (a > z && m >= a ? 86400 : 0);
+}
 function sessOf(t){
   const d = new Date(t * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
   for (const k of ['asia','eu','us']){
@@ -780,8 +790,10 @@ function drawOverlay(){
     ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 1;
     let labelEnd = -Infinity;
     for (const b of S.sess){
-      if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1)) continue;
-      const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(b.i1);
+      if (range && (b.i1 < range.from - 1 || b.i0 > range.to + 1) && b.i1 !== S.bars.length - 1) continue;
+      let i1 = b.i1;
+      if (b.i1 === S.bars.length - 1){ const e = sessEnd(b.s, S.bars[b.i1].time); if (e) i1 = Math.max(b.i1, b.i1 + Math.ceil((e - S.bars[b.i1].time) / S.tf[1]) - 1); }
+      const x1 = ts.logicalToCoordinate(b.i0), x2 = ts.logicalToCoordinate(i1);
       const yt = candle.priceToCoordinate(Math.max(b.o, b.c)), yb = candle.priceToCoordinate(Math.min(b.o, b.c));
       if ([x1, x2, yt, yb].some(v => v == null)) continue;
       const rgb = C[b.s], x = Math.round(x1 - half) + .5, bw = Math.max(2, Math.round(x2 - x1 + half * 2) - 1);
