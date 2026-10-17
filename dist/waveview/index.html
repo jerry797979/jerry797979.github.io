@@ -142,10 +142,11 @@ svg{display:block}
 .axplus:hover{background:#434651}
 .axplus svg{width:18px;height:18px}
 
-.ktr{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;border-collapse:collapse;background:rgba(0,0,0,.3);pointer-events:none;font-size:13px;color:#fff;text-align:center}
+.ktr{position:absolute;right:70px;bottom:40px;z-index:5;border-collapse:collapse;background:rgba(0,0,0,.3);cursor:grab;touch-action:none;user-select:none;font-size:13px;color:#fff;text-align:center}
 .ktr td{border:1px solid rgba(120,123,134,.5);padding:4px 10px;line-height:1.35;white-space:nowrap}
 .ktr td b{font-weight:400}
 .ktr td.y{color:#f5c518}
+.ktr.drag{cursor:grabbing;outline:1px dashed #2962ff}
 #ktrName{font-size:14px}
 
 .seg{display:flex;gap:4px;background:var(--hover);border-radius:6px;padding:3px;margin:10px 12px}
@@ -1114,7 +1115,28 @@ function renderKTR(){
   const f = x => String(Number(x.toFixed(2)));
   $('#ktrName').textContent = '세션: ' + name; $('#ktrName').style.color = col;
   $('#ktr05').textContent = f(v * .5); $('#ktr10').textContent = f(v); $('#ktr20').textContent = f(v * 2);
-  el.hidden = false;
+  el.hidden = false; placeKTR();
+}
+// KTR 표: 기본은 오른쪽 아래(가격축 옆). 끌어서 원하는 곳으로 옮기면 그 자리를 기억한다 (더블클릭하면 기본 자리로)
+function placeKTR(){
+  const el = $('#ktr'), w = $('#mainWrap'); if (el.hidden) return;
+  const ps = chart.priceScale('right').width(), ts = chart.timeScale().options().visible ? chart.timeScale().height() : 0, pos = store.get('ktrPos', null);
+  const r = pos ? pos.r : ps + 12, b = pos ? pos.b : ts + 12;
+  el.style.right = Math.max(0, Math.min(w.clientWidth - el.offsetWidth, r)) + 'px';
+  el.style.bottom = Math.max(0, Math.min(w.clientHeight - el.offsetHeight, b)) + 'px';
+}
+{
+  const el = $('#ktr'), w = $('#mainWrap');
+  el.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); el.setPointerCapture(e.pointerId); el.classList.add('drag');
+    const r0 = parseFloat(el.style.right) || 0, b0 = parseFloat(el.style.bottom) || 0, x0 = e.clientX, y0 = e.clientY;
+    const mv = ev => { store.set('ktrPos', { r:r0 - (ev.clientX - x0), b:b0 - (ev.clientY - y0) }); placeKTR(); };
+    el.addEventListener('pointermove', mv);
+    el.addEventListener('pointerup', () => { el.removeEventListener('pointermove', mv); el.classList.remove('drag'); }, { once:true });
+  });
+  el.addEventListener('dblclick', e => { e.stopPropagation(); store.set('ktrPos', null); placeKTR(); });
+  el.title = '끌어서 옮기기 · 더블클릭하면 오른쪽 아래로';
+  new ResizeObserver(placeKTR).observe(w);
 }
 
 /* ---------- 경제지표 발표 ---------- */
@@ -1552,7 +1574,7 @@ chart.subscribeCrosshairMove(p => {
   if (p && p.time){
     const i = S.bars.findIndex(b => b.time === p.time);
     const v = i >= 0 ? S.ind.di[i] : null;
-    if (v != null) diChart.setCrosshairPosition(v, p.time, diSeries); else diChart.clearCrosshairPosition();
+    try { if (v != null) diChart.setCrosshairPosition(v, p.time, diSeries); else diChart.clearCrosshairPosition(); } catch {}
   } else diChart.clearCrosshairPosition();
 });
 function renderOhlc(){
@@ -2061,7 +2083,7 @@ function onChartClick(p){
   let down = null;
   const wrap = $('#mainWrap');
   wrap.addEventListener('pointerdown', e => {
-    if (S.mode === 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
+    if (S.mode === 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar, #ktr')) return;
     down = { x:e.clientX, y:e.clientY };
   }, true);
   wrap.addEventListener('pointerup', e => {
@@ -2082,7 +2104,7 @@ function onChartClick(p){
     const l = chart.timeScale().coordinateToLogical(x), p = candle.coordinateToPrice(y); if (l == null || p == null) return null;
     const fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p }; };
   wrap.addEventListener('pointerdown', e => {
-    if ((S.mode !== 'brush' && S.mode !== 'hl') || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
+    if ((S.mode !== 'brush' && S.mode !== 'hl') || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar, #ktr')) return;
     const q = toPt(e); if (!q) return;
     e.preventDefault(); e.stopPropagation(); wrap.setPointerCapture(e.pointerId);
     chart.applyOptions({ handleScroll:false, handleScale:false });
@@ -2223,7 +2245,7 @@ function paneH(){ const ts = chart.timeScale(); return wrapEl.clientHeight - (ts
 function clearPan(){ S.yPan = null; chart.priceScale('right').applyOptions({ autoScale:true }); }
 const roundP = p => Math.round(p * 10 ** S.sym.dp) / 10 ** S.sym.dp;
 wrapEl.addEventListener('pointerdown', e => {
-  if (S.mode !== 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
+  if (S.mode !== 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar, #ktr')) return;
   S.measure = null;
   const { x, y } = ptOf(e), h = hitTest(x, y);
   if (!h){
