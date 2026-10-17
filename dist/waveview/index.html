@@ -197,6 +197,10 @@ svg{display:block}
 .warn{border:1px solid #ff9800;background:rgba(255,152,0,.08);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.6}
 @media (max-width:900px){.btbody{grid-template-columns:1fr;overflow:auto}.btform{border-right:0}.kpis{grid-template-columns:repeat(2,1fr)}}
 
+.tgflow{border:1px solid var(--border);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;line-height:1.6}
+.tgflow .btn{display:inline-grid;place-items:center;text-decoration:none;color:#fff;align-self:flex-start}
+.tgflow.ok{border-color:#22ab94;background:rgba(34,171,148,.08)}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -486,12 +490,12 @@ svg{display:block}
       <div class="field"><label for="setMt5Url">MT5 브리지 주소</label><input class="inp" id="setMt5Url" autocomplete="off" placeholder="http://127.0.0.1:8765"></div>
       <div class="field"><label for="setTd">Twelve Data API 키 (금·나스닥 실시간 시세)</label><input class="inp" id="setTd" autocomplete="off" placeholder="twelvedata.com 에서 무료 발급"></div>
       <div class="field"><label for="setPoll">시세 갱신 주기 (초)</label><input class="inp" id="setPoll" inputmode="numeric" placeholder="120"></div>
-      <div class="field"><label for="setTg">텔레그램 봇 토큰</label><input class="inp" id="setTg" autocomplete="off" placeholder="123456:ABC-..."></div>
-      <div class="field"><label for="setChat">텔레그램 채팅 ID</label><input class="inp" id="setChat" autocomplete="off" placeholder="봇에게 메시지를 보낸 뒤 '채팅 ID 찾기'"></div>
+      <div class="field"><label for="setTg">텔레그램 봇 토큰 (붙여 넣으면 나머지는 자동)</label><input class="inp" id="setTg" autocomplete="off" placeholder="123456:ABC-..."></div>
+      <div id="tgFlow" class="tgflow" hidden></div>
+      <div class="field"><label for="setChat">텔레그램 채팅 ID (자동으로 채워집니다)</label><input class="inp" id="setChat" autocomplete="off" placeholder="자동"></div>
       <div class="note" style="line-height:1.7"><b style="color:var(--text)">텔레그램 봇 만들기 (처음 한 번)</b><br>
-        ① 텔레그램에서 <b>@BotFather</b> 검색 → 대화 시작 → <b>/newbot</b> 입력<br>
-        ② 봇 이름과 아이디(끝이 bot)를 정하면 <b>토큰</b>(123456:ABC… 모양)을 줍니다 → 위 칸에 붙여넣기<br>
-        ③ 만든 봇을 검색해서 아무 말이나 한 번 보내기 → 아래 <b>채팅 ID 찾기</b> → <b>텔레그램 테스트</b> → <b>저장</b><br>
+        ① 텔레그램에서 <b>@BotFather</b> 검색 → <b>/newbot</b> 입력 → 봇 이름 입력 → 아이디 입력(끝이 bot, 예: waveview_kim_bot)<br>
+        ② 받은 <b>토큰</b>(123456:ABC… 모양)을 위 칸에 붙여 넣기 → 나오는 버튼으로 봇을 열어 <b>시작</b> → 끝<br>
         한텍 MT5 가 연결돼 있으면 웨이브뷰 창을 닫아도 PC 연결 프로그램이 돌파 더블비를 24시간 보내 줍니다.</div>
       <p class="note">차트 엔진: <a href="https://www.tradingview.com/lightweight-charts/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a></p>
     </form>
@@ -2485,10 +2489,45 @@ async function sendTelegram(text){
 }
 function fillSettings(){ $('#setMt5').checked = !!S.cfg.mt5; $('#setMt5Url').value = S.cfg.mt5url; $('#setTd').value = S.cfg.td; $('#setPoll').value = S.cfg.poll; $('#setTg').value = S.cfg.tg; $('#setChat').value = S.cfg.chat; }
 function readSettings(){ S.cfg = { mt5:$('#setMt5').checked, mt5url:($('#setMt5Url').value.trim() || 'http://127.0.0.1:8765').replace(/\/+$/, ''), td:$('#setTd').value.trim(), poll:Math.max(15, parseInt($('#setPoll').value, 10) || 120), tg:$('#setTg').value.trim(), chat:$('#setChat').value.trim() }; store.set('cfg', S.cfg); }
-$('#setBtn').onclick = () => { fillSettings(); $('#setModal').hidden = false; $('#setTd').focus(); };
+$('#setBtn').onclick = () => { fillSettings(); $('#setModal').hidden = false; tgAuto(); };
 $('#setClose').onclick = () => { $('#setModal').hidden = true; };
 $('#setModal').addEventListener('click', e => { if (e.target.id === 'setModal') $('#setModal').hidden = true; });
 $('#setForm').addEventListener('submit', async e => { e.preventDefault(); readSettings(); syncBridge(); $('#setModal').hidden = true; toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); await initMT5(); load(); });
+/* 텔레그램 자동 연결: 토큰만 넣으면 봇 확인 → 시작 버튼 → 채팅 ID 자동 저장 → 환영 메시지 → 브리지 등록 */
+let tgPoll = null;
+async function tgAuto(){
+  const tok = $('#setTg').value.trim(), box = $('#tgFlow');
+  clearInterval(tgPoll); tgPoll = null;
+  if (!/^\d+:[\w-]{20,}$/.test(tok)){ box.hidden = true; return; }
+  box.hidden = false; box.className = 'tgflow'; box.textContent = '봇을 확인하는 중…';
+  try {
+    const me = await (await fetch(`https://api.telegram.org/bot${tok}/getMe`)).json();
+    if (!me.ok) throw new Error(me.description || '토큰이 맞지 않습니다');
+    const un = me.result.username, chat = $('#setChat').value.trim();
+    if (chat){ box.className = 'tgflow ok'; box.innerHTML = `✅ <b>@${un}</b> 봇과 연결되어 있습니다 (채팅 ID ${chat}).`; return; }
+    box.innerHTML = `<div>봇 <b>@${un}</b> 확인됨. 아래 버튼을 눌러 텔레그램에서 <b>시작(Start)</b>만 누르세요. 나머지는 자동입니다.</div>
+      <a class="btn" href="https://t.me/${un}?start=waveview" target="_blank" rel="noopener">텔레그램에서 @${un} 열기</a><div class="note" id="tgWait">기다리는 중… (최대 5분)</div>`;
+    const t0 = Date.now();
+    tgPoll = setInterval(async () => {
+      if (Date.now() - t0 > 300000){ clearInterval(tgPoll); $('#tgWait').textContent = '시간이 지났습니다. 토큰 칸을 한 번 지웠다 다시 붙여 넣으면 다시 기다립니다.'; return; }
+      try {
+        const j = await (await fetch(`https://api.telegram.org/bot${tok}/getUpdates?timeout=0`)).json();
+        if (!j.ok) throw new Error(j.description);
+        const m = j.result.map(u => u.message || u.channel_post).filter(Boolean).pop(); if (!m) return;
+        clearInterval(tgPoll); tgPoll = null;
+        $('#setChat').value = String(m.chat.id); readSettings();
+        await sendTelegram('✅ 웨이브뷰 알림이 연결되었습니다.\n돌파 더블비 등 등록한 얼러트가 나오면 여기로 알려 드립니다.');
+        syncBridge();
+        box.className = 'tgflow ok'; box.innerHTML = `✅ 연결 완료! <b>@${un}</b> 로 환영 메시지를 보냈습니다. 휴대폰을 확인하세요.`;
+        toast('텔레그램 연결 완료', `@${un} 로 알림이 갑니다.`);
+      } catch (e) {
+        clearInterval(tgPoll); tgPoll = null;
+        $('#tgWait').textContent = /webhook/i.test(e.message || '') ? '이 봇은 다른 곳(웹훅)에 연결돼 있어 쓸 수 없습니다. @BotFather 에서 새 봇을 만들어 그 토큰을 넣어 주세요.' : `확인 실패: ${e.message || '인터넷 연결을 확인하세요.'}`;
+      }
+    }, 3000);
+  } catch (e) { box.textContent = `❌ ${e.message || '봇을 확인하지 못했습니다'}. @BotFather 에서 받은 토큰 전체(숫자:영문)를 붙여 넣었는지 확인하세요.`; }
+}
+$('#setTg').addEventListener('input', () => { $('#setChat').value = ''; tgAuto(); });
 $('#tgFind').onclick = async () => {
   readSettings();
   if (!S.cfg.tg) return toast('봇 토큰이 필요합니다', '@BotFather 에서 받은 봇 토큰을 먼저 입력하세요.');
