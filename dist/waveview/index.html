@@ -201,6 +201,15 @@ svg{display:block}
 .tgflow .btn{display:inline-grid;place-items:center;text-decoration:none;color:#fff;align-self:flex-start}
 .tgflow.ok{border-color:#22ab94;background:rgba(34,171,148,.08)}
 
+.tgsteps{padding:16px 20px 20px;display:flex;flex-direction:column;gap:16px;font-size:13px;line-height:1.6;overflow:auto}
+.tgsteps .st{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
+.tgsteps .st>b{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:13px}
+.tgsteps .btn{display:inline-grid;place-items:center;text-decoration:none;color:#fff}
+.tgsteps .btn.sub{color:var(--text);height:28px;padding:0 10px}
+.cp{display:flex;align-items:center;gap:8px;margin-top:6px}
+.cp code{flex:1;min-width:0;background:var(--hover);border-radius:4px;padding:5px 8px;font-size:13px;overflow-wrap:anywhere}
+#tgBtn.on{color:#22ab94}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -366,6 +375,7 @@ svg{display:block}
     <span class="spacer"></span>
     <button class="tb" id="fsBtn" title="전체화면"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 11V6h5M17 6h5v5M22 17v5h-5M11 22H6v-5"/></svg></button>
     <button class="tb" id="shotBtn" title="스크린샷 저장"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="8" width="20" height="14" rx="2"/><circle cx="14" cy="15" r="4"/><path d="M10 8l2-3h4l2 3"/></svg></button>
+    <button class="tb" id="tgBtn" title="텔레그램 알림"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 13.5l18-7-3 16-6-4.5-3 3v-5l9-8-11 6.5z"/></svg><span id="tgBtnTxt">텔레그램 연결</span></button>
     <span class="feed" id="feed"><i></i><span>연결 중</span></span>
     <button class="tb" id="appBtn" title="메뉴" aria-haspopup="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5" y="7" width="18" height="11" rx="1.5"/><path d="M14 18v4M10 22h8"/></svg></button>
     <button class="tb" id="setBtn" title="시세 · 텔레그램 설정"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="14" cy="14" r="3.5"/><path d="M14 4.5v3M14 20.5v3M4.5 14h3M20.5 14h3M7.3 7.3l2.1 2.1M18.6 18.6l2.1 2.1M7.3 20.7l2.1-2.1M18.6 9.4l2.1-2.1"/></svg></button>
@@ -565,6 +575,21 @@ svg{display:block}
         <div class="btns"><select class="inp" id="bt-xtf" style="flex:1"><option value="5m">5분</option><option value="15m" selected>15분</option><option value="1h">1시간</option><option value="1m">1분</option></select><button class="btn sub" type="button" id="btExport">CSV 저장</button></div>
       </form>
       <div class="btres" id="btRes"><div id="btApplied"></div><p class="note" style="padding:20px">왼쪽 설정을 확인하고 <b>테스트 실행</b>을 누르세요. 한텍 MT5 가 연결돼 있으면 최근 5,000봉으로 시험합니다.</p></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="tgModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="tgTitle" style="width:min(460px,100%)">
+    <header><span id="tgTitle">텔레그램 알림 켜기</span><button class="tb" id="tgClose" aria-label="닫기">✕</button></header>
+    <div class="tgsteps">
+      <div class="st"><b>1</b><div><a class="btn" href="https://t.me/BotFather" target="_blank" rel="noopener">BotFather 열기</a></div></div>
+      <div class="st"><b>2</b><div>BotFather 에 아래 세 줄을 <b>차례로 복사해서 보내세요</b>.
+        <div class="cp"><code>/newbot</code><button type="button" class="btn sub" data-cp="/newbot">복사</button></div>
+        <div class="cp"><code>웨이브뷰 알림</code><button type="button" class="btn sub" data-cp="웨이브뷰 알림">복사</button></div>
+        <div class="cp"><code id="tgUname"></code><button type="button" class="btn sub" data-cp-id="tgUname">복사</button></div></div></div>
+      <div class="st"><b>3</b><div>BotFather 가 준 <b>토큰</b>(숫자:영문)을 여기에 붙여 넣으세요.
+        <input class="inp" id="tgTok" autocomplete="off" placeholder="여기에 붙여넣기 (Ctrl+V)" style="margin-top:6px">
+        <div id="tgFlow2" class="tgflow" hidden style="margin-top:8px"></div></div></div>
     </div>
   </div>
 </div>
@@ -1379,6 +1404,7 @@ async function initMT5(){
     if (S.mt5warned) toast('한텍 MT5 연결됨', 'MT5 시세로 차트를 다시 그립니다.');
     S.mt5ok = true; S.mt5warned = false;
     setTimeout(syncBridge, 500);
+    if (!(S.cfg.tg && S.cfg.chat) && !S.tgNudged){ S.tgNudged = true; setTimeout(() => toast('텔레그램 알림', '휴대폰으로 신호를 받으려면 텔레그램을 연결하세요. 2분이면 됩니다.', false, ['텔레그램 연결', () => $('#tgBtn').click()]), 4000); }
     return true;
   } catch (e) {
     if (!S.mt5warned){
@@ -2490,13 +2516,14 @@ async function sendTelegram(text){
 function fillSettings(){ $('#setMt5').checked = !!S.cfg.mt5; $('#setMt5Url').value = S.cfg.mt5url; $('#setTd').value = S.cfg.td; $('#setPoll').value = S.cfg.poll; $('#setTg').value = S.cfg.tg; $('#setChat').value = S.cfg.chat; }
 function readSettings(){ S.cfg = { mt5:$('#setMt5').checked, mt5url:($('#setMt5Url').value.trim() || 'http://127.0.0.1:8765').replace(/\/+$/, ''), td:$('#setTd').value.trim(), poll:Math.max(15, parseInt($('#setPoll').value, 10) || 120), tg:$('#setTg').value.trim(), chat:$('#setChat').value.trim() }; store.set('cfg', S.cfg); }
 $('#setBtn').onclick = () => { fillSettings(); $('#setModal').hidden = false; tgAuto(); };
+$('#setForm').addEventListener('submit', () => setTimeout(tgState, 0));
 $('#setClose').onclick = () => { $('#setModal').hidden = true; };
 $('#setModal').addEventListener('click', e => { if (e.target.id === 'setModal') $('#setModal').hidden = true; });
 $('#setForm').addEventListener('submit', async e => { e.preventDefault(); readSettings(); syncBridge(); $('#setModal').hidden = true; toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); await initMT5(); load(); });
 /* 텔레그램 자동 연결: 토큰만 넣으면 봇 확인 → 시작 버튼 → 채팅 ID 자동 저장 → 환영 메시지 → 브리지 등록 */
 let tgPoll = null;
-async function tgAuto(){
-  const tok = $('#setTg').value.trim(), box = $('#tgFlow');
+async function tgAuto(tokIn, boxIn){
+  const tok = (tokIn ?? $('#setTg').value).trim(), box = boxIn || $('#tgFlow');
   clearInterval(tgPoll); tgPoll = null;
   if (!/^\d+:[\w-]{20,}$/.test(tok)){ box.hidden = true; return; }
   box.hidden = false; box.className = 'tgflow'; box.textContent = '봇을 확인하는 중…';
@@ -2504,9 +2531,9 @@ async function tgAuto(){
     const me = await (await fetch(`https://api.telegram.org/bot${tok}/getMe`)).json();
     if (!me.ok) throw new Error(me.description || '토큰이 맞지 않습니다');
     const un = me.result.username, chat = $('#setChat').value.trim();
-    if (chat){ box.className = 'tgflow ok'; box.innerHTML = `✅ <b>@${un}</b> 봇과 연결되어 있습니다 (채팅 ID ${chat}).`; return; }
+    if (chat && tok === S.cfg.tg){ box.className = 'tgflow ok'; box.innerHTML = `✅ <b>@${un}</b> 봇과 연결되어 있습니다.`; return; }
     box.innerHTML = `<div>봇 <b>@${un}</b> 확인됨. 아래 버튼을 눌러 텔레그램에서 <b>시작(Start)</b>만 누르세요. 나머지는 자동입니다.</div>
-      <a class="btn" href="https://t.me/${un}?start=waveview" target="_blank" rel="noopener">텔레그램에서 @${un} 열기</a><div class="note" id="tgWait">기다리는 중… (최대 5분)</div>`;
+      <a class="btn" href="https://t.me/${un}?start=waveview" target="_blank" rel="noopener">봇 열기 → 시작 누르기</a><div class="note" id="tgWait">기다리는 중… (최대 5분)</div>`;
     const t0 = Date.now();
     tgPoll = setInterval(async () => {
       if (Date.now() - t0 > 300000){ clearInterval(tgPoll); $('#tgWait').textContent = '시간이 지났습니다. 토큰 칸을 한 번 지웠다 다시 붙여 넣으면 다시 기다립니다.'; return; }
@@ -2515,7 +2542,7 @@ async function tgAuto(){
         if (!j.ok) throw new Error(j.description);
         const m = j.result.map(u => u.message || u.channel_post).filter(Boolean).pop(); if (!m) return;
         clearInterval(tgPoll); tgPoll = null;
-        $('#setChat').value = String(m.chat.id); readSettings();
+        $('#setTg').value = tok; $('#setChat').value = String(m.chat.id); readSettings(); tgState();
         await sendTelegram('✅ 웨이브뷰 알림이 연결되었습니다.\n돌파 더블비 등 등록한 얼러트가 나오면 여기로 알려 드립니다.');
         syncBridge();
         box.className = 'tgflow ok'; box.innerHTML = `✅ 연결 완료! <b>@${un}</b> 로 환영 메시지를 보냈습니다. 휴대폰을 확인하세요.`;
@@ -2528,6 +2555,21 @@ async function tgAuto(){
   } catch (e) { box.textContent = `❌ ${e.message || '봇을 확인하지 못했습니다'}. @BotFather 에서 받은 토큰 전체(숫자:영문)를 붙여 넣었는지 확인하세요.`; }
 }
 $('#setTg').addEventListener('input', () => { $('#setChat').value = ''; tgAuto(); });
+function tgState(){ const on = !!(S.cfg.tg && S.cfg.chat); $('#tgBtn').classList.toggle('on', on); $('#tgBtnTxt').textContent = on ? '텔레그램 ✓' : '텔레그램 연결'; }
+$('#tgBtn').onclick = () => {
+  let un = store.get('tgUname'); if (!un){ un = 'waveview_' + Math.random().toString(36).slice(2, 7) + '_bot'; store.set('tgUname', un); }
+  $('#tgUname').textContent = un; $('#tgTok').value = S.cfg.tg || ''; $('#tgModal').hidden = false;
+  if (S.cfg.tg) tgAuto(S.cfg.tg, $('#tgFlow2')); else $('#tgFlow2').hidden = true;
+};
+$('#tgClose').onclick = () => { $('#tgModal').hidden = true; };
+$('#tgTok').addEventListener('input', e => { $('#setChat').value = ''; S.cfg.chat = ''; tgAuto(e.target.value, $('#tgFlow2')); });
+$('#tgModal').addEventListener('click', async e => {
+  const b = e.target.closest('[data-cp],[data-cp-id]'); if (!b) return;
+  const t = b.dataset.cp || $('#' + b.dataset.cpId).textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = '복사됨'; setTimeout(() => b.textContent = '복사', 1500); }
+  catch { const r = document.createRange(); r.selectNodeContents(b.previousElementSibling); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('직접 복사하세요', '선택된 글자를 Ctrl+C 로 복사하세요.'); }
+});
+tgState();
 $('#tgFind').onclick = async () => {
   readSettings();
   if (!S.cfg.tg) return toast('봇 토큰이 필요합니다', '@BotFather 에서 받은 봇 토큰을 먼저 입력하세요.');
