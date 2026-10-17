@@ -242,6 +242,15 @@ svg{display:block}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
 .tool:hover{background:var(--hover)}
 .tool[aria-pressed="true"]{color:var(--blue);background:var(--blue-soft)}
+.tool{position:relative}
+.tool .garr{position:absolute;right:0;bottom:0;width:12px;height:14px;display:grid;place-items:center;opacity:0;border-radius:3px;color:var(--sub)}
+.tool:hover .garr{opacity:1}.tool .garr:hover{background:var(--hover);color:var(--text)}
+.tool .garr svg{width:7px;height:7px}
+.tfly{position:fixed;z-index:60;background:var(--chrome);border:1px solid var(--line,#363a45);border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,.45);padding:6px 0;min-width:210px}
+.tfly .hd{font-size:11px;color:var(--sub);padding:4px 14px 6px;letter-spacing:.3px}
+.tfly button{display:flex;align-items:center;gap:10px;width:100%;padding:6px 14px;font-size:13px;color:var(--text);text-align:left}
+.tfly button:hover{background:var(--hover)}.tfly button.on{color:var(--blue)}
+.tfly button svg{width:26px;height:26px;flex:none}
 .tool svg{width:28px;height:28px}
 .tools hr{width:28px;border:0;border-top:1px solid var(--border);margin:4px 0}
 
@@ -413,15 +422,7 @@ svg{display:block}
 
   <nav class="tools" aria-label="그리기 도구">
     <button class="tool" data-mode="cursor" aria-pressed="true" title="십자선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 5v18M5 14h18"/></svg></button>
-    <button class="tool" data-mode="trend" aria-pressed="false" title="추세선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8.5 19.5l11-11"/><circle cx="7" cy="21" r="2"/><circle cx="21" cy="7" r="2"/></svg></button>
-    <button class="tool" data-mode="brush" aria-pressed="false" title="브러시"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 22c3 0 5-1.5 5-4 0-1.7 1.3-3 3-3s3 1.3 3 3"/><path d="M13 15l9-9 1.5 1.5-9 9"/></svg></button>
-    <button class="tool" data-mode="ray" aria-pressed="false" title="수평 레이"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M10 14h14"/><circle cx="7.5" cy="14" r="2"/></svg></button>
-    <button class="tool" data-mode="vline" aria-pressed="false" title="수직선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 4v7.5M14 16.5V24"/><circle cx="14" cy="14" r="2"/></svg></button>
-    <button class="tool" data-mode="rect" aria-pressed="false" title="사각형"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="6" y="8" width="16" height="12"/><circle cx="6" cy="8" r="1.8" fill="currentColor"/><circle cx="22" cy="20" r="1.8" fill="currentColor"/></svg></button>
-    <button class="tool" data-mode="text" aria-pressed="false" title="텍스트"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 7h14M14 7v15M11 22h6"/></svg></button>
-    <button class="tool" data-mode="measure" aria-pressed="false" title="가격 범위 측정"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 20L20 5l3 3L8 23z"/><path d="M9 16l2 2M12 13l2 2M15 10l2 2"/></svg></button>
-    <button class="tool" data-mode="hline" aria-pressed="false" title="수평선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 14h7.5M16.5 14H24"/><circle cx="14" cy="14" r="2"/></svg></button>
-    <button class="tool" data-mode="alert" aria-pressed="false" title="가격 얼러트"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="14" cy="15" r="7.5"/><path d="M14 11v4.5l3 2M6.5 6.5L9 4.5M21.5 6.5L19 4.5"/></svg></button>
+    <div id="toolGroups" style="display:contents"></div>
     <hr>
     <button class="tool" id="clearBtn" title="그린 것 모두 지우기"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M7 9h14M11.5 9V6.5h5V9M9 9l1 13h8l1-13M12.5 12.5v6M15.5 12.5v6"/></svg></button>
   </nav>
@@ -1388,6 +1389,47 @@ function drawOverlay(){
 }
 const axisTags = [];
 const ONE = { ray:1, vline:1, text:1 };
+const DCOL = { rect:'#2962ff', ellipse:'#9c27b0', channel:'#2962ff', fibchan:'#787b86', fib:'#787b86', pricerange:'#2962ff', daterange:'#2962ff', pdrange:'#2962ff' };
+const FIB = [[0, '#787b86'], [.236, '#f23645'], [.382, '#ff9800'], [.5, '#4caf50'], [.618, '#089981'], [.786, '#00bcd4'], [1, '#787b86'], [1.618, '#2962ff'], [2.618, '#f23645']];
+const FIBCH = [[0, '#787b86'], [.236, '#f23645'], [.382, '#ff9800'], [.5, '#4caf50'], [.618, '#089981'], [.786, '#00bcd4'], [1, '#787b86'], [1.618, '#2962ff']];
+// 채널: a→b 기준선 위 어느 시점의 가격 (봉 번호 기준 직선)
+function linePriceAt(t, i){ const ia = timeToIdx(t.a.t), ib = timeToIdx(t.b.t); return ib === ia ? t.a.p : t.a.p + (t.b.p - t.a.p) * (i - ia) / (ib - ia); }
+// 선 종류 도형의 화면 선분 목록 (그리기·클릭 판정 공용)
+function segsOf(t, c, pw, h){
+  const type = t.type, { xa, ya, xb, yb } = c, dx = xb - xa, dy = yb - ya, at = x => ya + (x - xa) * dy / (dx || 1e-9);
+  if (type === 'extended') return Math.abs(dx) < .5 ? [[xa, 0, xa, h]] : [[0, at(0), pw, at(pw)]];
+  if (type === 'tray'){ if (Math.abs(dx) < .5) return [[xa, ya, xa, dy > 0 ? h : 0]]; const xe = dx > 0 ? pw : 0; return [[xa, ya, xe, at(xe)]]; }
+  if (type === 'fib'){ const x1 = Math.min(xa, xb), x2 = Math.max(xa, xb);
+    return FIB.map(([l]) => { const y = candle.priceToCoordinate(t.b.p + (t.a.p - t.b.p) * l); return y == null ? null : [x1, y, x2, y]; }).filter(Boolean); }
+  if (type === 'channel' || type === 'fibchan'){
+    const lv = type === 'channel' ? [[0], [1]] : FIBCH, out = [];
+    for (const [l] of lv){ const y1 = candle.priceToCoordinate(t.a.p + (t.off || 0) * l), y2 = candle.priceToCoordinate(t.b.p + (t.off || 0) * l); if (y1 != null && y2 != null) out.push([xa, y1, xb, y2]); }
+    return out;
+  }
+  return [[xa, ya, xb, yb]];
+}
+const segD = (x, y, [x1, y1, x2, y2]) => { const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy || 1, u = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / L2)); return Math.hypot(x - (x1 + u * dx), y - (y1 + u * dy)); };
+const chanHandle = (t, c) => { const y1 = candle.priceToCoordinate(t.a.p + (t.off || 0)), y2 = candle.priceToCoordinate(t.b.p + (t.off || 0)); return y1 == null || y2 == null ? null : [(c.xa + c.xb) / 2, (y1 + y2) / 2]; };
+function rangeBox(t, xa, ya, xb, yb, mode){
+  const x = Math.min(xa, xb), y = Math.min(ya, yb), w = Math.abs(xb - xa), hh = Math.abs(yb - ya), mx = (xa + xb) / 2, my = (ya + yb) / 2;
+  const up = t.b.p >= t.a.p, c2 = mode === 'd' ? '#2962ff' : up ? '#2962ff' : '#f23645';
+  ctx.setLineDash([]); ctx.fillStyle = hexA(c2, .2); ctx.fillRect(x, y, w, hh);
+  ctx.strokeStyle = c2; ctx.lineWidth = 1; ctx.beginPath();
+  const ah = (x1, y1, x2, y2) => { const a = Math.atan2(y2 - y1, x2 - x1); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.moveTo(x2 - 7 * Math.cos(a - .5), y2 - 7 * Math.sin(a - .5)); ctx.lineTo(x2, y2); ctx.lineTo(x2 - 7 * Math.cos(a + .5), y2 - 7 * Math.sin(a + .5)); };
+  if (mode !== 'd') ah(mx, ya, mx, yb);
+  if (mode !== 'p') ah(xa, my, xb, my);
+  if (mode === 'p'){ ctx.moveTo(x, Math.round(ya) + .5); ctx.lineTo(x + w, Math.round(ya) + .5); ctx.moveTo(x, Math.round(yb) + .5); ctx.lineTo(x + w, Math.round(yb) + .5); }
+  if (mode === 'd'){ ctx.moveTo(Math.round(xa) + .5, y); ctx.lineTo(Math.round(xa) + .5, y + hh); ctx.moveTo(Math.round(xb) + .5, y); ctx.lineTo(Math.round(xb) + .5, y + hh); }
+  ctx.stroke();
+  const d = t.b.p - t.a.p, pct = d / t.a.p * 100, bars = Math.round(timeToIdx(t.b.t) - timeToIdx(t.a.t));
+  const L = [];
+  if (mode !== 'd') L.push(`${fmt(d)} (${pct.toFixed(2)}%) ${Math.round(d * 10 ** S.sym.dp).toLocaleString('en-US')}`);
+  if (mode !== 'p') L.push(`${bars}개 봉, ${durTxt(Math.abs(bars) * S.tf[1])}`);
+  ctx.font = '12px -apple-system, "Malgun Gothic", sans-serif';
+  const tw = Math.max(...L.map(l => ctx.measureText(l).width)) + 18, bh = L.length * 16 + 8, bx = mx - tw / 2, by = (mode === 'd' ? true : up) ? y - bh - 6 : y + hh + 6;
+  ctx.fillStyle = c2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, tw, bh, 4) : ctx.rect(bx, by, tw, bh); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; L.forEach((l, k) => ctx.fillText(l, mx, by + 16 + k * 16)); ctx.textAlign = 'start';
+}
 const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
 const durTxt = sec => { const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.round(sec % 3600 / 60);
   return [d && `${d}일`, h && `${h}시간`, m && `${m}분`].filter(Boolean).join(' ') || '0분'; };
@@ -1403,9 +1445,10 @@ function drawShape(t, pw, h){
   if (t.type === 'brush'){
     const pts = t.pts.map(bpXY).filter(([x, y]) => x != null && y != null); if (pts.length < 2) return;
     ctx.strokeStyle = t.color; ctx.lineWidth = t.width || 2; ctx.setLineDash(DASH[t.style || 0]); ctx.lineJoin = ctx.lineCap = 'round';
+    if (t.hl) ctx.globalAlpha = .35;
     ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
     for (let k = 1; k < pts.length - 1; k++){ const mx = (pts[k][0] + pts[k + 1][0]) / 2, my = (pts[k][1] + pts[k + 1][1]) / 2; ctx.quadraticCurveTo(pts[k][0], pts[k][1], mx, my); }
-    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]); ctx.stroke(); ctx.setLineDash([]); ctx.lineJoin = ctx.lineCap = 'butt';
+    ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]); ctx.stroke(); ctx.globalAlpha = 1; ctx.setLineDash([]); ctx.lineJoin = ctx.lineCap = 'butt';
     if (t === S.sel || t === S.hover){ const a = pts[0], z = pts[pts.length - 1]; ctx.beginPath(); ctx.lineWidth = 1; ctx.strokeStyle = '#2962ff'; ctx.fillStyle = C.bg;
       for (const [x, y] of [a, z]){ ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill(); ctx.stroke(); } }
     return;
@@ -1437,6 +1480,41 @@ function drawShape(t, pw, h){
     if (t.text){ ctx.fillStyle = col; ctx.fillText(t.text, x + 4, y - 5); }
     if (on) [[xa, ya], [xb, yb], [xa, yb], [xb, ya]].forEach(([p, q]) => handle(p, q)); return;
   }
+  if (type === 'pricerange' || type === 'daterange' || type === 'pdrange'){
+    rangeBox(t, xa, ya, xb, yb, type === 'pricerange' ? 'p' : type === 'daterange' ? 'd' : 'pd');
+    if (on){ handle(xa, ya); handle(xb, yb); } return;
+  }
+  if (type === 'ellipse'){
+    ctx.beginPath(); ctx.ellipse((xa + xb) / 2, (ya + yb) / 2, w / 2 || .5, hh / 2 || .5, 0, 0, Math.PI * 2); ctx.fillStyle = hexA(col, .15); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+    if (t.text){ ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.fillText(t.text, (xa + xb) / 2, (ya + yb) / 2 + 4); ctx.textAlign = 'start'; }
+    if (on) [[xa, ya], [xb, yb]].forEach(([p, q]) => handle(p, q)); return;
+  }
+  if (type === 'fib'){
+    const sg = segsOf(t, { xa, ya, xb, yb }, pw, h);
+    ctx.setLineDash([2, 3]); ctx.strokeStyle = hexA('#787b86', .8); ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = '11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
+    sg.forEach(([x1, y1, x2], k) => {
+      const [l, fc] = FIB[k];
+      if (k){ const yp = sg[k - 1][1]; ctx.fillStyle = hexA(fc, .1); ctx.fillRect(x1, Math.min(yp, y1), x2 - x1, Math.abs(y1 - yp)); }
+      ctx.strokeStyle = fc; ctx.lineWidth = t.width || 1; ctx.beginPath(); ctx.moveTo(x1, Math.round(y1) + .5); ctx.lineTo(x2, Math.round(y1) + .5); ctx.stroke();
+      const lab = `${l} (${fmt(t.b.p + (t.a.p - t.b.p) * l)})`; ctx.fillStyle = fc;
+      if (x1 > ctx.measureText(lab).width + 8){ ctx.textAlign = 'right'; ctx.fillText(lab, x1 - 4, y1); ctx.textAlign = 'start'; } else ctx.fillText(lab, x1 + 4, y1 - 7);
+    });
+    ctx.textBaseline = 'alphabetic';
+    if (on){ handle(xa, ya); handle(xb, yb); } return;
+  }
+  if (type === 'channel' || type === 'fibchan'){
+    const sg = segsOf(t, { xa, ya, xb, yb }, pw, h), lv = type === 'channel' ? null : FIBCH;
+    if (type === 'channel' && sg.length === 2){
+      ctx.fillStyle = hexA(col, .1); ctx.beginPath(); ctx.moveTo(sg[0][0], sg[0][1]); ctx.lineTo(sg[0][2], sg[0][3]); ctx.lineTo(sg[1][2], sg[1][3]); ctx.lineTo(sg[1][0], sg[1][1]); ctx.closePath(); ctx.fill();
+      ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(xa, (sg[0][1] + sg[1][1]) / 2); ctx.lineTo(xb, (sg[0][3] + sg[1][3]) / 2); ctx.stroke(); ctx.setLineDash(DASH[t.style || 0]);
+    }
+    sg.forEach(([x1, y1, x2, y2], k) => { ctx.strokeStyle = lv ? lv[k][1] : col; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      if (lv){ ctx.fillStyle = lv[k][1]; ctx.font = '11px -apple-system, sans-serif'; ctx.fillText(String(lv[k][0]), Math.max(x1, x2) + 4, (x2 >= x1 ? y2 : y1) + 4); } });
+    ctx.setLineDash([]);
+    if (on){ handle(xa, ya); handle(xb, yb); const ch = t.b && chanHandle(t, { xa, xb }); if (ch && !(t === S.draft && !t.stage)) handle(ch[0], ch[1]); }
+    return;
+  }
   if (type === 'measure'){
     const up = t.b.p >= t.a.p, c2 = up ? '#2962ff' : '#f23645', mx = (xa + xb) / 2, my = (ya + yb) / 2;
     ctx.setLineDash([]); ctx.fillStyle = hexA(c2, .2); ctx.fillRect(x, y, w, hh);
@@ -1447,7 +1525,10 @@ function drawShape(t, pw, h){
     ctx.fillStyle = c2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, tw, 40, 4) : ctx.rect(bx, by, tw, 40); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(l1, mx, by + 16); ctx.fillText(l2, mx, by + 32); ctx.textAlign = 'start'; return;
   }
-  ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke(); ctx.setLineDash([]);
+  const [s0] = segsOf(t, { xa, ya, xb, yb }, pw, h);
+  ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s0[2], s0[3]); ctx.stroke(); ctx.setLineDash([]);
+  if (type === 'arrow'){ const a = Math.atan2(yb - ya, xb - xa), L = 10 + (t.width || 1) * 3; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(xb, yb);
+    ctx.lineTo(xb - L * Math.cos(a - .4), yb - L * Math.sin(a - .4)); ctx.lineTo(xb - L * Math.cos(a + .4), yb - L * Math.sin(a + .4)); ctx.closePath(); ctx.fill(); }
   if (t.text){ ctx.fillStyle = col; ctx.fillText(t.text, xb + 6, yb - 6); }
   if (on){ handle(xa, ya); handle(xb, yb); }
 }
@@ -1458,7 +1539,7 @@ chart.subscribeCrosshairMove(p => {
   hoverBar = p && p.time ? p.seriesData.get(candle) || null : null;
   if (S.draft && p && p.point && p.logical != null){
     const price = candle.coordinateToPrice(p.point.y);
-    if (price != null) S.draft.b = { t:idxToTime(p.logical), p:price };
+    if (price != null){ if (S.draft.stage) S.draft.off = price - linePriceAt(S.draft, p.logical); else S.draft.b = { t:idxToTime(p.logical), p:price }; }
   }
   renderOhlc();
   if (!diChart.setCrosshairPosition) return;
@@ -1841,9 +1922,68 @@ $('#clearBtn').onclick = () => {
 };
 
 
-const TWO = { trend:1, rect:1, measure:1 };
+/* 왼쪽 그리기 도구 — 트레이딩뷰처럼 묶음 버튼 + 펼침 메뉴 (마지막에 고른 도구가 버튼에 남는다) */
+const TI = {
+  trend:'<path d="M8.5 19.5l11-11"/><circle cx="7" cy="21" r="2"/><circle cx="21" cy="7" r="2"/>',
+  tray:'<path d="M8.5 19.5L25 3"/><circle cx="7" cy="21" r="2"/><circle cx="15" cy="13" r="2"/>',
+  extended:'<path d="M2 26l7-7M11.5 16.5l5-5M19 9l7-7"/><circle cx="10" cy="18" r="2"/><circle cx="18" cy="10" r="2"/>',
+  hline:'<path d="M4 14h7.5M16.5 14H24"/><circle cx="14" cy="14" r="2"/>',
+  ray:'<path d="M10 14h14"/><circle cx="7.5" cy="14" r="2"/>',
+  vline:'<path d="M14 4v7.5M14 16.5V24"/><circle cx="14" cy="14" r="2"/>',
+  channel:'<path d="M4 17L17 6M11 24l13-11"/><path d="M7.5 20.5l13-11" stroke-dasharray="2 2"/><circle cx="4" cy="17" r="1.6" fill="currentColor"/><circle cx="17" cy="6" r="1.6" fill="currentColor"/>',
+  fib:'<path d="M4 6h20M4 11h20M4 16h20M4 22h20" /><circle cx="6" cy="22" r="1.8" fill="currentColor"/><circle cx="22" cy="6" r="1.8" fill="currentColor"/>',
+  fibchan:'<path d="M3 15L15 4M8 20L20 9M13 25L25 14"/><circle cx="3" cy="15" r="1.6" fill="currentColor"/><circle cx="15" cy="4" r="1.6" fill="currentColor"/>',
+  brush:'<path d="M5 22c3 0 5-1.5 5-4 0-1.7 1.3-3 3-3s3 1.3 3 3"/><path d="M13 15l9-9 1.5 1.5-9 9"/>',
+  hl:'<path d="M9 19l9-12 4 3-9 12z"/><path d="M9 19l-3 4h5l2-1"/><path d="M4 25h20" stroke-width="2.5" stroke-opacity=".5"/>',
+  rect:'<rect x="6" y="8" width="16" height="12"/><circle cx="6" cy="8" r="1.8" fill="currentColor"/><circle cx="22" cy="20" r="1.8" fill="currentColor"/>',
+  ellipse:'<ellipse cx="14" cy="14" rx="9" ry="6.5"/>',
+  arrow:'<path d="M6 22L21 7"/><path d="M13 7h8v8"/>',
+  text:'<path d="M7 7h14M14 7v15M11 22h6"/>',
+  pricerange:'<path d="M14 5v18M10 9l4-4 4 4M10 19l4 4 4-4M5 5h18M5 23h18" />',
+  daterange:'<path d="M5 14h18M9 10l-4 4 4 4M19 10l4 4-4 4M5 5v18M23 5v18"/>',
+  pdrange:'<rect x="5" y="5" width="18" height="18"/><path d="M14 8v12M8 14h12"/>',
+  measure:'<path d="M5 20L20 5l3 3L8 23z"/><path d="M9 16l2 2M12 13l2 2M15 10l2 2"/>',
+  alert:'<circle cx="14" cy="15" r="7.5"/><path d="M14 11v4.5l3 2M6.5 6.5L9 4.5M21.5 6.5L19 4.5"/>',
+};
+const TN = { trend:'추세선', tray:'레이 (한쪽 연장)', extended:'연장선 (양쪽 연장)', hline:'수평선', ray:'수평 레이', vline:'수직선', channel:'평행 채널',
+  fib:'피보나치 되돌림', fibchan:'피보나치 채널', brush:'브러시', hl:'형광펜', rect:'사각형', ellipse:'원 (타원)', arrow:'화살표', text:'텍스트',
+  pricerange:'가격 범위', daterange:'날짜 범위', pdrange:'날짜 및 가격 범위', measure:'자 (임시 측정)', alert:'가격 얼러트' };
+const TGROUPS = [
+  ['lines', '선', ['trend', 'tray', 'extended', 'hline', 'ray', 'vline', 'channel']],
+  ['fibs', '피보나치', ['fib', 'fibchan']],
+  ['brushes', '브러시', ['brush', 'hl']],
+  ['shapes', '도형', ['rect', 'ellipse', 'arrow']],
+  ['texts', '글씨', ['text']],
+  ['ranges', '측정', ['pricerange', 'daterange', 'pdrange', 'measure']],
+  ['alerts', '얼러트', ['alert']],
+];
+const GARR = '<svg viewBox="0 0 8 8" fill="currentColor"><path d="M8 0v8H0z"/></svg>';
+function renderTools(){
+  $('#toolGroups').innerHTML = TGROUPS.map(([g, , list]) => { const m = list.includes(store.get('tg:' + g)) ? store.get('tg:' + g) : list[0];
+    return `<button class="tool" data-mode="${m}" data-g="${g}" aria-pressed="${S.mode === m}" title="${TN[m]}"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">${TI[m]}</svg>${list.length > 1 ? `<span class="garr" title="더 보기">${GARR}</span>` : ''}</button>`; }).join('');
+}
+function openFly(btn){
+  closeFly(); const g = TGROUPS.find(x => x[0] === btn.dataset.g), el = document.createElement('div'); el.className = 'tfly'; el.id = 'toolFly';
+  el.innerHTML = `<div class="hd">${g[1]}</div>` + g[2].map(m => `<button data-m="${m}" class="${S.mode === m ? 'on' : ''}"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">${TI[m]}</svg>${TN[m]}</button>`).join('');
+  document.body.append(el); const r = btn.getBoundingClientRect();
+  el.style.left = Math.min(innerWidth - el.offsetWidth - 4, r.right + 4) + 'px'; el.style.top = Math.max(4, Math.min(innerHeight - el.offsetHeight - 4, r.top)) + 'px';
+  el.onclick = e => { const b = e.target.closest('[data-m]'); if (!b) return; store.set('tg:' + g[0], b.dataset.m); closeFly(); renderTools(); setMode(b.dataset.m); };
+}
+function closeFly(){ const f = $('#toolFly'); if (f) f.remove(); }
+renderTools();
+$('#toolGroups').addEventListener('click', e => {
+  const b = e.target.closest('.tool'); if (!b) return;
+  if (e.target.closest('.garr')) return $('#toolFly') && $('#toolFly').dataset.g === b.dataset.g ? closeFly() : (openFly(b), $('#toolFly').dataset.g = b.dataset.g);
+  closeFly(); setMode(S.mode === b.dataset.mode ? 'cursor' : b.dataset.mode);
+});
+// 길게 누르면(또는 오른쪽 클릭) 펼침 메뉴
+$('#toolGroups').addEventListener('contextmenu', e => { const b = e.target.closest('.tool'); if (!b || !b.querySelector('.garr')) return; e.preventDefault(); openFly(b); });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#toolFly, .garr')) closeFly(); });
+
+const TWO = { trend:1, rect:1, measure:1, tray:1, extended:1, channel:1, fib:1, fibchan:1, ellipse:1, arrow:1, pricerange:1, daterange:1, pdrange:1 };
+const THREE = { channel:1, fibchan:1 };
 const HINTS0 = 0;
-const HINTS = { brush:'누른 채로 끌어서 그리세요', hline:'수평선을 놓을 가격을 클릭하세요 (아래 DI 패널에도 그릴 수 있습니다)', ray:'레이를 시작할 곳을 클릭하세요', vline:'수직선을 놓을 곳을 클릭하세요', rect:'사각형의 한쪽 모서리를 클릭하세요', text:'글씨를 쓸 곳을 클릭하세요', measure:'측정을 시작할 곳을 클릭하세요',
+const HINTS = { brush:'누른 채로 끌어서 그리세요', hl:'누른 채로 끌어서 칠하세요', tray:'시작점을 클릭하세요', extended:'첫 점을 클릭하세요', channel:'채널 시작점을 클릭하세요 (3번 클릭: 시작 · 끝 · 폭)', fibchan:'시작점을 클릭하세요 (3번 클릭: 시작 · 끝 · 폭)', fib:'시작점(되돌림 1)을 클릭하세요 → 끝점(0)', ellipse:'원의 한쪽 모서리를 클릭하세요', arrow:'화살표 시작점을 클릭하세요', pricerange:'시작 가격을 클릭하세요', daterange:'시작 시각을 클릭하세요', pdrange:'시작점을 클릭하세요', hline:'수평선을 놓을 가격을 클릭하세요 (아래 DI 패널에도 그릴 수 있습니다)', ray:'레이를 시작할 곳을 클릭하세요', vline:'수직선을 놓을 곳을 클릭하세요', rect:'사각형의 한쪽 모서리를 클릭하세요', text:'글씨를 쓸 곳을 클릭하세요', measure:'측정을 시작할 곳을 클릭하세요',
   trend:'시작점을 클릭하세요 · 그린 선은 끌어서 옮기고, 클릭 후 Delete 로 지웁니다', alert:'얼러트 가격을 클릭하세요', replay:'리플레이를 시작할 봉을 클릭하세요' };
 function setMode(m){
   S.mode = m; S.draft = null;
@@ -1851,8 +1991,8 @@ function setMode(m){
   if (!S.rp) $('#replayBtn').setAttribute('aria-pressed', m === 'replay');
   $('#hint').hidden = m === 'cursor'; $('#hint').textContent = (HINTS[m] || '') + ' · Esc 취소';
 }
-document.querySelectorAll('.tool[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
-document.addEventListener('keydown', e => { if (e.key === 'Escape'){ setMode('cursor'); $('#setModal').hidden = true; $('#pmModal').hidden = true; $('#moreMenu').hidden = true; } });
+$('.tool[data-mode="cursor"]').onclick = () => { closeFly(); setMode('cursor'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeFly(); setMode('cursor'); $('#setModal').hidden = true; $('#pmModal').hidden = true; $('#moreMenu').hidden = true; } });
 function onChartClick(p){
   if (!p.point || S.mode === 'cursor') return;
   if (S.mode === 'replay'){ if (p.logical != null){ setMode('cursor'); startReplay(Math.round(p.logical)); } return; }
@@ -1861,8 +2001,9 @@ function onChartClick(p){
   if (TWO[S.mode]){
     if (p.logical == null) return;
     const pt = { t:idxToTime(p.logical), p:r };
-    if (!S.draft){ S.measure = null; S.draft = { type:S.mode, a:pt, b:null, color:S.mode === 'rect' ? '#2962ff' : C.trend, width:1, style:0, text:'' }; $('#hint').textContent = '끝점을 클릭하세요 · Esc 취소'; return; }
-    const o = { ...S.draft, id:uid(), b:pt }; S.draft = null;
+    if (!S.draft){ S.measure = null; S.draft = { type:S.mode, a:pt, b:null, color:DCOL[S.mode] || C.trend, width:1, style:0, text:'' }; $('#hint').textContent = '끝점을 클릭하세요 · Esc 취소'; return; }
+    if (THREE[S.mode] && !S.draft.stage){ S.draft.b = pt; S.draft.stage = 2; S.draft.off = 0; $('#hint').textContent = '채널 폭을 정할 곳을 클릭하세요 · Esc 취소'; return; }
+    const o = { ...S.draft, id:uid(), b:S.draft.stage ? S.draft.b : pt }; delete o.stage; S.draft = null;
     if (o.type === 'measure'){ S.measure = o; setMode('cursor'); return; }
     S.trends.push(o); saveDrawings(); setMode('cursor'); selectLine({ obj:o }); return;
   }
@@ -1902,11 +2043,12 @@ function onChartClick(p){
     const l = chart.timeScale().coordinateToLogical(x), p = candle.coordinateToPrice(y); if (l == null || p == null) return null;
     const fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p }; };
   wrap.addEventListener('pointerdown', e => {
-    if (S.mode !== 'brush' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
+    if ((S.mode !== 'brush' && S.mode !== 'hl') || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
     const q = toPt(e); if (!q) return;
     e.preventDefault(); e.stopPropagation(); wrap.setPointerCapture(e.pointerId);
     chart.applyOptions({ handleScroll:false, handleScale:false });
-    S.stroke = { id:uid(), type:'brush', pts:[q], color:store.get('brushColor', '#00bcd4'), width:2, style:0, text:'' };
+    S.stroke = S.mode === 'hl' ? { id:uid(), type:'brush', hl:true, pts:[q], color:store.get('hlColor', '#f5c518'), width:14, style:0, text:'' }
+      : { id:uid(), type:'brush', pts:[q], color:store.get('brushColor', '#00bcd4'), width:2, style:0, text:'' };
   }, true);
   wrap.addEventListener('pointermove', e => {
     if (!S.stroke) return; e.stopPropagation();
@@ -1946,8 +2088,12 @@ function hitTest(x, y){
     if (type === 'text'){ ctx.font = textFont(t); const tw = ctx.measureText(t.text || '텍스트').width, fh = 14 + (t.width || 1) * 2;
       if (x >= c.xa - 5 && x <= c.xa + tw + 5 && y >= c.ya - fh - 2 && y <= c.ya + 7) return { kind:'trend', obj:t, end:null }; continue; }
     if (c.xb == null || c.yb == null) continue;
+    if (type === 'channel' || type === 'fibchan'){ const ch = chanHandle(t, c); if (ch && Math.hypot(x - ch[0], y - ch[1]) < 8) return { kind:'trend', obj:t, end:'c' }; }
     if (Math.hypot(x - c.xa, y - c.ya) < 8) return { kind:'trend', obj:t, end:'a' };
     if (Math.hypot(x - c.xb, y - c.yb) < 8) return { kind:'trend', obj:t, end:'b' };
+    if (['pricerange', 'daterange', 'pdrange', 'ellipse'].includes(type)){ if (x >= Math.min(c.xa, c.xb) - 4 && x <= Math.max(c.xa, c.xb) + 4 && y >= Math.min(c.ya, c.yb) - 4 && y <= Math.max(c.ya, c.yb) + 4) return { kind:'trend', obj:t, end:null }; continue; }
+    if (['extended', 'tray', 'fib', 'channel', 'fibchan'].includes(type)){ const pwid = wrapEl.clientWidth - chart.priceScale('right').width();
+      if (segsOf(t, c, pwid, wrapEl.clientHeight).some(sg => segD(x, y, sg) < 5)) return { kind:'trend', obj:t, end:null }; continue; }
     if (type === 'rect'){ if (x >= Math.min(c.xa, c.xb) - 4 && x <= Math.max(c.xa, c.xb) + 4 && y >= Math.min(c.ya, c.yb) - 4 && y <= Math.max(c.ya, c.yb) + 4) return { kind:'trend', obj:t, end:null }; continue; }
     const dx = c.xb - c.xa, dy = c.yb - c.ya, L2 = dx * dx + dy * dy || 1;
     const u = Math.max(0, Math.min(1, ((x - c.xa) * dx + (y - c.ya) * dy) / L2));
@@ -1988,7 +2134,7 @@ function renderDrawBar(){
     const at = bar.querySelector(`[data-p="${dpop}"]`), pop = document.createElement('div'); pop.className = 'dpop';
     if (dpop === 'color') pop.innerHTML = `<div class="sws">${SWATCH.map(c => `<button class="sw${o.color === c ? ' on' : ''}" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>`;
     else if (dpop === 'text') pop.innerHTML = `<input id="dbText" placeholder="선에 표시할 글씨 (예: 지지선)" value="${(o.text || '').replace(/"/g, '&quot;')}">`;
-    else if (dpop === 'width') pop.innerHTML = [1, 2, 3, 4].map(w => `<button class="opt${o.width === w ? ' on' : ''}" data-w="${w}"><svg viewBox="0 0 30 8" width="30" height="8"><line x1="1" y1="4" x2="29" y2="4" stroke="currentColor" stroke-width="${w}"/></svg>${w}px</button>`).join('');
+    else if (dpop === 'width') pop.innerHTML = (o.hl ? [8, 14, 20, 28] : [1, 2, 3, 4]).map(w => `<button class="opt${o.width === w ? ' on' : ''}" data-w="${w}"><svg viewBox="0 0 30 8" width="30" height="8"><line x1="1" y1="4" x2="29" y2="4" stroke="currentColor" stroke-width="${w}"/></svg>${w}px</button>`).join('');
     else if (dpop === 'style') pop.innerHTML = [[0, '실선'], [2, '파선'], [1, '점선']].map(([st, n]) => `<button class="opt${o.style === st ? ' on' : ''}" data-s="${st}">${styleIc(st)}${n}</button>`).join('');
     else if (dpop === 'more') pop.innerHTML = '<button class="opt" data-a="clone">복제</button><button class="opt" data-a="del">지우기</button>';
     pop.style.left = (at.offsetLeft) + 'px'; bar.append(pop);
@@ -2011,7 +2157,7 @@ $('#drawBar').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !S.sel) return;
   const o = S.sel;
   if (b.dataset.p){ dpop = dpop === b.dataset.p ? null : b.dataset.p; renderDrawBar(); if (dpop === 'text'){ const t = $('#dbText'); t.focus(); t.select(); } return; }
-  if (b.dataset.c){ o.color = b.dataset.c; dpop = null; if (o.type === 'brush') store.set('brushColor', o.color); }
+  if (b.dataset.c){ o.color = b.dataset.c; dpop = null; if (o.type === 'brush') store.set(o.hl ? 'hlColor' : 'brushColor', o.color); }
   else if (b.dataset.w){ o.width = +b.dataset.w; dpop = null; }
   else if (b.dataset.s){ o.style = +b.dataset.s; dpop = null; }
   else if (b.dataset.a === 'del') return deleteSel();
@@ -2086,7 +2232,8 @@ wrapEl.addEventListener('pointermove', e => {
   if (h.kind !== 'trend'){ h.obj.price = roundP(p); h.obj.line.applyOptions({ price:h.obj.price }); return; }
   if (h.obj.type === 'brush'){ const di = i - drag.i0, dp = p - drag.p0;
     h.obj.pts = drag.orig.pts.map(q => { const l = timeToIdx(q.t) + (q.f || 0) + di, fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p:q.p + dp }; }); return; }
-  if (h.end) h.obj[h.end] = { t:idxToTime(i), p:roundP(p) };
+  if (h.end === 'c') h.obj.off = p - linePriceAt(h.obj, i);
+  else if (h.end) h.obj[h.end] = { t:idxToTime(i), p:roundP(p) };
   else {
     const di = i - drag.i0, dp = p - drag.p0, o = drag.orig;
     h.obj.a = { t:idxToTime(timeToIdx(o.a.t) + di), p:roundP(o.a.p + dp) };
