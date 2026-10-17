@@ -266,6 +266,18 @@ def watcher():
                             title = r.get("name") or f"{TF_NAME.get(tf, tf)} 돌파 더블비 {'상방' if s == 'up' else '하방'}"
                             text = (f"{title}\n{'↑' if s == 'up' else '↓'} DB | {symbol} {TF_NAME.get(tf, tf)} | 종가 {b['c']:,.2f} | "
                                     f"BB1·BB2 {'상단' if s == 'up' else '하단'} 동시 돌파 (한텍 MT5)")
+                            plan = r.get("plan")
+                            if plan:
+                                sig = plan.get("sig")
+                                up = s == "up"
+                                d = (-1 if up else 1) if sig == "rev" else (1 if up else -1) if sig == "trend" else (0 if up else 1) if sig == "long" else (-1 if up else 0)
+                                if d:
+                                    ref = b["c"]
+                                    parts = [f"{'매수' if d > 0 else '매도'} 진입 ≈ {ref:,.2f} ({plan.get('lot1', 0.01)}랏)"]
+                                    for k, lot in enumerate(plan.get("adds") or []):
+                                        parts.append(f"추가 {ref - d * plan.get('gap', 0) * (k + 1):,.2f} ({lot}랏)")
+                                    parts.append(f"익절 평균가 {'+' if d > 0 else '-'}{plan.get('tp')} / 손절 평균가 {'-' if d > 0 else '+'}{plan.get('sl')}")
+                                    text += "\n[적용 설정] " + " / ".join(parts)
                             send_telegram(text)
                             print("알림:", text.replace("\n", " / "))
                     done[key] = last_t
