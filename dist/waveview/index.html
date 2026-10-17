@@ -1575,7 +1575,7 @@ const GEAR = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-
 const TRASH = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3.5 5h11M7 5V3h4v2M5 5l.8 10h6.4L13 5M7.5 7.5v5M10.5 7.5v5"/></svg>';
 const DOTS = '<svg viewBox="0 0 18 18" fill="currentColor"><circle cx="4" cy="9" r="1.3"/><circle cx="9" cy="9" r="1.3"/><circle cx="14" cy="9" r="1.3"/></svg>';
 function renderLegend(){
-  $('#lgName').textContent = `${S.sym.name} · ${S.tf[2]} · ${S.live === 'paxg' ? 'PAXG 참고' : S.live ? S.sym.ex : '시뮬레이션'}`;
+  $('#lgName').textContent = `${S.sym.name} · ${S.tf[2]} · ${S.live === 'paxg' ? '⚠ 한텍 꺼짐 · 코인(PAXG) 참고 시세 · 알림 안 보냄' : S.live ? S.sym.ex : '시뮬레이션'}`;
   $('#lgCoin').style.background = S.sym.icon;
   $('#lgInds').innerHTML = IND.filter(([k]) => !S.removed.includes(k)).map(([k, n]) => {
     const on = S.show[k];
@@ -2475,14 +2475,21 @@ async function barsFor(symId, tfKey){
   } catch {}
   const v = bars ? { bars, live:true, paxg } : null; barCache.set(key, { at:Date.now(), v }); return v;
 }
+// 한텍이 꺼져 금 알림을 못 보낼 때: 평일 장중에 하루 한 번만 알려 준다
+function paxgSkip(){
+  const now = Math.floor(Date.now() / 1000), day = new Date((now + KST) * 1000).toISOString().slice(0, 10);
+  if (goldClosed(now) || store.get('paxgSkip') === day) return;
+  store.set('paxgSkip', day);
+  notify({ sym:'XAUUSD', name:'⚠ 한텍 연결이 꺼져 있어 금 알림을 멈췄습니다', msg:'코인(PAXG) 가격으로는 금 알림을 보내지 않습니다. PC에서 한텍 연결 프로그램이 켜지면 자동으로 다시 알립니다.', tg:true, sound:false });
+}
 async function runAlerts(){
   const now = Date.now(); let dirty = false;
   for (const a of ALERTS){
     if (!a.active) continue;
     if (a.exp && now > a.exp){ a.active = false; dirty = true; continue; }
     const r = await barsFor(a.sym, a.tf); if (!r || !r.live) continue;
-    // 참고 시세(PAXG)는 금 휴장 중(주말·정산 시간)에는 신호를 내지 않는다
-    if (r.paxg && goldClosed(Math.floor(now / 1000))) continue;
+    // 금 알림은 진짜 금 시세(한텍)로만 보낸다. 코인(PAXG) 가격으로는 절대 울리지 않는다
+    if (r.paxg){ paxgSkip(); continue; }
     const bars = r.bars, tf = tfBy(a.tf)[1], I = compute(bars);
     const i = a.trig === 'bar' ? bars.length - 1 : bars.length - 2; if (i < 2) continue;
     const bt = bars[i].time;
@@ -2492,7 +2499,7 @@ async function runAlerts(){
       a.lastBar = bt; dirty = true;
       const st = stratFor(a.sym, a.tf), hc = a.conds.find(c => c.src === 'hhj'), pd = st && hc ? sigDir(st.cfg.sig, hc.op === 'up') : 0;
       const plan = pd ? ' · ' + planText(st, pd, bars[bars.length - 1].close) : '';
-      notify({ alertId:a.id, name:a.name || a.conds.map(condText).join(' + '), msg:(a.msg || `${a.sym} ${tfLabel(a.tf)} · ${a.conds.map(condText).join(' + ')} · 현재가 ${bars[bars.length - 1].close.toFixed(2)}`) + (r.paxg ? '\n※ 참고 시세(PAXG) 기준 — 한텍 연결 프로그램이 꺼져 있어 한텍 가격과 다를 수 있습니다' : '') + plan,
+      notify({ alertId:a.id, name:a.name || a.conds.map(condText).join(' + '), msg:(a.msg || `${a.sym} ${tfLabel(a.tf)} · ${a.conds.map(condText).join(' + ')} · 현재가 ${bars[bars.length - 1].close.toFixed(2)}`) + plan,
         sym:a.sym, tf:tfLabel(a.tf), toast:a.toast, sound:a.sound, tg:a.tg });
       if (a.trig === 'once') a.active = false;
     } else if (a.trig !== 'bar'){ a.lastBar = bt; dirty = true; }
@@ -2969,7 +2976,7 @@ async function ptSignals(){
   for (const st of ['grid', 'trail']){
     if (!PT.auto[st] || PT.pos.some(p => p.strat === st)) continue;
     const c = PT.cfg[st], r = await barsFor(sym, c.tf); if (!r || !r.live) continue;
-    if (r.paxg && goldClosed(Math.floor(Date.now() / 1000))) continue;
+    if (r.paxg) continue; // 모의 거래도 진짜 금 시세(한텍)로만 자동 진입
     const bars = r.bars, i = bars.length - 2; if (i < 130) continue;
     const bt = bars[i].time, key = st + '|' + sym + '|' + c.tf;
     if (PT.lastSig[key] == null){ PT.lastSig[key] = bt; savePT(); continue; }
