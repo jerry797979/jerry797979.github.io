@@ -246,6 +246,10 @@ svg{display:block}
 .tool .garr{position:absolute;right:0;bottom:0;width:12px;height:14px;display:grid;place-items:center;opacity:0;border-radius:3px;color:var(--sub)}
 .tool:hover .garr{opacity:1}.tool .garr:hover{background:var(--hover);color:var(--text)}
 .tool .garr svg{width:7px;height:7px}
+.favbar{position:absolute;z-index:6;display:flex;align-items:center;gap:1px;background:var(--chrome);border:1px solid var(--line,#363a45);border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.4);padding:3px 4px}
+.favbar[hidden]{display:none}
+.favbar .grip{cursor:grab;color:var(--sub);padding:0 4px;display:grid;place-items:center;touch-action:none}
+.favbar .tool{width:34px;height:34px}
 .tfly{position:fixed;z-index:60;background:var(--chrome);border:1px solid var(--line,#363a45);border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,.45);padding:6px 0;min-width:210px}
 .tfly .hd{font-size:11px;color:var(--sub);padding:4px 14px 6px;letter-spacing:.3px}
 .tfly button{display:flex;align-items:center;gap:10px;width:100%;padding:6px 14px;font-size:13px;color:var(--text);text-align:left}
@@ -424,6 +428,7 @@ svg{display:block}
     <button class="tool" data-mode="cursor" aria-pressed="true" title="십자선"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 5v18M5 14h18"/></svg></button>
     <div id="toolGroups" style="display:contents"></div>
     <hr>
+    <button class="tool" id="favBtn" title="즐겨찾기 도구 바 보이기/숨기기" aria-pressed="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 5l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L14 18.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></button>
     <button class="tool" id="clearBtn" title="그린 것 모두 지우기"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M7 9h14M11.5 9V6.5h5V9M9 9l1 13h8l1-13M12.5 12.5v6M15.5 12.5v6"/></svg></button>
   </nav>
 
@@ -437,6 +442,7 @@ svg{display:block}
         <button class="lgfold" id="lgFold" aria-label="지표 목록 접기"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 11l4-4 4 4"/></svg></button>
       </div>
       <div class="drawhint" id="hint" hidden></div>
+      <div class="favbar" id="favBar"></div>
       <div class="tfbuf" id="tfBuf" hidden></div>
       <table class="ktr" id="ktr" hidden><tr><td id="ktrName"></td><td>0.5 KTR<br><b id="ktr05"></b></td><td class="y">1.0 KTR<br><b id="ktr10"></b></td><td>2.0 KTR<br><b id="ktr20"></b></td></tr></table>
       <button class="axplus" id="axPlus" hidden aria-label="이 가격으로 얼러트·수평선"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="9" cy="9" r="7.5"/><path d="M9 5.5v7M5.5 9h7"/></svg></button>
@@ -1769,13 +1775,26 @@ async function initMT5(){
     return false;
   }
 }
+// 금 시장이 닫힌 시간 (미국 동부 금 17:00 ~ 일 18:00, 평일 17:00~18:00 정산 휴장)
+// PAXG 는 코인이라 주말에도 거래되므로 이 시간 봉을 버려야 트레이딩뷰·한텍 차트와 같아진다
+function goldClosed(utc){
+  const d0 = new Date(utc * 1000), d = new Date((utc - (usDst(d0) ? 4 : 5) * 3600) * 1000), wd = d.getUTCDay(), h = d.getUTCHours();
+  return wd === 6 || (wd === 5 && h >= 17) || (wd === 0 && h < 18) || h === 17;
+}
 async function loadBinance(sym, tf){
-  const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 4000);
-  const src = tf[4] ? tf : tfBy(tf[5]);
-  const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym.bn || sym.id}&interval=${src[4]}&limit=1000`, { signal:ac.signal });
-  clearTimeout(to);
-  if (!r.ok) throw new Error('http ' + r.status);
-  const bars = (await r.json()).map(k => ({ time:k[0] / 1000 + KST, open:+k[1], high:+k[2], low:+k[3], close:+k[4], v:+k[5] }));
+  const src = tf[4] ? tf : tfBy(tf[5]), gold = sym.feed === 'td';
+  let rows = [], end = '';
+  // 금은 휴장 시간을 빼면 봉이 줄어들어 3번까지 더 앞쪽을 받아 온다
+  for (let k = 0; k < (gold && src[1] < 86400 ? 3 : 1); k++){
+    const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 5000);
+    const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym.bn || sym.id}&interval=${src[4]}&limit=1000${end}`, { signal:ac.signal });
+    clearTimeout(to);
+    if (!r.ok){ if (rows.length) break; throw new Error('http ' + r.status); }
+    const j = await r.json(); if (!j.length) break;
+    rows = j.concat(rows); end = `&endTime=${j[0][0] - 1}`;
+  }
+  let bars = rows.map(k => ({ time:k[0] / 1000 + KST, open:+k[1], high:+k[2], low:+k[3], close:+k[4], v:+k[5] }));
+  if (gold && src[1] < 86400) bars = bars.filter(b => !goldClosed(b.time - KST));
   return tf[4] ? bars : aggregate(bars, tf[1]);
 }
 function openSocket(sym, tf, id){
@@ -1783,6 +1802,7 @@ function openSocket(sym, tf, id){
     const src = tf[4] ? tf : tfBy(tf[5]);
     const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${(sym.bn || sym.id).toLowerCase()}@kline_${src[4]}`);
     ws.onmessage = e => { if (id !== S.loadId) return; const k = JSON.parse(e.data).k;
+      if (sym.feed === 'td' && goldClosed(k.t / 1000)) return;
       const t = Math.floor((k.t / 1000 + KST) / tf[1]) * tf[1], last = S.bars[S.bars.length - 1];
       if (!tf[4] && last.time === t) onBar({ time:t, open:last.open, high:Math.max(last.high, +k.h), low:Math.min(last.low, +k.l), close:+k.c });
       else onBar({ time:tf[4] ? k.t / 1000 + KST : t, open:+k.o, high:+k.h, low:+k.l, close:+k.c }); };
@@ -1971,6 +1991,25 @@ function openFly(btn){
 }
 function closeFly(){ const f = $('#toolFly'); if (f) f.remove(); }
 renderTools();
+/* 즐겨찾기 그리기 도구 바 — 차트 위에 떠 있고 끌어서 옮긴다 (트레이딩뷰 구성 그대로) */
+const FAV = ['brush', 'hline', 'pricerange', 'daterange', 'trend', 'text', 'ray', 'vline', 'hl', 'rect', 'channel'];
+{
+  const fb = $('#favBar');
+  fb.innerHTML = `<span class="grip" title="끌어서 옮기기">${'<svg viewBox="0 0 10 20" width="8" height="18" fill="currentColor"><circle cx="3" cy="4" r="1.2"/><circle cx="7" cy="4" r="1.2"/><circle cx="3" cy="10" r="1.2"/><circle cx="7" cy="10" r="1.2"/><circle cx="3" cy="16" r="1.2"/><circle cx="7" cy="16" r="1.2"/></svg>'}</span>`
+    + FAV.map(m => `<button class="tool" data-mode="${m}" aria-pressed="false" title="${TN[m]}"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">${TI[m]}</svg></button>`).join('');
+  const place = () => { const w = fb.parentElement, pos = store.get('favPos', null);
+    const x = pos ? pos.x : 130, y = pos ? pos.y : w.clientHeight - 90;
+    fb.style.left = Math.max(0, Math.min(w.clientWidth - fb.offsetWidth - 70, x)) + 'px'; fb.style.top = Math.max(0, Math.min(w.clientHeight - fb.offsetHeight - 30, y)) + 'px'; };
+  fb.hidden = !store.get('favOn', true); $('#favBtn').setAttribute('aria-pressed', !fb.hidden);
+  requestAnimationFrame(place); new ResizeObserver(place).observe(fb.parentElement);
+  $('#favBtn').onclick = () => { fb.hidden = !fb.hidden; store.set('favOn', !fb.hidden); $('#favBtn').setAttribute('aria-pressed', !fb.hidden); place(); };
+  fb.addEventListener('pointerdown', e => e.stopPropagation());
+  fb.addEventListener('click', e => { const b = e.target.closest('.tool'); if (!b) return; closeFly(); setMode(S.mode === b.dataset.mode ? 'cursor' : b.dataset.mode); });
+  const g = fb.querySelector('.grip');
+  g.addEventListener('pointerdown', e => { e.preventDefault(); g.setPointerCapture(e.pointerId); const sx = e.clientX - fb.offsetLeft, sy = e.clientY - fb.offsetTop;
+    const mv = ev => { store.set('favPos', { x:ev.clientX - sx, y:ev.clientY - sy }); place(); };
+    g.addEventListener('pointermove', mv); g.addEventListener('pointerup', () => g.removeEventListener('pointermove', mv), { once:true }); });
+}
 $('#toolGroups').addEventListener('click', e => {
   const b = e.target.closest('.tool'); if (!b) return;
   if (e.target.closest('.garr')) return $('#toolFly') && $('#toolFly').dataset.g === b.dataset.g ? closeFly() : (openFly(b), $('#toolFly').dataset.g = b.dataset.g);
@@ -2022,7 +2061,7 @@ function onChartClick(p){
   let down = null;
   const wrap = $('#mainWrap');
   wrap.addEventListener('pointerdown', e => {
-    if (S.mode === 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
+    if (S.mode === 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
     down = { x:e.clientX, y:e.clientY };
   }, true);
   wrap.addEventListener('pointerup', e => {
@@ -2043,7 +2082,7 @@ function onChartClick(p){
     const l = chart.timeScale().coordinateToLogical(x), p = candle.coordinateToPrice(y); if (l == null || p == null) return null;
     const fl = Math.floor(l); return { t:idxToTime(fl), f:l - fl, p }; };
   wrap.addEventListener('pointerdown', e => {
-    if ((S.mode !== 'brush' && S.mode !== 'hl') || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
+    if ((S.mode !== 'brush' && S.mode !== 'hl') || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
     const q = toPt(e); if (!q) return;
     e.preventDefault(); e.stopPropagation(); wrap.setPointerCapture(e.pointerId);
     chart.applyOptions({ handleScroll:false, handleScale:false });
@@ -2184,7 +2223,7 @@ function paneH(){ const ts = chart.timeScale(); return wrapEl.clientHeight - (ts
 function clearPan(){ S.yPan = null; chart.priceScale('right').applyOptions({ autoScale:true }); }
 const roundP = p => Math.round(p * 10 ** S.sym.dp) / 10 ** S.sym.dp;
 wrapEl.addEventListener('pointerdown', e => {
-  if (S.mode !== 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar')) return;
+  if (S.mode !== 'cursor' || e.button !== 0 || e.target.closest('#drawBar, .legend, #replayBar, #favBar')) return;
   S.measure = null;
   const { x, y } = ptOf(e), h = hitTest(x, y);
   if (!h){
