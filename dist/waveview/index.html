@@ -207,6 +207,7 @@ svg{display:block}
 .tgsteps .btn{display:inline-grid;place-items:center;text-decoration:none;color:#fff}
 .tgsteps .btn.sub{color:var(--text);height:28px;padding:0 10px}
 .cp{display:flex;align-items:center;gap:8px;margin-top:6px}
+.exist{margin-top:10px;padding:8px 10px;border:1px dashed var(--border);border-radius:6px;font-size:12.5px}
 .cp code{flex:1;min-width:0;background:var(--hover);border-radius:4px;padding:5px 8px;font-size:13px;overflow-wrap:anywhere}
 #tgBtn.on{color:#22ab94}
 
@@ -582,8 +583,10 @@ svg{display:block}
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="tgTitle" style="width:min(460px,100%)">
     <header><span id="tgTitle">텔레그램 알림 켜기</span><button class="tb" id="tgClose" aria-label="닫기">✕</button></header>
     <div class="tgsteps">
-      <div class="st"><b>1</b><div><a class="btn" href="https://t.me/BotFather" target="_blank" rel="noopener">BotFather 열기</a></div></div>
-      <div class="st"><b>2</b><div>BotFather 에 아래 세 줄을 <b>차례로 복사해서 보내세요</b>.
+      <div class="st"><b>1</b><div><a class="btn" href="https://t.me/BotFather" target="_blank" rel="noopener">BotFather 열기</a>
+        <div class="exist"><b>이미 봇이 있으면</b> (예: 티스토리 발행 알림) 2번은 건너뛰세요. BotFather 에 아래를 보내고 → 봇 선택 → <b>API Token</b> 을 눌러 토큰을 복사해 3번에 붙여 넣으면 됩니다.
+          <div class="cp"><code>/mybots</code><button type="button" class="btn sub" data-cp="/mybots">복사</button></div></div></div></div>
+      <div class="st"><b>2</b><div><b>새 봇을 만들 때만</b>: BotFather 에 아래 세 줄을 <b>차례로 복사해서 보내세요</b>.
         <div class="cp"><code>/newbot</code><button type="button" class="btn sub" data-cp="/newbot">복사</button></div>
         <div class="cp"><code>웨이브뷰 알림</code><button type="button" class="btn sub" data-cp="웨이브뷰 알림">복사</button></div>
         <div class="cp"><code id="tgUname"></code><button type="button" class="btn sub" data-cp-id="tgUname">복사</button></div></div></div>
@@ -2520,6 +2523,19 @@ $('#setForm').addEventListener('submit', () => setTimeout(tgState, 0));
 $('#setClose').onclick = () => { $('#setModal').hidden = true; };
 $('#setModal').addEventListener('click', e => { if (e.target.id === 'setModal') $('#setModal').hidden = true; });
 $('#setForm').addEventListener('submit', async e => { e.preventDefault(); readSettings(); syncBridge(); $('#setModal').hidden = true; toast('설정 저장됨', '새 설정으로 시세를 다시 불러옵니다.'); await initMT5(); load(); });
+// 다른 프로그램(예: 티스토리 발행 알림)이 이미 쓰는 봇이라 메시지를 읽을 수 없을 때: 채팅 ID 직접 입력
+function manualChat(tok, un, box){
+  box.className = 'tgflow';
+  box.innerHTML = `<div>@${un} 봇은 다른 프로그램이 이미 쓰고 있어서 대화방을 자동으로 찾을 수 없습니다. 주식 알림이 오는 <b>채팅 ID</b>를 넣어 주세요.<br><span class="note">티스토리 알림 프로그램 설정 파일의 chat_id 값입니다. 모르시면 텔레그램에서 <b>@userinfobot</b> 에 아무 말이나 보내면 내 ID(숫자)를 알려 줍니다.</span></div>
+    <div class="cp"><input class="inp" id="tgManual" placeholder="예: 123456789" inputmode="numeric"><button type="button" class="btn" id="tgManualOk">연결</button></div>`;
+  $('#tgManualOk').onclick = async () => {
+    const id = $('#tgManual').value.trim(); if (!/^-?\d+$/.test(id)) return toast('숫자를 확인하세요', '채팅 ID 는 숫자입니다.');
+    $('#setTg').value = tok; $('#setChat').value = id; readSettings();
+    try { await sendTelegram('✅ 웨이브뷰 알림이 연결되었습니다.\n돌파 더블비 등 등록한 얼러트가 나오면 여기로 알려 드립니다.');
+      syncBridge(); tgState(); box.className = 'tgflow ok'; box.innerHTML = `✅ 연결 완료! @${un} 로 환영 메시지를 보냈습니다. 휴대폰을 확인하세요.`; }
+    catch (e) { toast('보내기 실패', (e.message || '') + ' — 채팅 ID 를 확인하세요. 봇과 대화를 한 번도 안 했다면 봇에서 시작을 먼저 누르세요.'); }
+  };
+}
 /* 텔레그램 자동 연결: 토큰만 넣으면 봇 확인 → 시작 버튼 → 채팅 ID 자동 저장 → 환영 메시지 → 브리지 등록 */
 let tgPoll = null;
 async function tgAuto(tokIn, boxIn){
@@ -2533,7 +2549,8 @@ async function tgAuto(tokIn, boxIn){
     const un = me.result.username, chat = $('#setChat').value.trim();
     if (chat && tok === S.cfg.tg){ box.className = 'tgflow ok'; box.innerHTML = `✅ <b>@${un}</b> 봇과 연결되어 있습니다.`; return; }
     box.innerHTML = `<div>봇 <b>@${un}</b> 확인됨. 아래 버튼을 눌러 텔레그램에서 <b>시작(Start)</b>만 누르세요. 나머지는 자동입니다.</div>
-      <a class="btn" href="https://t.me/${un}?start=waveview" target="_blank" rel="noopener">봇 열기 → 시작 누르기</a><div class="note" id="tgWait">기다리는 중… (최대 5분)</div>`;
+      <a class="btn" href="https://t.me/${un}?start=waveview" target="_blank" rel="noopener">봇 열기 → 시작 누르기</a><div class="note" id="tgWait">기다리는 중… (최대 5분) · <a href="#" id="tgToManual">채팅 ID 직접 넣기</a></div>`;
+    $('#tgToManual').onclick = ev => { ev.preventDefault(); clearInterval(tgPoll); tgPoll = null; manualChat(tok, un, box); };
     const t0 = Date.now();
     tgPoll = setInterval(async () => {
       if (Date.now() - t0 > 300000){ clearInterval(tgPoll); $('#tgWait').textContent = '시간이 지났습니다. 토큰 칸을 한 번 지웠다 다시 붙여 넣으면 다시 기다립니다.'; return; }
@@ -2549,7 +2566,8 @@ async function tgAuto(tokIn, boxIn){
         toast('텔레그램 연결 완료', `@${un} 로 알림이 갑니다.`);
       } catch (e) {
         clearInterval(tgPoll); tgPoll = null;
-        $('#tgWait').textContent = /webhook/i.test(e.message || '') ? '이 봇은 다른 곳(웹훅)에 연결돼 있어 쓸 수 없습니다. @BotFather 에서 새 봇을 만들어 그 토큰을 넣어 주세요.' : `확인 실패: ${e.message || '인터넷 연결을 확인하세요.'}`;
+        if (/webhook|conflict/i.test(e.message || '')) manualChat(tok, un, box);
+        else $('#tgWait').textContent = `확인 실패: ${e.message || '인터넷 연결을 확인하세요.'}`;
       }
     }, 3000);
   } catch (e) { box.textContent = `❌ ${e.message || '봇을 확인하지 못했습니다'}. @BotFather 에서 받은 토큰 전체(숫자:영문)를 붙여 넣었는지 확인하세요.`; }
