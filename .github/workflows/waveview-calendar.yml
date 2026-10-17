@@ -1,0 +1,37 @@
+name: 웨이브뷰 경제지표 일정
+
+# 미국 경제지표 일정을 받아 dist/waveview/calendar.json 에 저장한다 (웹 차트가 읽음).
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: waveview-calendar
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: 일정 받기
+        run: python3 _tools/waveview_calendar.py
+      - name: 저장
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add dist/waveview/calendar.json
+          if ! git diff --cached --quiet; then
+            git commit -m "웨이브뷰 경제지표 일정 갱신" && git push
+            # 봇 커밋은 push 이벤트를 만들지 않으므로 배포를 직접 돌린다
+            gh workflow run pages.yml --ref main
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}

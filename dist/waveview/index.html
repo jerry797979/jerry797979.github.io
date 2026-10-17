@@ -59,6 +59,9 @@ svg{display:block}
 .bottom .clock{margin-left:8px}
 .tb svg{width:22px;height:22px}
 .spacer{flex:1}
+.news{font-size:12px;color:var(--sub);padding:0 8px;height:26px;border-radius:4px;white-space:nowrap;display:flex;align-items:center;gap:5px;flex:none;cursor:pointer}
+.news:hover{background:var(--hover,rgba(255,255,255,.06))}
+.news.soon{color:#ff9800}.news.block{color:#fff;background:#f23645}
 .feed{font-size:12px;color:var(--sub);padding:0 8px;white-space:nowrap;display:flex;align-items:center;gap:6px;flex:none}
 .feed i{width:7px;height:7px;border-radius:50%;background:var(--sub)}
 .feed.live i{background:var(--up)}
@@ -210,6 +213,29 @@ svg{display:block}
 .exist{margin-top:10px;padding:8px 10px;border:1px dashed var(--border);border-radius:6px;font-size:12.5px}
 .cp code{flex:1;min-width:0;background:var(--hover);border-radius:4px;padding:5px 8px;font-size:13px;overflow-wrap:anywhere}
 #tgBtn.on{color:#22ab94}
+
+.term{flex:none;height:230px;border-top:4px solid var(--gap);background:var(--chrome);display:flex;flex-direction:column;min-height:0;font-size:12px}
+.trow{display:flex;align-items:center;gap:12px;padding:6px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.acct{display:flex;gap:14px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.acct span{color:var(--sub)}.acct b{color:var(--text);font-weight:600;margin-left:4px}
+.oneclick{display:flex;align-items:stretch;gap:0;border-radius:4px;overflow:hidden}
+.oneclick button{width:92px;padding:3px 8px;color:#fff;text-align:left;display:flex;flex-direction:column;line-height:1.2}
+.oneclick small{font-size:10.5px;opacity:.9}.oneclick b{font-size:15px;font-variant-numeric:tabular-nums}
+.sellb{background:#f23645}.buyb{background:#2962ff}
+.oneclick .lot{width:62px;border-radius:0;height:auto;text-align:center;font-weight:600}
+.autos{display:flex;align-items:center;gap:8px;margin-left:auto}
+.sw{display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:600}
+.ttabs{display:flex;gap:2px;padding:4px 8px;border-bottom:1px solid var(--border);align-items:center}
+.ttabs button{padding:3px 10px;border-radius:4px;color:var(--sub);font-weight:600}
+.ttabs button[aria-pressed="true"]{background:var(--hover);color:var(--text)}
+.ptinfo{margin-left:auto;color:var(--sub);font-size:11.5px}
+.tbody{overflow:auto;min-height:0;flex:1}
+.ptab{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ptab th,.ptab td{padding:4px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border)}
+.ptab th{color:var(--sub);font-weight:500;position:sticky;top:0;background:var(--chrome)}
+.ptab td:first-child,.ptab th:first-child{text-align:left}
+.ptab .x{color:var(--sub);padding:0 6px;border-radius:3px}.ptab .x:hover{color:#f23645;background:var(--hover)}
+.ptab tfoot td{font-weight:600}
 
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
@@ -368,8 +394,11 @@ svg{display:block}
     <button class="tb" id="indBtn" aria-haspopup="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 21l6-7 5 4 9-10"/><path d="M19 8h5v5"/></svg>지표</button>
     <span class="sep"></span>
     <button class="tb" id="alertBtn"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="14" cy="15" r="8"/><path d="M14 11v4.5l3 2M6.5 6.5L9 4.5M21.5 6.5L19 4.5"/></svg>얼러트</button>
+    <button class="tb" id="ptBtn" title="모의 거래 (MT5처럼)" aria-pressed="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="7" width="20" height="15" rx="2"/><path d="M4 12h20M9 17h4"/></svg>모의 거래</button>
     <button class="tb" id="btBtn" title="전략 테스트 (백테스트)"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5 22V6M5 22h18"/><path d="M8 18l4-5 3 3 6-8"/></svg>전략 테스트</button>
     <button class="tb" id="replayBtn" aria-pressed="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M13 8l-6 6 6 6M21 8l-6 6 6 6"/></svg>리플레이</button>
+    <span class="sep"></span>
+    <span class="news" id="newsPill" title="다음 경제지표 발표 · 클릭하면 이번 주 일정"></span>
     <span class="sep"></span>
     <button class="tb" id="undoBtn" title="되돌리기 (Ctrl+Z)" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 9l-4 4 4 4"/><path d="M5 13h11a6 6 0 0 1 0 12h-3"/></svg></button>
     <button class="tb" id="redoBtn" title="다시 실행 (Ctrl+Y)" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M19 9l4 4-4 4"/><path d="M23 13H12a6 6 0 0 0 0 12h3"/></svg></button>
@@ -422,6 +451,24 @@ svg{display:block}
     <div id="diWrap">
       <div id="diChart"></div>
       <div class="dilabel" id="diLabel"></div>
+    </div>
+    <div class="term" id="term" hidden>
+      <div class="trow">
+        <div class="acct" id="ptAcct"></div>
+        <div class="oneclick">
+          <button class="sellb" id="ptSell"><small>SELL</small><b id="ptBid">—</b></button>
+          <input class="inp lot" id="ptLot" value="0.01" inputmode="decimal" aria-label="랏">
+          <button class="buyb" id="ptBuy"><small>BUY</small><b id="ptAsk">—</b></button>
+        </div>
+        <div class="autos">
+          <label class="sw"><input type="checkbox" id="ptAutoGrid"><span>물타기 회복</span></label>
+          <label class="sw"><input type="checkbox" id="ptAutoTrail"><span>끌고 가기</span></label>
+          <button class="tb" id="ptSet" title="모의 거래 설정">⚙</button>
+          <button class="tb" id="ptCloseAll">전체 청산</button>
+        </div>
+      </div>
+      <div class="ttabs"><button data-pt="pos" aria-pressed="true">포지션</button><button data-pt="hist" aria-pressed="false">거래 기록</button><span class="ptinfo" id="ptInfo"></span></div>
+      <div class="tbody" id="ptBody"></div>
     </div>
     <div class="bottom"><div class="ranges" id="ranges" role="group" aria-label="기간"></div>
       <div class="rt"><span class="clock" id="clock"></span><span class="sep"></span>
@@ -596,6 +643,37 @@ svg{display:block}
     </div>
   </div>
 </div>
+<div class="modal" id="ptModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ptTitle" style="width:min(560px,100%)">
+    <header><span id="ptTitle">모의 거래 설정</span><button class="tb" id="ptClose" aria-label="닫기">✕</button></header>
+    <form id="ptForm" class="btform" style="border:0">
+      <h4>계좌</h4>
+      <label>종목<select class="inp" id="pt-sym"></select></label>
+      <label>레버리지 1:<input class="inp" id="pt-lev" inputmode="numeric"></label>
+      <label>1포인트 = 가격<select class="inp" id="pt-ptv"><option value="1">1.00 (예: 4150 → 4140 은 10포인트)</option><option value="0.1">0.10 (예: 4150.0 → 4149.0 은 10포인트)</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:8px;color:var(--text)"><input type="checkbox" id="pt-tg">체결·청산을 텔레그램으로도 알리기</label>
+      <div id="ptOptInfo"></div>
+      <h4>① 물타기 회복</h4>
+      <label>신호 타임프레임<select class="inp tfsel" id="pt-gtf"></select></label>
+      <label>신호 방향<select class="inp" id="pt-gdir"><option value="rev">역추세: ↓돌파 매수 · ↑돌파 매도</option><option value="trend">순추세: ↑돌파 매수 · ↓돌파 매도</option><option value="long">↓돌파 매수만</option><option value="short">↑돌파 매도만</option></select></label>
+      <label>1차 랏<input class="inp" id="pt-glot" inputmode="decimal"></label>
+      <label>추가 진입 (불리한 포인트:랏, 쉼표로)<input class="inp" id="pt-gadds" placeholder="30:0.2, 60:0.3"></label>
+      <label>추가 없이 익절 (바스켓 수익 $)<input class="inp" id="pt-gtp" inputmode="decimal"></label>
+      <label>추가 후 탈출 (바스켓 수익 $ 이상이면 전부 청산)<input class="inp" id="pt-gbe" inputmode="decimal"></label>
+      <label>전체 손절 (첫 진입가에서 불리한 포인트)<input class="inp" id="pt-gstop" inputmode="decimal"></label>
+      <h4>② 끌고 가기</h4>
+      <label>신호 타임프레임<select class="inp tfsel" id="pt-ttf"></select></label>
+      <label>신호 방향<select class="inp" id="pt-tdir"><option value="trend">순추세: ↑돌파 매수 · ↓돌파 매도</option><option value="rev">역추세: ↓돌파 매수 · ↑돌파 매도</option><option value="long">↑돌파 매수만</option><option value="short">↓돌파 매도만</option></select></label>
+      <label>랏<input class="inp" id="pt-tlot" inputmode="decimal"></label>
+      <label>처음 손절 (반대로 밀리는 포인트)<input class="inp" id="pt-tsl" inputmode="decimal"></label>
+      <label>추적 시작 (내 방향으로 이만큼 가면, 포인트)<input class="inp" id="pt-tact" inputmode="decimal"></label>
+      <label>추적 방식<select class="inp" id="pt-tmode"><option value="half">번 것의 절반 지키기</option><option value="fixed">최고점에서 일정 포인트 뒤</option></select></label>
+      <label>일정 포인트 (뒤따라가는 거리)<input class="inp" id="pt-tdist" inputmode="decimal"></label>
+      <p class="note">가격은 한텍 MT5 실제 호가(BUY=Ask, SELL=Bid)로 체결합니다. 돈은 가상입니다. 마진 레벨이 50% 아래로 떨어지면 MT5 처럼 손실이 큰 포지션부터 강제 청산합니다. 자동매매는 웨이브뷰 창이 열려 있는 동안 돌아갑니다.</p>
+    </form>
+    <footer><button class="btn sub" type="button" id="ptReset" style="margin-right:auto;color:#f23645">계좌 초기화 ($1,000)</button><button class="btn" type="submit" form="ptForm">저장</button></footer>
+  </div>
+</div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
@@ -635,13 +713,16 @@ let SYMS = [
 ];
 const DEF_P = { bb:{ ma120:true, ma20:true, bb1:true, bb2:true, len:20, k1:2, len2:4, k2:4, ob:false }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
   ses:{ lstyle:'Solid', lwidth:1, tsize:'Small', ostyle:'Dashed', ocolor:'#ffffff', asiaOp:15, euOp:15, usOp:15 }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{},
-  ktr:{ view:'현재장' } };
+  ktr:{ view:'현재장' }, vp:{ bins:60, width:22 }, news:{ before:30, after:60, spike:3.5 }, sr:{ touch:3, show:4 } };
 const SCHEMA = {
   bb:[['ma120','120MA 표시','bool'],['ma20','20MA 표시','bool'],['bb1','BB1 표시 (종가기준, 빨간색)','bool'],['bb2','BB2 표시 (시가기준, 흰색)','bool'],['len','BB1 길이','int'],['k1','BB1 표준편차','num'],['len2','BB2 길이','int'],['k2','BB2 표준편차','num'],['ob','1B 신호 표시 (한쪽만 터치)','bool']],
   ma:[['l1','MA1 기간','int'],['l2','MA2 기간','int'],['l3','MA3 기간','int']],
   db:[['band','기준 밴드','sel',['안쪽','바깥']],['mode','마감 조건','sel',['몸통 전체','종가만']]],
   ses:[['lstyle','박스 테두리 스타일','sel',['Solid','Dashed','Dotted']],['lwidth','박스 선 두께','int'],['tsize','글씨 크기','sel',['Tiny','Small','Normal','Large']],['ostyle','아시아 시가선 모양','sel',['Solid','Dashed','Dotted']],['ocolor','아시아 시가선 색상','text'],['asiaOp','아시아 투명도','int'],['euOp','유로 투명도','int'],['usOp','미장 투명도','int']],
   ktr:[['view','표시할 세션','sel',['현재장','아시아','유로','미장']]],
+  news:[['before','발표 전 대기 (분)','int'],['after','발표 후 대기 (분)','int'],['spike','급변동 기준 (평소 봉 크기의 몇 배)','num']],
+  vp:[['bins','가격 칸 수','int'],['width','막대 최대 폭 (% 화면)','int']],
+  sr:[['touch','최소 터치 횟수','int'],['show','표시할 매물대 수','int']],
   low:[['len','조회 봉 수','int']],
   di:[['len','기간','int'],['lv1','경계선 1','num'],['lv2','경계선 2','num']],
 };
@@ -649,11 +730,12 @@ const P = {}; { const saved = (() => { try { return JSON.parse(localStorage.getI
   for (const k in DEF_P) P[k] = { ...DEF_P[k], ...(saved[k] || {}) }; }
 const pText = {
   bb: () => '', ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
+  news: p => `전 ${p.before}분 · 후 ${p.after}분`, vp: p => `${p.bins}칸`, sr: p => `${p.touch}회 이상`,
   ses: p => `${p.lstyle} ${p.lwidth} ${p.tsize} ${p.ostyle} ${p.asiaOp} ${p.euOp} ${p.usOp}`, us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
   ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['ses','세션박스'],
-  ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['di','DI 이격도'],
+  ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['news','경제지표 발표 · 급변동 표시'], ['vp','매물대 (볼륨 프로파일)'], ['sr','매물대 지지·저항 자동'], ['di','DI 이격도'],
 ];
 const EYE = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/></svg>';
 const EYE_OFF = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/><path d="M3 15L15 3"/></svg>';
@@ -668,7 +750,7 @@ const S = {
   sym: SYMS.find(s => s.id === store.get('sym')) || SYMS[0],
   tf: TFS.find(t => t[0] === store.get('tf')) || tfBy('4h'), range: null,
   bars: [], ind: null, sess: [], mode: 'cursor', ticks: 0,
-  show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
+  show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, news:true, vp:true, sr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
   removed: store.get('removed', []),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
   cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
@@ -884,7 +966,7 @@ function applyVisibility(){
 }
 function renderAll(){
   S.ind = compute(S.bars);
-  S.sess = sessions(S.bars, S.tf[1]); S.sbox = computeSessionBoxes();
+  S.sess = sessions(S.bars, S.tf[1]); S.sbox = computeSessionBoxes(); S.zones = computeZones(S.bars);
   candle.setData(candleData());
   for (const k in alt) if (S.ctype === k) alt[k].setData(altData(k));
   for (const k of Object.keys(L)) L[k].setData(lineData(S.ind[k]));
@@ -899,7 +981,7 @@ function renderLast(newBar){
   for (const k in alt) if (S.ctype === k){ const d = altData(k); alt[k].update(d[d.length - 1]); }
   for (const k of Object.keys(L)) L[k].update(S.ind[k][i] == null ? { time:t } : { time:t, value:S.ind[k][i] });
   diSeries.update(S.ind.di[i] == null ? { time:t } : { time:t, value:S.ind.di[i] });
-  if (newBar){ renderRefLines(); } else renderLowLine();
+  if (newBar){ renderRefLines(); S.zones = computeZones(S.bars); } else renderLowLine();
   renderMarkers();
   renderKTR();
   renderOhlc(); updateQuote();
@@ -920,6 +1002,7 @@ function renderMarkers(){
       if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ 돌파' });
     }
   }
+  if (S.show.news) mk.push(...spikeMarks());
   if (S.btMarks && S.btMarks.sym === S.sym.id && S.btMarks.tf === S.tf[0]) mk.push(...S.btMarks.list);
   mk.sort((a, b) => a.time - b.time);
   candle.setMarkers(mk);
@@ -1027,6 +1110,191 @@ function renderKTR(){
   el.hidden = false;
 }
 
+/* ---------- 경제지표 발표 ---------- */
+// 일정: calendar.json(서버가 매일 받아 둔 ForexFactory 미국 지표) + 고정 규칙(NFP·실업수당·FOMC)
+const NEWS_KO = [
+  [/Non-Farm|NFP/i, '미국 고용지표(NFP)'], [/Core CPI/i, '미국 근원 CPI'], [/\bCPI\b/i, '미국 소비자물가(CPI)'],
+  [/Core PPI/i, '미국 근원 PPI'], [/\bPPI\b/i, '미국 생산자물가(PPI)'], [/Core PCE/i, '미국 근원 PCE'], [/PCE/i, '미국 PCE 물가'],
+  [/Federal Funds Rate|FOMC Statement|Rate Decision/i, 'FOMC 금리 결정'], [/FOMC Press/i, '파월 기자회견'], [/FOMC Meeting Minutes/i, 'FOMC 의사록'],
+  [/Fed Chair|Powell/i, '연준 의장 연설'], [/Unemployment Claims|Jobless/i, '미국 신규 실업수당'], [/Unemployment Rate/i, '미국 실업률'],
+  [/Retail Sales/i, '미국 소매판매'], [/GDP/i, '미국 GDP'], [/ISM Manufacturing/i, 'ISM 제조업'], [/ISM Services/i, 'ISM 서비스업'],
+  [/JOLTS/i, 'JOLTS 구인'], [/ADP/i, 'ADP 고용'], [/Average Hourly/i, '미국 시간당 임금'], [/UoM|Consumer Sentiment/i, '미시간 소비심리'],
+  [/President Trump|Trump/i, '트럼프 연설'],
+];
+const newsKo = t => (NEWS_KO.find(([re]) => re.test(t)) || [0, t])[1];
+const FOMC = ['2025-01-29','2025-03-19','2025-05-07','2025-06-18','2025-07-30','2025-09-17','2025-10-29','2025-12-10',
+  '2026-01-28','2026-03-18','2026-04-29','2026-06-17','2026-07-29','2026-09-16','2026-10-28','2026-12-09'];
+const etToUtc = (y, m, d, hh, mm) => { const g = new Date(Date.UTC(y, m, d, 12)); return Date.UTC(y, m, d, hh + (usDst(g) ? 4 : 5), mm) / 1000; };
+function ruleEvents(from, to){
+  const ev = [], d0 = new Date(from * 1000);
+  for (let d = new Date(Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate())); d.getTime() / 1000 <= to + 86400; d = new Date(d.getTime() + 86400000)){
+    const y = d.getUTCFullYear(), m = d.getUTCMonth(), dd = d.getUTCDate(), wd = d.getUTCDay();
+    if (wd === 5 && dd <= 7) ev.push({ t:etToUtc(y, m, dd, 8, 30), ko:'미국 고용지표(NFP)', imp:3, rule:true });
+    if (wd === 4) ev.push({ t:etToUtc(y, m, dd, 8, 30), ko:'미국 신규 실업수당', imp:2, rule:true });
+  }
+  for (const f of FOMC){ const [y, m, dd] = f.split('-').map(Number); ev.push({ t:etToUtc(y, m - 1, dd, 14, 0), ko:'FOMC 금리 결정', imp:3, rule:true }, { t:etToUtc(y, m - 1, dd, 14, 30), ko:'파월 기자회견', imp:3, rule:true }); }
+  return ev.filter(e => e.t >= from && e.t <= to);
+}
+S.cal = store.get('cal', []);
+async function loadCalendar(){
+  try {
+    const j = await (await fetch('calendar.json?' + Math.floor(Date.now() / 3600000), { cache:'no-store' })).json();
+    if (Array.isArray(j) && j.length){
+      S.cal = j.map(e => ({ t:Math.floor(Date.parse(e.date) / 1000), ko:newsKo(e.title), en:e.title, imp:e.impact === 'High' ? 3 : 2, fc:e.forecast || '', pv:e.previous || '', ac:e.actual || '' }))
+        .filter(e => e.t > 0); store.set('cal', S.cal);
+    }
+  } catch {}
+  renderMarkers && S.ind && renderMarkers(); newsTick();
+}
+function newsEvents(from, to){
+  const cal = S.cal.filter(e => e.t >= from && e.t <= to), out = cal.slice();
+  for (const r of ruleEvents(from, to)) if (!cal.some(e => Math.abs(e.t - r.t) < 120 && e.imp >= 2)) out.push(r);
+  // 같은 시각 여러 지표는 하나로 묶는다 (예: 21:30 CPI · 실업수당)
+  out.sort((a, b) => a.t - b.t || b.imp - a.imp);
+  const g = [];
+  for (const e of out){ const p = g[g.length - 1]; if (p && p.t === e.t){ if (!p.ko.includes(e.ko)) p.ko += ' · ' + e.ko; p.imp = Math.max(p.imp, e.imp); } else g.push({ ...e }); }
+  return g;
+}
+const nowSec = () => Math.floor(Date.now() / 1000);
+function newsBlock(at = nowSec()){
+  if (!S.show.news) return null;
+  return newsEvents(at - P.news.after * 60, at + P.news.before * 60).find(e => e.imp >= 3 && at >= e.t - P.news.before * 60 && at <= e.t + P.news.after * 60) || null;
+}
+const hm = t => { const d = new Date((t + KST) * 1000); return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+const md = t => { const d = new Date((t + KST) * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${'일월화수목금토'[d.getUTCDay()]}`; };
+function newsTick(){
+  const el = $('#newsPill'); if (!el) return;
+  if (!S.show.news){ el.hidden = true; return; } el.hidden = false;
+  const now = nowSec(), b = newsBlock(now), nx = newsEvents(now, now + 7 * 86400).find(e => e.imp >= 3);
+  el.className = 'news';
+  if (b){ el.classList.add('block'); el.textContent = `⛔ 거래 대기 · ${b.ko} ${hm(b.t)}`; }
+  else if (nx){
+    const m = Math.round((nx.t - now) / 60), left = m >= 1440 ? `${md(nx.t)} ${hm(nx.t)}` : m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분 후` : `${m}분 후`;
+    if (m <= 120) el.classList.add('soon');
+    el.textContent = `📅 ${nx.ko} · ${m >= 1440 ? left : hm(nx.t) + ' (' + left + ')'}`;
+    // 텔레그램: 발표 30분 전 1번
+    const k = 'newsTg:' + nx.t;
+    if (m <= P.news.before && m > 0 && !store.get(k)){ store.set(k, 1); notify({ sym:'경제지표', name:`⚠ ${m}분 후 ${nx.ko} 발표 (${hm(nx.t)})`, msg:`발표 ${P.news.before}분 전부터 ${P.news.after}분 후까지는 큰 무빙이 나올 수 있어 거래 대기를 권합니다.${nx.fc ? `\n예상 ${nx.fc} · 이전 ${nx.pv}` : ''}`, tg:true, sound:true }); }
+  } else el.textContent = '📅 지표 일정 없음';
+}
+$('#newsPill').onclick = () => {
+  const now = nowSec(), list = newsEvents(now - 86400, now + 7 * 86400).filter(e => e.imp >= 2);
+  toast('이번 주 미국 경제지표 (한국 시간)', list.length ? list.slice(0, 14).map(e => `${e.imp >= 3 ? '🔴' : '🟠'} ${md(e.t)} ${hm(e.t)}  ${e.ko}${e.fc ? `  (예상 ${e.fc})` : ''}${e.ac ? `  → 결과 ${e.ac}` : ''}`).join('\n') : '일정 없음', false);
+  $('#toasts').firstChild.querySelector('.msg').style.whiteSpace = 'pre-line';
+};
+setInterval(newsTick, 15000); setTimeout(loadCalendar, 1500); setInterval(loadCalendar, 3600000);
+
+// 급변동 봉: 평소 봉 크기(앞 100봉 중앙값)의 N배 이상. 바로 앞(45분 안) 지표를 찾아 붙인다
+function spikeMarks(){
+  const B = S.bars, out = [], tf = S.tf[1]; if (B.length < 120 || tf > 3600) return out;
+  const rg = B.map(b => b.high - b.low); let last = -1e12;
+  const from = B[0].time - KST, ev = newsEvents(from - 3600, B[B.length - 1].time - KST + 3600);
+  for (let i = 100; i < B.length; i++){
+    const med = rg.slice(i - 100, i).sort((a, b) => a - b)[50]; if (!med || rg[i] < med * (P.news.spike || 3.5)) continue;
+    const t = B[i].time - KST; if (t - last < 3 * 3600) continue; last = t;
+    const e = ev.filter(x => x.t <= t + tf && x.t >= t - 45 * 60).sort((a, b) => b.imp - a.imp || b.t - a.t)[0];
+    const d = new Date(t * 1000), et = (d.getUTCHours() - (usDst(d) ? 4 : 5) + 24) % 24, etm = d.getUTCMinutes();
+    const guess = !e && ((et === 8 && etm >= 30 && etm < 60) || (et === 10 && etm < 30)) ? `${hm(t - etm % 30 * 60)} 미국 지표 시간` : '';
+    out.push({ time:B[i].time, position:'aboveBar', color:'#ff9800', shape:'circle', size:0, text:`⚡ ${e ? e.ko + ' ' + hm(e.t) : guess || '급변동'}` });
+  }
+  return out;
+}
+// 차트 위 발표 시각 세로선 + 대기 구간 (미래 일정도 오른쪽 빈 공간에 표시)
+function newsX(t){
+  const ts = chart.timeScale(), B = S.bars, tk = t + KST, n = B.length; if (!n) return null;
+  if (tk <= B[n - 1].time){ let lo = 0, hi = n - 1; while (lo < hi){ const m = (lo + hi) >> 1; if (B[m].time < tk) lo = m + 1; else hi = m; }
+    const x = ts.logicalToCoordinate(lo - (B[lo].time - tk) / S.tf[1]); return x; }
+  return ts.logicalToCoordinate(n - 1 + (tk - B[n - 1].time) / S.tf[1]);
+}
+function drawNews(pw, h){
+  if (!S.show.news || !S.bars.length || S.tf[1] > 3600) return;
+  const r = chart.timeScale().getVisibleLogicalRange(); if (!r) return;
+  const B = S.bars, n = B.length, sec = S.tf[1];
+  const t0 = B[Math.max(0, Math.floor(r.from))].time - KST, t1 = B[n - 1].time - KST + Math.max(0, r.to - n + 1) * sec;
+  const now = nowSec();
+  for (const e of newsEvents(t0 - 3600, t1 + 3600)){
+    const x = newsX(e.t); if (x == null || x < -50 || x > pw + 50) continue;
+    const hi = e.imp >= 3, fut = e.t > now - P.news.after * 60;
+    if (hi && fut){
+      const xa = newsX(e.t - P.news.before * 60), xb = newsX(e.t + P.news.after * 60);
+      if (xa != null && xb != null){ ctx.fillStyle = 'rgba(242,54,69,.08)'; ctx.fillRect(xa, 0, Math.max(2, xb - xa), h); }
+    }
+    ctx.strokeStyle = hi ? 'rgba(242,54,69,.7)' : 'rgba(255,152,0,.45)'; ctx.lineWidth = 1; ctx.setLineDash(hi ? [] : [3, 3]);
+    ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, h); ctx.stroke(); ctx.setLineDash([]);
+    if (!hi && sec > 900) continue;
+    const label = `${hi && fut ? '⏸ 대기 · ' : ''}${e.ko} ${hm(e.t)}`;
+    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif';
+    const w = ctx.measureText(label).width + 10, y = h - (hi ? 50 : 70); if (x - w / 2 < 0 || x + w / 2 > pw) continue;
+    ctx.fillStyle = hi ? '#f23645' : 'rgba(255,152,0,.85)'; ctx.fillRect(x - w / 2, y, w, 17);
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillText(label, x, y + 9); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+}
+
+/* ---------- 매물대 ---------- */
+// ① 볼륨 프로파일: 보이는 구간의 가격대별 거래량(없으면 머문 시간)
+let vpMemo = null;
+function drawVP(pw, h){
+  if (!S.show.vp || !S.bars.length) return;
+  const r = chart.timeScale().getVisibleLogicalRange(); if (!r) return;
+  const i0 = Math.max(0, Math.floor(r.from)), i1 = Math.min(S.bars.length - 1, Math.ceil(r.to)); if (i1 - i0 < 5) return;
+  const lb = S.bars[S.bars.length - 1], key = `${i0}|${i1}|${lb.time}|${lb.close}|${P.vp.bins}`;
+  if (!vpMemo || vpMemo.key !== key){
+    let lo = Infinity, hi = -Infinity; for (let i = i0; i <= i1; i++){ lo = Math.min(lo, S.bars[i].low); hi = Math.max(hi, S.bars[i].high); }
+    const n = Math.max(10, P.vp.bins | 0), step = (hi - lo) / n || 1, vol = Array(n).fill(0), hasV = S.bars[i1].v > 0;
+    for (let i = i0; i <= i1; i++){
+      const b = S.bars[i], w = hasV ? (b.v || 0) : 1, a = Math.max(0, Math.floor((b.low - lo) / step)), z = Math.min(n - 1, Math.floor((b.high - lo) / step)), share = w / (z - a + 1);
+      for (let k = a; k <= z; k++) vol[k] += share;
+    }
+    const poc = vol.indexOf(Math.max(...vol)), tot = vol.reduce((x, y) => x + y, 0);
+    let va = new Set([poc]), acc = vol[poc], dn = poc - 1, up = poc + 1;
+    while (acc < tot * .7 && (dn >= 0 || up < n)){ const vd = dn >= 0 ? vol[dn] : -1, vu = up < n ? vol[up] : -1; if (vu >= vd){ va.add(up); acc += vu; up++; } else { va.add(dn); acc += vd; dn--; } }
+    vpMemo = { key, lo, step, vol, poc, va, max:Math.max(...vol), hasV };
+  }
+  const m = vpMemo, wMax = pw * (P.vp.width || 22) / 100;
+  for (let k = 0; k < m.vol.length; k++){
+    const y1 = candle.priceToCoordinate(m.lo + (k + 1) * m.step), y2 = candle.priceToCoordinate(m.lo + k * m.step); if (y1 == null || y2 == null) continue;
+    const w = m.vol[k] / m.max * wMax;
+    ctx.fillStyle = k === m.poc ? 'rgba(255,152,0,.55)' : m.va.has(k) ? 'rgba(41,98,255,.30)' : 'rgba(149,152,161,.18)';
+    ctx.fillRect(pw - w, Math.min(y1, y2) + .5, w, Math.max(1, Math.abs(y2 - y1) - 1));
+  }
+  const yp = candle.priceToCoordinate(m.lo + (m.poc + .5) * m.step);
+  if (yp != null){ ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(0, Math.round(yp) + .5); ctx.lineTo(pw, Math.round(yp) + .5); ctx.stroke(); ctx.setLineDash([]);
+    lineLabel(`POC 최대 매물대${m.hasV ? '' : ' (머문 시간)'}`, yp, '#ff9800', pw - wMax - 4); }
+}
+// ② 지지·저항 매물대: 여러 번 튕겨 나간 가격대를 묶는다
+function computeZones(bars){
+  bars = bars.slice(-1500); const N = bars.length, L = 5; if (N < 50) return [];
+  const rng = bars.slice(-300).map(b => b.high - b.low).sort((a, b) => a - b), tol = rng[Math.floor(rng.length / 2)] * .8 || 1;
+  const piv = [];
+  for (let i = L; i < N - L; i++){
+    let ph = true, pl = true;
+    for (let k = 1; k <= L; k++){ if (bars[i - k].high > bars[i].high || bars[i + k].high > bars[i].high) ph = false; if (bars[i - k].low < bars[i].low || bars[i + k].low < bars[i].low) pl = false; }
+    if (ph) piv.push({ p:bars[i].high, i }); if (pl) piv.push({ p:bars[i].low, i });
+  }
+  piv.sort((a, b) => a.p - b.p);
+  const cl = [];
+  for (const v of piv){ const c = cl[cl.length - 1]; if (c && v.p - c.lo <= tol){ c.hi = v.p; c.n++; c.last = Math.max(c.last, v.i); } else cl.push({ lo:v.p, hi:v.p, n:1, last:v.i }); }
+  const zs = cl.filter(c => c.n >= (P.sr.touch || 3)).map(c => ({ lo:c.lo - tol * .25, hi:c.hi + tol * .25, n:c.n, last:c.last })), out = [];
+  // 겹치면 터치가 많은 쪽만 남긴다 (구간이 길게 이어 붙지 않게)
+  for (const z of zs.sort((a, b) => b.n - a.n)) if (!out.some(o => z.lo <= o.hi + tol * .5 && z.hi >= o.lo - tol * .5)) out.push(z);
+  return out;
+}
+function drawZones(pw){
+  if (!S.show.sr || !S.zones || !S.zones.length) return;
+  const px = S.bars[S.bars.length - 1].close, maxN = Math.max(...S.zones.map(z => z.n));
+  const lastY = [], pick = S.zones.slice().sort((a, b) => Math.abs((a.lo + a.hi) / 2 - px) - Math.abs((b.lo + b.hi) / 2 - px)).slice(0, P.sr.show || 6);
+  for (const z of pick){
+    const y1 = candle.priceToCoordinate(z.hi), y2 = candle.priceToCoordinate(z.lo); if (y1 == null || y2 == null) continue;
+    const res = (z.lo + z.hi) / 2 > px, rgb = res ? '242,54,69' : '34,171,148', a = .05 + .08 * (z.n / maxN);
+    ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fillRect(0, y1, pw, Math.max(2, y2 - y1));
+    ctx.strokeStyle = `rgba(${rgb},.45)`; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+    ctx.beginPath(); ctx.moveTo(0, Math.round(y1) + .5); ctx.lineTo(pw, Math.round(y1) + .5); ctx.moveTo(0, Math.round(y2) + .5); ctx.lineTo(pw, Math.round(y2) + .5); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.fillStyle = `rgba(${rgb},.95)`; ctx.textBaseline = 'middle';
+    const ym = (y1 + y2) / 2; if (lastY.some(y => Math.abs(y - ym) < 14)) continue; lastY.push(ym);
+    ctx.textAlign = 'right'; ctx.fillText(`${res ? '저항' : '지지'} 매물대 · ${z.n}회 터치`, pw - (S.show.vp ? pw * (P.vp.width || 22) / 100 : 0) - 8, (y1 + y2) / 2); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+}
+
 /* ---------- 오버레이: 세션박스 + 추세선 ---------- */
 const cv = $('#overlay'), ctx = cv.getContext('2d');
 const DASH = { 0:[], 1:[2, 3], 2:[7, 5] };
@@ -1075,7 +1343,8 @@ function drawOverlay(){
   }
 
   // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
-  drawPlan(pw);
+  drawNews(pw, h); drawPlan(pw); drawPaper(pw);
+  drawVP(pw, h); drawZones(pw);
   if (S.usLine){
     const x0 = ts.logicalToCoordinate(S.usLine.i0);
     for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', '어제 미장 고점'], [S.usLine.lo, '#FF0000', '어제 미장 저점']]){
@@ -1365,7 +1634,7 @@ function startTDPoll(sym, tf, id){
 }
 /* 한텍 MT5 브리지 */
 const mt5Get = async path => { const r = await fetch(S.cfg.mt5url + path); const j = await r.json(); if (j.error) throw new Error(j.error); return j; };
-const mapBars = arr => arr.map(b => ({ time:b.t + KST, open:b.o, high:b.h, low:b.l, close:b.c }));
+const mapBars = arr => arr.map(b => ({ time:b.t + KST, open:b.o, high:b.h, low:b.l, close:b.c, v:b.v }));
 async function loadMT5(sym, tf){ return mapBars((await mt5Get(`/bars?symbol=${encodeURIComponent(sym.id)}&tf=${tf[0]}&count=1500`)).bars); }
 function startMT5Poll(sym, tf, id){
   S.timer = setInterval(async () => {
@@ -1406,6 +1675,7 @@ async function initMT5(){
     pollQuotes(); S.qtimer = setInterval(pollQuotes, 3000);
     if (S.mt5warned) toast('한텍 MT5 연결됨', 'MT5 시세로 차트를 다시 그립니다.');
     S.mt5ok = true; S.mt5warned = false;
+    autoSetupAlerts();
     setTimeout(syncBridge, 500);
     if (!(S.cfg.tg && S.cfg.chat) && !S.tgNudged){ S.tgNudged = true; setTimeout(() => toast('텔레그램 알림', '휴대폰으로 신호를 받으려면 텔레그램을 연결하세요. 2분이면 됩니다.', false, ['텔레그램 연결', () => $('#tgBtn').click()]), 4000); }
     return true;
@@ -1424,7 +1694,7 @@ async function loadBinance(sym, tf){
   const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym.bn || sym.id}&interval=${src[4]}&limit=1000`, { signal:ac.signal });
   clearTimeout(to);
   if (!r.ok) throw new Error('http ' + r.status);
-  const bars = (await r.json()).map(k => ({ time:k[0] / 1000 + KST, open:+k[1], high:+k[2], low:+k[3], close:+k[4] }));
+  const bars = (await r.json()).map(k => ({ time:k[0] / 1000 + KST, open:+k[1], high:+k[2], low:+k[3], close:+k[4], v:+k[5] }));
   return tf[4] ? bars : aggregate(bars, tf[1]);
 }
 function openSocket(sym, tf, id){
@@ -2053,6 +2323,27 @@ function notify(n){
   ALOG.unshift({ ts:Date.now(), name:n.name, msg:n.msg || '', sym:n.sym, tf:n.tf, read:false }); saveLog(); renderLog();
 }
 
+/* 한텍 연결 시 기본 얼러트 자동 등록 (사장님 트레이딩뷰 구성: 2·5·10분·1시간 × 상방·하방) */
+function autoSetupAlerts(){
+  if (store.get('autoAlertsV1')) return;
+  const pick = re => (SYMS.find(x => x.feed === 'mt5' && re.test(x.id)) || {}).id;
+  const gold = pick(/^XAUUSD/i), nas = pick(/^(US100|NAS100|USTEC|NDX)/i);
+  // 예전 기본 알림(XAUUSD)은 한텍 종목으로 옮긴다
+  if (gold) ALERTS.forEach(a => { if (a.sym === 'XAUUSD') a.sym = gold; });
+  let added = 0;
+  for (const [sym, label] of [[gold, ''], [nas, ' 나스닥']]){
+    if (!sym) continue;
+    for (const tf of ['2m', '5m', '10m', '1h']) for (const [op, w] of [['up', '상방'], ['dn', '하방']]){
+      if (ALERTS.some(a => a.sym === sym && a.tf === tf && a.conds.length === 1 && a.conds[0].src === 'hhj' && a.conds[0].op === op)) continue;
+      ALERTS.push({ id:uid(), sym, tf, conds:[{ src:'hhj', op }], trig:'close', exp:null, name:`${tfLabel(tf)}${label} 돌파 더블비 ${w}`, msg:'',
+        toast:true, sound:true, tg:true, active:true, created:Date.now() });
+      added++;
+    }
+  }
+  store.set('autoAlertsV1', 1); saveAlerts(); renderAlertList();
+  if (added) toast('얼러트 자동 등록', `${[gold, nas].filter(Boolean).join(', ')} · 2분·5분·10분·1시간 돌파 더블비 상방·하방 ${added}개를 등록했습니다.`);
+}
+
 /* 텔레그램 24시간: 한텍 종목의 돌파 더블비 규칙을 PC 연결 프로그램에 맡긴다 */
 S.bridgeIds = new Set();
 async function syncBridge(){
@@ -2401,6 +2692,256 @@ function drawPlan(pw){
     lineLabel(name, y, col, pw); axisTags.push({ text:fmt(pr), y, col });
   }
 }
+
+/* ---------- 모의 거래 (MT5 처럼) + 자동매매 ---------- */
+const PT_DEF = { bal:1000, pos:[], hist:[], seq:100000, auto:{ grid:false, trail:false }, lastSig:{}, day:'', dayStart:1000,
+  cfg:{ sym:'', tf:'5m', lev:500, cs:100, ptv:1, tg:true,
+    grid:{ tf:'5m', dir:'rev', lot1:0.01, adds:'30:0.02, 60:0.03', tp:5, be:1, stop:100 },
+    trail:{ tf:'5m', dir:'trend', lot:0.01, sl:10, act:10, mode:'half', dist:10 } } };
+let PT = (() => { const x = store.get('paper', null); if (!x) return JSON.parse(JSON.stringify(PT_DEF));
+  return { ...JSON.parse(JSON.stringify(PT_DEF)), ...x, cfg:{ ...PT_DEF.cfg, ...x.cfg, grid:{ ...PT_DEF.cfg.grid, ...(x.cfg || {}).grid }, trail:{ ...PT_DEF.cfg.trail, ...(x.cfg || {}).trail } } }; })();
+if (/0\.2\b|0\.3\b/.test(PT.cfg.grid.adds)) PT.cfg.grid.adds = '30:0.02, 60:0.03';
+const savePT = () => store.set('paper', PT);
+S.ptq = null;
+const ptSym = () => PT.cfg.sym || (SYMS.find(x => x.feed === 'mt5' && /^XAU/i.test(x.id)) || S.sym).id;
+const parseAdds = t => String(t).split(',').map(x => x.split(':').map(Number)).filter(([d, l]) => d > 0 && l > 0).map(([d, l]) => ({ d, l }));
+const ptPnl = p => { const q = S.ptq; if (!q) return 0; const cur = p.dir > 0 ? q.bid : q.ask; return (cur - p.open) * p.dir * p.lots * PT.cfg.cs; };
+const ptMargin = () => PT.pos.reduce((a, p) => a + p.lots * PT.cfg.cs * p.open / PT.cfg.lev, 0);
+async function ptQuote(){
+  const sym = ptSym();
+  try {
+    if (S.mt5ok && (SYMS.find(x => x.id === sym) || {}).feed === 'mt5'){
+      const q = (await mt5Get('/quotes')).quotes[sym]; if (q) S.ptq = { bid:q.bid, ask:q.ask, sym, live:true };
+    } else if (S.sym.id === sym && S.bars.length){ const c = S.bars[S.bars.length - 1].close; S.ptq = { bid:c - .1, ask:c + .1, sym, live:false }; }
+  } catch {}
+}
+function ptLog(title, msg){
+  notify({ name:'[모의] ' + title, msg, sym:ptSym(), tf:'', toast:true, sound:false, tg:PT.cfg.tg });
+}
+function ptOpen(dir, lots, strat, group, sl = null, tp = null){
+  const q = S.ptq; if (!q) return null;
+  const price = dir > 0 ? q.ask : q.bid, need = lots * PT.cfg.cs * price / PT.cfg.lev, eq = PT.bal + PT.pos.reduce((a, p) => a + ptPnl(p), 0);
+  if (eq - ptMargin() < need){ ptLog('증거금 부족', `${lots}랏 ${dir > 0 ? '매수' : '매도'}에 필요한 증거금 $${need.toFixed(2)} 이 모자라 주문하지 않았습니다.`); return null; }
+  const p = { id:++PT.seq, sym:q.sym, dir, lots, open:price, time:Date.now(), sl, tp, strat, group, peak:0 };
+  PT.pos.push(p); savePT();
+  ptLog(`${dir > 0 ? 'BUY' : 'SELL'} ${lots}랏 체결`, `${q.sym} @ ${fmt(price)}${strat ? ` · ${strat === 'grid' ? '물타기 회복' : '끌고 가기'}` : ''}${sl ? ` · S/L ${fmt(sl)}` : ''}`);
+  return p;
+}
+function ptClose(p, why){
+  const q = S.ptq; if (!q) return;
+  const price = p.dir > 0 ? q.bid : q.ask, pnl = (price - p.open) * p.dir * p.lots * PT.cfg.cs;
+  PT.bal += pnl; PT.pos = PT.pos.filter(x => x !== p);
+  PT.hist.unshift({ ...p, close:price, ctime:Date.now(), pnl, why }); PT.hist = PT.hist.slice(0, 500); savePT();
+  return pnl;
+}
+function ptCloseGroup(g, why){
+  const ps = PT.pos.filter(p => p.group === g); let sum = 0; ps.forEach(p => { sum += ptClose(p, why) || 0; });
+  if (ps.length) ptLog(`${why} · ${ps.length}건 청산`, `합계 ${money(sum)} · 잔액 $${PT.bal.toFixed(2)}`);
+}
+function ptStep(){
+  const q = S.ptq; if (!q) return;
+  const v = PT.cfg.ptv;
+  // 개별 S/L · T/P
+  for (const p of PT.pos.slice()){
+    const cur = p.dir > 0 ? q.bid : q.ask;
+    if (p.sl != null && (p.dir > 0 ? cur <= p.sl : cur >= p.sl)){ const r = ptClose(p, '손절'); ptLog(`손절 · ${p.lots}랏`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); continue; }
+    if (p.tp != null && (p.dir > 0 ? cur >= p.tp : cur <= p.tp)){ const r = ptClose(p, '익절'); ptLog(`익절 · ${p.lots}랏`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); continue; }
+    // 끌고 가기: 본전 → 추적
+    if (p.strat === 'trail'){
+      const t = PT.cfg.trail, fav = (cur - p.open) * p.dir / v; p.peak = Math.max(p.peak, fav);
+      if (p.peak >= t.act){
+        const keep = t.mode === 'half' ? p.peak / 2 : p.peak - t.dist, ns = p.open + p.dir * Math.max(0, keep) * v;
+        if (p.sl == null || (p.dir > 0 ? ns > p.sl : ns < p.sl)){ const first = p.sl == null || (p.dir > 0 ? p.sl < p.open : p.sl > p.open); p.sl = +ns.toFixed(2); savePT();
+          if (first) ptLog('끌고 가기 · 손절선 본전 이상으로', `S/L ${fmt(p.sl)} (수익 ${p.peak.toFixed(1)}포인트)`); }
+      }
+    }
+  }
+  // 물타기 회복 바스켓
+  const groups = [...new Set(PT.pos.filter(p => p.strat === 'grid').map(p => p.group))];
+  for (const g of groups){
+    const ps = PT.pos.filter(p => p.group === g), first = ps.reduce((a, p) => p.time < a.time ? p : a), d = first.dir, gc = PT.cfg.grid;
+    const against = (d > 0 ? first.open - q.bid : q.ask - first.open) / v, adds = parseAdds(gc.adds), done = ps.length - 1;
+    adds.forEach((a, k) => { if (k >= done && against >= a.d && !PT.pos.some(p => p.group === g && p.addIdx === k)){ const np = ptOpen(d, a.l, 'grid', g); if (np){ np.addIdx = k; savePT(); } } });
+    const sum = PT.pos.filter(p => p.group === g).reduce((a, p) => a + ptPnl(p), 0), hasAdd = PT.pos.some(p => p.group === g && p.addIdx != null);
+    if (against >= gc.stop) ptCloseGroup(g, `물타기 전체 손절 (${gc.stop}포인트)`);
+    else if (hasAdd ? sum >= gc.be : sum >= gc.tp) ptCloseGroup(g, hasAdd ? '물타기 탈출' : '물타기 익절');
+  }
+  // 스톱아웃 (마진 레벨 50%)
+  let m = ptMargin();
+  while (PT.pos.length && m > 0){
+    const eq = PT.bal + PT.pos.reduce((a, p) => a + ptPnl(p), 0);
+    if (eq / m * 100 >= 50) break;
+    const worst = PT.pos.reduce((a, p) => ptPnl(p) < ptPnl(a) ? p : a); const r = ptClose(worst, '스톱아웃');
+    ptLog('스톱아웃 (마진 레벨 50% 미만)', `${worst.lots}랏 강제 청산 ${money(r)}`); m = ptMargin();
+  }
+}
+async function ptSignals(){
+  const sym = ptSym();
+  for (const st of ['grid', 'trail']){
+    if (!PT.auto[st] || PT.pos.some(p => p.strat === st)) continue;
+    const c = PT.cfg[st], r = await barsFor(sym, c.tf); if (!r || !r.live) continue;
+    const bars = r.bars, i = bars.length - 2; if (i < 130) continue;
+    const bt = bars[i].time, key = st + '|' + sym + '|' + c.tf;
+    if (PT.lastSig[key] == null){ PT.lastSig[key] = bt; savePT(); continue; }
+    if (PT.lastSig[key] === bt) continue; PT.lastSig[key] = bt; savePT();
+    const I = compute(bars), up = I.dbUp[i], dn = I.dbDn[i]; if (!up && !dn) continue;
+    const d = sigToDir(c.dir, up, dn, st); if (!d || !S.ptq) continue;
+    const nb = newsBlock(); if (nb){ toast('모의 거래', `${nb.ko} 발표 전후 대기 중이라 자동 진입을 건너뜁니다.`); continue; }
+    if (st === 'grid') ptOpen(d, c.lot1, 'grid', 'G' + Date.now());
+    else { const px = d > 0 ? S.ptq.ask : S.ptq.bid; ptOpen(d, c.lot, 'trail', 'T' + Date.now(), +(px - d * c.sl * PT.cfg.ptv).toFixed(2)); }
+  }
+}
+// 신호 → 방향 (물타기의 '매수만'은 ↓돌파, 끌고 가기의 '매수만'은 ↑돌파)
+function sigToDir(mode, up, dn, st){
+  if (mode === 'rev') return dn ? 1 : -1;
+  if (mode === 'trend') return up ? 1 : -1;
+  if (mode === 'long') return (st === 'grid' ? dn : up) ? 1 : 0;
+  return (st === 'grid' ? up : dn) ? -1 : 0;
+}
+
+/* 모의 전략 자동 탐색: 한텍 데이터로 물타기·끌고 가기 숫자를 찾아 적용한다 */
+function simStrat(bars, I, st, c, cs = 100, spr = 0.3){
+  const trades = []; let pos = null, bal = 1000, peakEq = 1000, mdd = 0, mddPct = 0;
+  const N = bars.length, adds = st === 'grid' ? parseAdds(c.adds) : [];
+  for (let i = 121; i < N; i++){
+    const b = bars[i];
+    if (pos){
+      const d = pos.dir; let exit = null;
+      if (st === 'grid'){
+        const adv = d > 0 ? b.low : b.high, against = (pos.first - adv) * d;
+        adds.forEach((a, k) => { if (k >= pos.k && against >= a.d){ pos.legs.push({ p:pos.first - d * a.d, l:a.l }); pos.k = k + 1; } });
+        const L = pos.legs.reduce((x, y) => x + y.l, 0), OL = pos.legs.reduce((x, y) => x + y.p * y.l, 0);
+        if (against >= c.stop){ exit = pos.first - d * c.stop; }
+        else { const tgt = pos.k ? c.be : c.tp, X = OL / L + d * (tgt + spr * L * cs) / (cs * L), fav = d > 0 ? b.high : b.low; if ((fav - X) * d >= 0) exit = X; }
+        if (exit != null){ const net = (exit * L - OL) * d * cs - spr * L * cs; bal += net; trades.push({ net, i1:i }); pos = null; }
+        else { const fl = (adv * L - OL) * d * cs; peakEq = Math.max(peakEq, bal); const dd = peakEq - (bal + fl); if (dd > mdd){ mdd = dd; mddPct = dd / peakEq * 100; } }
+      } else {
+        const adv = d > 0 ? b.low : b.high, fav = d > 0 ? b.high : b.low;
+        if ((adv - pos.sl) * d <= 0) exit = pos.sl;
+        if (exit != null){ const net = (exit - pos.open) * d * c.lot * cs - spr * c.lot * cs; bal += net; trades.push({ net, i1:i }); pos = null; }
+        else {
+          pos.peak = Math.max(pos.peak, (fav - pos.open) * d);
+          if (pos.peak >= c.act){ const keep = c.mode === 'half' ? pos.peak / 2 : pos.peak - c.dist, ns = pos.open + d * Math.max(0, keep); if ((ns - pos.sl) * d > 0) pos.sl = ns; }
+          const fl = (adv - pos.open) * d * c.lot * cs; peakEq = Math.max(peakEq, bal); const dd = peakEq - (bal + fl); if (dd > mdd){ mdd = dd; mddPct = dd / peakEq * 100; }
+        }
+      }
+    }
+    if (!pos && i + 1 < N && (I.dbUp[i] || I.dbDn[i])){
+      const d = sigToDir(c.dir, I.dbUp[i], I.dbDn[i], st);
+      if (d){ const o = bars[i + 1].open; pos = st === 'grid' ? { dir:d, first:o, legs:[{ p:o, l:c.lot1 }], k:0 } : { dir:d, open:o, sl:o - d * c.sl, peak:0 }; }
+    }
+  }
+  const w = trades.filter(t => t.net > 0), l = trades.filter(t => t.net <= 0), gw = w.reduce((a, t) => a + t.net, 0), gl = -l.reduce((a, t) => a + t.net, 0);
+  return { trades, net:bal - 1000, mdd, mddPct, n:trades.length, win:trades.length ? w.length / trades.length * 100 : 0, pf:gl ? gw / gl : (gw ? 9 : 0), avgW:w.length ? gw / w.length : 0, avgL:l.length ? gl / l.length : 0 };
+}
+async function autoPaperOptimize(force){
+  if (!S.mt5ok || S.ptOptRunning) return;
+  if (!force && PT.opt && Date.now() - PT.opt.at < 86400000) return;
+  const sym = ptSym(); if ((SYMS.find(x => x.id === sym) || {}).feed !== 'mt5') return;
+  S.ptOptRunning = true;
+  try {
+    const grids = [], trails = [];
+    for (const dir of ['rev', 'trend']) for (const adds of ['15:0.02, 30:0.03', '20:0.02, 40:0.03', '30:0.02, 60:0.03', '40:0.02, 80:0.03'])
+      for (const tp of [2, 3, 5, 8]) for (const be of [0.5, 1, 2]) for (const stop of [50, 100, 150]) grids.push({ dir, lot1:0.01, adds, tp, be, stop });
+    for (const dir of ['trend', 'rev']) for (const sl of [5, 10, 15, 20]) for (const act of [5, 10, 15, 20])
+      for (const [mode, dist] of [['half', 0], ['fixed', 5], ['fixed', 10], ['fixed', 15]]) trails.push({ dir, lot:0.01, sl, act, mode, dist });
+    const best = { grid:null, trail:null };
+    for (const tf of ['2m', '5m', '10m', '15m', '1h']){
+      let bars; try { bars = mapBars((await mt5Get(`/bars?symbol=${encodeURIComponent(sym)}&tf=${tf}&count=30000`)).bars); } catch { continue; }
+      if (bars.length < 3000) continue;
+      const I = compute(bars), N = bars.length, seg = 5, bd = []; for (let k = 0; k <= seg; k++) bd.push(Math.floor(121 + (N - 121) * k / seg));
+      for (const [st, list] of [['grid', grids], ['trail', trails]]){
+        for (let g = 0; g < list.length; g++){
+          const c = list[g], r = simStrat(bars, I, st, c);
+          if (r.n >= 30 && r.pf >= 1.2 && r.mddPct < 25 && !(r.avgL > r.avgW * 8)){
+            const sn = Array(seg).fill(0); r.trades.forEach(t => { for (let k = 0; k < seg; k++) if (t.i1 >= bd[k] && t.i1 < bd[k + 1]){ sn[k] += t.net; break; } });
+            const score = r.net / (r.mdd + 1);
+            if (sn.filter(v => v > 0).length >= 4 && sn[seg - 1] > 0 && (!best[st] || score > best[st].score))
+              best[st] = { c:{ ...c, tf }, r, sn, score, from:new Date(bars[0].time * 1000).toISOString().slice(0, 10), to:new Date(bars[N - 1].time * 1000).toISOString().slice(0, 10) };
+          }
+          if (g % 25 === 0) await new Promise(res => setTimeout(res, 0));
+        }
+      }
+    }
+    const desc = (st, b) => !b ? `${st === 'grid' ? '물타기 회복' : '끌고 가기'}: 기준을 통과한 숫자가 없어 <b>켜지 않았습니다</b>.`
+      : st === 'grid' ? `물타기 회복: ${tfLabel(b.c.tf)} ${b.c.dir === 'rev' ? '역추세' : '순추세'} · 0.01랏 → 불리 ${parseAdds(b.c.adds).map(a => `${a.d}p ${a.l}랏`).join(', ')} 추가 · 익절 $${b.c.tp} / 추가 후 $${b.c.be} 이상 탈출 · 전체 손절 ${b.c.stop}p<br>　→ ${b.from}~${b.to} 순이익 ${money(b.r.net)}, 최대 낙폭 ${b.r.mddPct.toFixed(1)}%, ${b.r.n}회, 승률 ${b.r.win.toFixed(0)}%`
+      : `끌고 가기: ${tfLabel(b.c.tf)} ${b.c.dir === 'trend' ? '순추세' : '역추세'} · 0.01랏 · 처음 손절 ${b.c.sl}p · ${b.c.act}p 가면 추적 시작(${b.c.mode === 'half' ? '번 것의 절반 지키기' : `최고점 ${b.c.dist}p 뒤`})<br>　→ ${b.from}~${b.to} 순이익 ${money(b.r.net)}, 최대 낙폭 ${b.r.mddPct.toFixed(1)}%, ${b.r.n}회, 승률 ${b.r.win.toFixed(0)}%`;
+    if (best.grid) PT.cfg.grid = { ...PT.cfg.grid, ...best.grid.c };
+    if (best.trail) PT.cfg.trail = { ...PT.cfg.trail, ...best.trail.c };
+    PT.auto.grid = !!best.grid; PT.auto.trail = !!best.trail; PT.lastSig = {};
+    PT.opt = { at:Date.now(), text:desc('grid', best.grid) + '<br>' + desc('trail', best.trail) };
+    savePT(); $('#ptAutoGrid').checked = PT.auto.grid; $('#ptAutoTrail').checked = PT.auto.trail;
+    ptLog('자동 탐색 완료 · 설정 적용', PT.opt.text.replace(/<br>　?/g, ' / ').replace(/<[^>]+>/g, ''));
+  } catch {}
+  S.ptOptRunning = false;
+}
+setTimeout(() => autoPaperOptimize(false), 8000); setInterval(() => autoPaperOptimize(false), 3600000);
+
+function ptRender(){
+  if ($('#term').hidden) return;
+  const q = S.ptq, float = PT.pos.reduce((a, p) => a + ptPnl(p), 0), eq = PT.bal + float, m = ptMargin();
+  const today = new Date(Date.now() + KST * 1000).toISOString().slice(0, 10);
+  if (PT.day !== today){ PT.day = today; PT.dayStart = PT.bal; savePT(); }
+  const f2 = v => v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  $('#ptAcct').innerHTML = `<span>잔액<b>$${f2(PT.bal)}</b></span><span>평가금<b>$${f2(eq)}</b></span><span>증거금<b>$${f2(m)}</b></span><span>가용<b>$${f2(eq - m)}</b></span><span>마진 레벨<b>${m ? f2(eq / m * 100) + '%' : '—'}</b></span><span>오늘<b class="${eq - PT.dayStart >= 0 ? 'upc' : 'dnc'}">${money(eq - PT.dayStart)}</b></span>`;
+  $('#ptBid').textContent = q ? fmt(q.bid) : '—'; $('#ptAsk').textContent = q ? fmt(q.ask) : '—';
+  $('#ptInfo').textContent = `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)} · ${S.ptOptRunning ? '숫자 찾는 중… · ' : ''}${q ? (q.live ? '한텍 실시간 호가' : '시뮬레이션 가격') : '가격 대기'}${PT.auto.grid || PT.auto.trail ? ' · 자동매매 켜짐' : ''}`;
+  const tm = t => new Date(t + KST * 1000).toISOString().slice(5, 16).replace('T', ' ');
+  if ($('[data-pt="pos"]').getAttribute('aria-pressed') === 'true'){
+    const rows = PT.pos.map(p => { const cur = q ? (p.dir > 0 ? q.bid : q.ask) : null, pl = ptPnl(p);
+      return `<tr><td>${p.id}</td><td>${tm(p.time)}</td><td class="${p.dir > 0 ? 'upc' : 'dnc'}">${p.dir > 0 ? 'buy' : 'sell'}</td><td>${p.lots.toFixed(2)}</td><td>${fmt(p.open)}</td><td>${p.sl != null ? fmt(p.sl) : ''}</td><td>${p.tp != null ? fmt(p.tp) : ''}</td><td>${cur != null ? fmt(cur) : ''}</td><td>${p.strat === 'grid' ? '물타기' : p.strat === 'trail' ? '끌고 가기' : '수동'}</td><td class="${pl >= 0 ? 'upc' : 'dnc'}">${f2(pl)}</td><td><button class="x" data-cl="${p.id}" title="청산">✕</button></td></tr>`; }).join('');
+    $('#ptBody').innerHTML = `<table class="ptab"><thead><tr><th>티켓</th><th>시간</th><th>종류</th><th>랏</th><th>가격</th><th>S/L</th><th>T/P</th><th>현재가</th><th>전략</th><th>손익</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="11" style="text-align:left;color:var(--sub)">열린 포지션이 없습니다. BUY/SELL 을 누르거나 자동매매를 켜세요.</td></tr>'}</tbody><tfoot><tr><td colspan="9">잔액 $${f2(PT.bal)} · 평가금 $${f2(eq)}</td><td class="${float >= 0 ? 'upc' : 'dnc'}">${f2(float)}</td><td></td></tr></tfoot></table>`;
+  } else {
+    const n = PT.hist.length, w = PT.hist.filter(h => h.pnl > 0).length, tot = PT.hist.reduce((a, h) => a + h.pnl, 0);
+    $('#ptBody').innerHTML = `<table class="ptab"><thead><tr><th>티켓</th><th>진입</th><th>청산</th><th>종류</th><th>랏</th><th>진입가</th><th>청산가</th><th>사유</th><th>손익</th></tr></thead><tbody>${PT.hist.slice(0, 200).map(h => `<tr><td>${h.id}</td><td>${tm(h.time)}</td><td>${tm(h.ctime)}</td><td class="${h.dir > 0 ? 'upc' : 'dnc'}">${h.dir > 0 ? 'buy' : 'sell'}</td><td>${h.lots.toFixed(2)}</td><td>${fmt(h.open)}</td><td>${fmt(h.close)}</td><td>${h.why}</td><td class="${h.pnl >= 0 ? 'upc' : 'dnc'}">${f2(h.pnl)}</td></tr>`).join('') || '<tr><td colspan="9" style="text-align:left;color:var(--sub)">아직 거래 기록이 없습니다.</td></tr>'}</tbody><tfoot><tr><td colspan="8">${n}건 · 승률 ${n ? (w / n * 100).toFixed(0) : 0}% · 시작 $1,000 대비</td><td class="${tot >= 0 ? 'upc' : 'dnc'}">${f2(tot)}</td></tr></tfoot></table>`;
+  }
+}
+function drawPaper(pw){
+  if (!PT.pos.length) return;
+  for (const p of PT.pos){
+    if (p.sym !== S.sym.id) continue;
+    const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
+    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `${p.dir > 0 ? 'BUY' : 'SELL'} ${p.lots} · ${money(pl)}`, [6, 4]]];
+    if (p.sl != null) L.push([p.sl, '#f23645', `S/L #${p.id}`, [2, 3]]);
+    if (p.tp != null) L.push([p.tp, '#22ab94', `T/P #${p.id}`, [2, 3]]);
+    for (const [pr, col, name, dash] of L){ const yy = candle.priceToCoordinate(pr); if (yy == null) continue;
+      ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(0, Math.round(yy) + .5); ctx.lineTo(pw, Math.round(yy) + .5); ctx.stroke(); ctx.setLineDash([]);
+      lineLabel(name, yy, col, pw); axisTags.push({ text:fmt(pr), y:yy, col }); }
+  }
+}
+setInterval(async () => { await ptQuote(); ptStep(); ptRender(); }, 1000);
+setInterval(ptSignals, 10000);
+// UI
+$('#ptBtn').onclick = () => { const t = $('#term'); t.hidden = !t.hidden; $('#ptBtn').setAttribute('aria-pressed', !t.hidden); store.set('ptOpen', !t.hidden); ptRender(); };
+if (store.get('ptOpen')){ $('#term').hidden = false; $('#ptBtn').setAttribute('aria-pressed', true); }
+const lotVal = () => Math.max(0.01, Math.round((parseFloat($('#ptLot').value) || 0.01) * 100) / 100);
+$('#ptBuy').onclick = () => { ptOpen(1, lotVal(), null, 'M' + Date.now()); ptRender(); };
+$('#ptSell').onclick = () => { ptOpen(-1, lotVal(), null, 'M' + Date.now()); ptRender(); };
+$('#ptCloseAll').onclick = () => { let sum = 0; PT.pos.slice().forEach(p => { sum += ptClose(p, '수동 전체 청산') || 0; }); ptLog('전체 청산', `합계 ${money(sum)} · 잔액 $${PT.bal.toFixed(2)}`); ptRender(); };
+$('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl); if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); ptRender(); } });
+document.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pt]').forEach(x => x.setAttribute('aria-pressed', x === b)); ptRender(); });
+$('#ptAutoGrid').checked = PT.auto.grid; $('#ptAutoTrail').checked = PT.auto.trail;
+$('#ptAutoGrid').onchange = e => { PT.auto.grid = e.target.checked; savePT(); ptLog(`물타기 회복 ${PT.auto.grid ? '켜짐' : '꺼짐'}`, `${ptSym()} ${tfLabel(PT.cfg.grid.tf)} 돌파 더블비 신호로 자동 진입합니다.`); };
+$('#ptAutoTrail').onchange = e => { PT.auto.trail = e.target.checked; savePT(); ptLog(`끌고 가기 ${PT.auto.trail ? '켜짐' : '꺼짐'}`, `${ptSym()} ${tfLabel(PT.cfg.trail.tf)} 돌파 더블비 신호로 자동 진입합니다.`); };
+function ptFill(){
+  const c = PT.cfg;
+  $('#pt-sym').innerHTML = SYMS.map(x => `<option${x.id === ptSym() ? ' selected' : ''}>${x.id}</option>`).join('');
+  document.querySelectorAll('.tfsel').forEach(el => el.innerHTML = TFS.filter(t => t[1] < 86400).map(t => `<option value="${t[0]}">${t[2]}</option>`).join(''));
+  const o = PT.opt; $('#ptOptInfo').innerHTML = o ? `<div class="warn" style="border-color:#22ab94;background:rgba(34,171,148,.08)"><b>자동으로 찾은 설정</b> (${new Date(o.at + KST * 1000).toISOString().slice(0, 16).replace('T', ' ')})<br>${o.text}</div>` : '<div class="warn">아직 자동 탐색 전입니다. 한텍 MT5 가 연결돼 있으면 스스로 찾아 적용합니다.</div>';
+  $('#pt-lev').value = c.lev; $('#pt-ptv').value = String(c.ptv); $('#pt-tg').checked = c.tg;
+  $('#pt-gdir').value = c.grid.dir; $('#pt-glot').value = c.grid.lot1; $('#pt-gadds').value = c.grid.adds; $('#pt-gtf').value = c.grid.tf; $('#pt-ttf').value = c.trail.tf; $('#pt-gtp').value = c.grid.tp; $('#pt-gbe').value = c.grid.be; $('#pt-gstop').value = c.grid.stop;
+  $('#pt-tdir').value = c.trail.dir; $('#pt-tlot').value = c.trail.lot; $('#pt-tsl').value = c.trail.sl; $('#pt-tact').value = c.trail.act; $('#pt-tmode').value = c.trail.mode; $('#pt-tdist').value = c.trail.dist;
+}
+$('#ptSet').onclick = () => { ptFill(); $('#ptModal').hidden = false; };
+$('#ptClose').onclick = () => { $('#ptModal').hidden = true; };
+$('#ptForm').addEventListener('submit', e => {
+  e.preventDefault(); const n = id => parseFloat($('#pt-' + id).value);
+  PT.cfg = { ...PT.cfg, sym:$('#pt-sym').value, lev:n('lev') || 500, ptv:n('ptv') || 1, tg:$('#pt-tg').checked,
+    grid:{ tf:$('#pt-gtf').value, dir:$('#pt-gdir').value, lot1:n('glot'), adds:$('#pt-gadds').value, tp:n('gtp'), be:n('gbe'), stop:n('gstop') },
+    trail:{ tf:$('#pt-ttf').value, dir:$('#pt-tdir').value, lot:n('tlot'), sl:n('tsl'), act:n('tact'), mode:$('#pt-tmode').value, dist:n('tdist') } };
+  PT.lastSig = {}; savePT(); $('#ptModal').hidden = true; toast('모의 거래 설정 저장됨', `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)}`);
+});
+$('#ptReset').onclick = () => { const keep = PT.cfg; PT = JSON.parse(JSON.stringify(PT_DEF)); PT.cfg = keep; savePT(); $('#ptAutoGrid').checked = false; $('#ptAutoTrail').checked = false; $('#ptModal').hidden = true; toast('계좌 초기화', '잔액 $1,000 으로 다시 시작합니다.'); ptRender(); };
 
 /* ---------- 오른쪽 클릭 메뉴 ---------- */
 const RESET_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 7.5A6 6 0 1 1 4 12"/><path d="M4 3.5v4h4"/></svg>';
