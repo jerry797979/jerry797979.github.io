@@ -173,7 +173,7 @@ class Handler(BaseHTTPRequestHandler):
                 tf = q.get("tf", "15m")
                 if tf not in TF:
                     return self._send(400, {"error": f"지원하지 않는 주기: {tf}"})
-                return self._send(200, {"bars": rates(q["symbol"], tf, min(int(q.get("count", 1500)), 5000))})
+                return self._send(200, {"bars": rates(q["symbol"], tf, min(int(q.get("count", 1500)), 200000))})
             if u.path == "/quotes":
                 return self._send(200, {"quotes": quotes()})
             return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": 2,

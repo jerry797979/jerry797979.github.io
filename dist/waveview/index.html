@@ -176,6 +176,27 @@ svg{display:block}
 .chk{display:flex;gap:14px;flex-wrap:wrap;padding-top:6px}
 .chk label{display:flex;gap:6px;align-items:center;font-size:12.5px}
 
+.dlg.bt{width:min(1080px,100%);height:min(760px,100%)}
+.btsub{color:var(--sub);font-size:12.5px;font-weight:400;margin-left:10px}
+.btbody{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:0;flex:1;overflow:hidden}
+.btform{padding:12px 16px;overflow:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.btform h4{margin:8px 0 0;font-size:12px;color:var(--sub);font-weight:600}
+.btform label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--sub)}
+.btform .inp{height:30px;font-size:12.5px}
+.btres{overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.kpi{border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.kpi small{display:block;color:var(--sub);font-size:11px}
+.kpi b{font-size:16px;font-variant-numeric:tabular-nums}
+.btchart{height:180px;border:1px solid var(--border);border-radius:6px;position:relative}
+.ttab{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.ttab th,.ttab td{padding:5px 6px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.ttab th:first-child,.ttab td:first-child{text-align:left}
+.ttab th{color:var(--sub);font-weight:500;position:sticky;top:0;background:var(--chrome)}
+.ttab tr.pick{cursor:pointer}.ttab tr.pick:hover{background:var(--hover)}
+.warn{border:1px solid #ff9800;background:rgba(255,152,0,.08);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.6}
+@media (max-width:900px){.btbody{grid-template-columns:1fr;overflow:auto}.btform{border-right:0}.kpis{grid-template-columns:repeat(2,1fr)}}
+
 /* 왼쪽 도구 */
 .tools{grid-area:tools;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .tool{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;color:var(--text)}
@@ -333,6 +354,7 @@ svg{display:block}
     <button class="tb" id="indBtn" aria-haspopup="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 21l6-7 5 4 9-10"/><path d="M19 8h5v5"/></svg>지표</button>
     <span class="sep"></span>
     <button class="tb" id="alertBtn"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="14" cy="15" r="8"/><path d="M14 11v4.5l3 2M6.5 6.5L9 4.5M21.5 6.5L19 4.5"/></svg>얼러트</button>
+    <button class="tb" id="btBtn" title="전략 테스트 (백테스트)"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5 22V6M5 22h18"/><path d="M8 18l4-5 3 3 6-8"/></svg>전략 테스트</button>
     <button class="tb" id="replayBtn" aria-pressed="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M13 8l-6 6 6 6M21 8l-6 6 6 6"/></svg>리플레이</button>
     <span class="sep"></span>
     <button class="tb" id="undoBtn" title="되돌리기 (Ctrl+Z)" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 9l-4 4 4 4"/><path d="M5 13h11a6 6 0 0 1 0 12h-3"/></svg></button>
@@ -510,6 +532,36 @@ svg{display:block}
       <p class="note" id="alNote"></p>
     </form>
     <footer><button class="btn sub" type="button" id="alDel" style="margin-right:auto;color:#f23645" hidden>삭제</button><button class="btn sub" type="button" id="alCancel">취소</button><button class="btn" type="submit" form="alForm">저장</button></footer>
+  </div>
+</div>
+<div class="modal" id="btModal" hidden>
+  <div class="dlg bt" role="dialog" aria-modal="true" aria-labelledby="btTitle">
+    <header><span id="btTitle">전략 테스트</span><span class="btsub" id="btSub"></span><span style="flex:1"></span><button class="tb" id="btClose" aria-label="닫기">✕</button></header>
+    <div class="btbody">
+      <form id="btForm" class="btform">
+        <h4>진입</h4>
+        <label>신호<select class="inp" id="bt-sig"><option value="rev">역추세: ↓돌파 더블비 매수 · ↑돌파 더블비 매도</option><option value="long">↓돌파 더블비 매수만</option><option value="short">↑돌파 더블비 매도만</option><option value="trend">순추세: ↑ 매수 · ↓ 매도</option></select></label>
+        <label>추세 필터<select class="inp" id="bt-flt"><option value="none">없음</option><option value="ma">20MA·120MA 방향과 같을 때만</option></select></label>
+        <label>1차 랏<input class="inp" id="bt-lot1" value="0.01" inputmode="decimal"></label>
+        <h4>분할 매수 (물타기)</h4>
+        <label>추가 간격 (포인트)<input class="inp" id="bt-gap" value="20" inputmode="decimal"></label>
+        <label>추가 랏 (쉼표로)<input class="inp" id="bt-adds" value="0.05" placeholder="예: 0.05, 0.1"></label>
+        <h4>청산</h4>
+        <label>익절: 평균가 + (포인트)<input class="inp" id="bt-tp" value="10" inputmode="decimal"></label>
+        <label>손절: 평균가 − (포인트)<input class="inp" id="bt-sl" value="40" inputmode="decimal"></label>
+        <label>최대 보유 봉 (0=제한 없음)<input class="inp" id="bt-max" value="0" inputmode="numeric"></label>
+        <h4>계좌</h4>
+        <label>시작 금액 ($)<input class="inp" id="bt-bal" value="1087.70" inputmode="decimal"></label>
+        <label>1랏 = 온스<input class="inp" id="bt-cs" value="100" inputmode="decimal"></label>
+        <label>스프레드 (포인트)<input class="inp" id="bt-spr" value="0.2" inputmode="decimal"></label>
+        <p class="note">1포인트 = 가격 1.00 (예: 4,150 → 4,130 은 20포인트). 0.01랏이면 1포인트에 $1입니다. 신호 봉이 마감된 뒤 다음 봉 시가에 들어가고, 한 봉 안에서 손절·익절이 둘 다 닿으면 손절로 계산합니다(보수적).</p>
+        <div class="btns"><button class="btn" type="submit">테스트 실행</button><button class="btn sub" type="button" id="btOpt">좋은 설정 찾기</button></div>
+        <h4>분석용 데이터 저장</h4>
+        <p class="note">한텍 MT5 에서 받을 수 있는 만큼(최대 20만 봉) CSV 파일로 저장합니다. 이 파일을 Claude 대화창에 올려 주시면 더 깊게 분석합니다.</p>
+        <div class="btns"><select class="inp" id="bt-xtf" style="flex:1"><option value="5m">5분</option><option value="15m" selected>15분</option><option value="1h">1시간</option><option value="1m">1분</option></select><button class="btn sub" type="button" id="btExport">CSV 저장</button></div>
+      </form>
+      <div class="btres" id="btRes"><p class="note" style="padding:20px">왼쪽 설정을 확인하고 <b>테스트 실행</b>을 누르세요. 한텍 MT5 가 연결돼 있으면 최근 5,000봉으로 시험합니다.</p></div>
+    </div>
   </div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -836,6 +888,8 @@ function renderMarkers(){
       if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ 돌파' });
     }
   }
+  if (S.btMarks && S.btMarks.sym === S.sym.id && S.btMarks.tf === S.tf[0]) mk.push(...S.btMarks.list);
+  mk.sort((a, b) => a.time - b.time);
   candle.setMarkers(mk);
 }
 let refLines = [], lowLine = null;
@@ -2077,6 +2131,160 @@ $('#alForm').addEventListener('submit', e => {
   saveAlerts(); renderAlertList(); $('#alModal').hidden = true; toast('얼러트 저장됨', `${d.sym} ${tfLabel(d.tf)} · ${d.conds.map(condText).join(' + ')}`);
 });
 renderAlertList(); renderLog();
+
+/* ---------- 전략 테스트 (분할 매수 백테스트) ---------- */
+function readBt(){
+  const n = id => parseFloat($('#bt-' + id).value);
+  return { sig:$('#bt-sig').value, flt:$('#bt-flt').value, lot1:n('lot1'), gap:n('gap'), adds:$('#bt-adds').value.split(',').map(x => parseFloat(x)).filter(x => x > 0),
+    tp:n('tp'), sl:n('sl'), max:parseInt($('#bt-max').value, 10) || 0, bal:n('bal'), cs:n('cs') || 100, spr:n('spr') || 0 };
+}
+function backtest(bars, I, cfg, from = 0, to = bars.length){
+  const trades = []; let pos = null, eq = cfg.bal, peak = cfg.bal, mdd = 0, mddPct = 0; const curve = [];
+  const pnl = (dir, entry, exit, lots) => (exit - entry) * dir * lots * cfg.cs;
+  for (let i = Math.max(from, 121); i < to; i++){
+    const b = bars[i];
+    if (pos){
+      const d = pos.dir;
+      // 1) 불리한 쪽 먼저: 분할 추가 → 손절
+      while (pos.k < cfg.adds.length){
+        const lv = pos.first - d * cfg.gap * (pos.k + 1);
+        if (d > 0 ? b.low <= lv : b.high >= lv){ pos.legs.push({ p:lv, l:cfg.adds[pos.k] }); pos.k++; } else break;
+      }
+      const lots = pos.legs.reduce((a, x) => a + x.l, 0), avg = pos.legs.reduce((a, x) => a + x.p * x.l, 0) / lots;
+      const sl = cfg.sl > 0 ? avg - d * cfg.sl : null, tp = avg + d * cfg.tp;
+      let exit = null, why = '';
+      if (sl != null && (d > 0 ? b.low <= sl : b.high >= sl)){ exit = sl; why = '손절'; }
+      else if (d > 0 ? b.high >= tp : b.low <= tp){ exit = tp; why = '익절'; }
+      else if (cfg.max && i - pos.i0 >= cfg.max){ exit = b.close; why = '시간'; }
+      if (exit != null){
+        const gross = pnl(d, avg, exit, lots), cost = cfg.spr * lots * cfg.cs, net = gross - cost;
+        eq += net; trades.push({ dir:d, t0:pos.t0, t1:b.time, entry:avg, exit, lots, adds:pos.k, net, why, i0:pos.i0, i1:i });
+        pos = null;
+      }
+    }
+    // 2) 신호 봉 마감 → 다음 봉 시가 진입
+    if (!pos && i + 1 < to){
+      let dir = 0;
+      const up = I.dbUp[i], dn = I.dbDn[i];
+      if (cfg.sig === 'rev'){ if (dn) dir = 1; else if (up) dir = -1; }
+      else if (cfg.sig === 'long'){ if (dn) dir = 1; }
+      else if (cfg.sig === 'short'){ if (up) dir = -1; }
+      else if (cfg.sig === 'trend'){ if (up) dir = 1; else if (dn) dir = -1; }
+      if (dir && cfg.flt === 'ma'){ const a = I.bma20[i], z = I.bma120[i]; if (a == null || z == null || (dir > 0 ? a < z : a > z)) dir = 0; }
+      if (dir){ const nb = bars[i + 1]; pos = { dir, first:nb.open, legs:[{ p:nb.open, l:cfg.lot1 }], k:0, i0:i + 1, t0:nb.time }; }
+    }
+    if (pos){ const lots = pos.legs.reduce((a, x) => a + x.l, 0), avg = pos.legs.reduce((a, x) => a + x.p * x.l, 0) / lots;
+      const open = pnl(pos.dir, avg, pos.dir > 0 ? b.low : b.high, lots); const cur = eq + open;
+      peak = Math.max(peak, eq); const dd = peak - cur; if (dd > mdd){ mdd = dd; mddPct = dd / peak * 100; } }
+    else { peak = Math.max(peak, eq); }
+    curve.push({ time:b.time, value:eq });
+  }
+  const wins = trades.filter(t => t.net > 0), losses = trades.filter(t => t.net <= 0);
+  const gw = wins.reduce((a, t) => a + t.net, 0), gl = -losses.reduce((a, t) => a + t.net, 0);
+  return { trades, curve, net:eq - cfg.bal, end:eq, win:trades.length ? wins.length / trades.length * 100 : 0, pf:gl ? gw / gl : (gw ? Infinity : 0),
+    mdd, mddPct, avgW:wins.length ? gw / wins.length : 0, avgL:losses.length ? gl / losses.length : 0, maxAdds:Math.max(0, ...trades.map(t => t.adds)) };
+}
+let btData = null, btChart = null;
+async function btLoad(){
+  let bars = S.bars, src = S.live ? (S.sym.feed === 'mt5' ? '한텍 MT5' : '참고 시세') : '시뮬레이션';
+  if (S.sym.feed === 'mt5' && S.mt5ok){
+    try { bars = mapBars((await mt5Get(`/bars?symbol=${encodeURIComponent(S.sym.id)}&tf=${S.tf[0]}&count=5000`)).bars); } catch {}
+  }
+  btData = { bars, I:compute(bars), src, sym:S.sym.id, tf:S.tf };
+  const d0 = new Date(bars[0].time * 1000), d1 = new Date(bars[bars.length - 1].time * 1000);
+  $('#btSub').textContent = `${S.sym.id} · ${S.tf[2]} · ${src} · ${bars.length.toLocaleString()}봉 (${d0.toISOString().slice(0, 10)} ~ ${d1.toISOString().slice(0, 10)})`;
+  return btData;
+}
+const money = v => (v >= 0 ? '+' : '−') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function kpiHtml(r, cfg){
+  return `<div class="kpis">
+    <div class="kpi"><small>순이익</small><b class="${r.net >= 0 ? 'upc' : 'dnc'}">${money(r.net)}</b></div>
+    <div class="kpi"><small>최대 낙폭 (보유 중 평가손 포함)</small><b class="dnc">−$${r.mdd.toFixed(2)} (${r.mddPct.toFixed(1)}%)</b></div>
+    <div class="kpi"><small>거래 수 · 승률</small><b>${r.trades.length}회 · ${r.win.toFixed(1)}%</b></div>
+    <div class="kpi"><small>손익비 (총이익 ÷ 총손실)</small><b>${isFinite(r.pf) ? r.pf.toFixed(2) : '손실 없음'}</b></div>
+    <div class="kpi"><small>평균 이익</small><b class="upc">$${r.avgW.toFixed(2)}</b></div>
+    <div class="kpi"><small>평균 손실</small><b class="dnc">$${r.avgL.toFixed(2)}</b></div>
+    <div class="kpi"><small>최대 동시 랏</small><b>${(cfg.lot1 + cfg.adds.slice(0, r.maxAdds).reduce((a, x) => a + x, 0)).toFixed(2)}랏</b></div>
+    <div class="kpi"><small>끝 잔고</small><b>$${r.end.toFixed(2)}</b></div></div>`;
+}
+function warnHtml(r, cfg){
+  const w = [];
+  if (btData.src === '시뮬레이션') w.push('지금은 <b>가짜 시뮬레이션 데이터</b>라 결과에 의미가 없습니다. 한텍 MT5 를 연결한 뒤 다시 실행하세요.');
+  if (r.trades.length < 30) w.push(`거래가 ${r.trades.length}회뿐이라 우연일 가능성이 큽니다. 더 긴 기간이나 더 짧은 봉으로 확인하세요.`);
+  if (r.mddPct > 30) w.push(`최대 낙폭이 ${r.mddPct.toFixed(0)}% 입니다. 이 정도면 실제 계좌는 마진콜이 날 수 있습니다.`);
+  if (!(cfg.sl > 0)) w.push('손절이 없습니다. 물타기에 손절이 없으면 한 번의 큰 추세로 계좌가 사라질 수 있습니다.');
+  if (r.win > 85 && r.avgL > r.avgW * 5) w.push('승률은 높지만 한 번 잃을 때 평균 이익의 5배 이상을 잃습니다. 물타기 전략의 전형적인 위험 신호입니다.');
+  return w.length ? `<div class="warn">${w.map(x => '⚠ ' + x).join('<br>')}</div>` : '';
+}
+function showResult(r, cfg, title){
+  const tr = r.trades.slice(-200).reverse().map(t => {
+    const d0 = new Date(t.t0 * 1000).toISOString().slice(5, 16).replace('T', ' ');
+    return `<tr><td>${d0}</td><td>${t.dir > 0 ? '매수' : '매도'}</td><td>${fmt(t.entry)}</td><td>${fmt(t.exit)}</td><td>${t.lots.toFixed(2)}</td><td>${t.adds}</td><td>${t.why}</td><td class="${t.net >= 0 ? 'upc' : 'dnc'}">${money(t.net)}</td></tr>`; }).join('');
+  $('#btRes').innerHTML = `${title ? `<b>${title}</b>` : ''}${warnHtml(r, cfg)}${kpiHtml(r, cfg)}<div class="btchart" id="btChart"></div>
+    <div class="btns"><button class="btn sub" type="button" id="btMark">차트에 거래 표시</button><button class="btn sub" type="button" id="btUnmark">표시 지우기</button></div>
+    <div style="overflow:auto;max-height:260px"><table class="ttab"><tr><th>진입 시각</th><th>방향</th><th>평균가</th><th>청산가</th><th>랏</th><th>추가</th><th>청산</th><th>손익</th></tr>${tr || '<tr><td colspan="8">거래가 없습니다.</td></tr>'}</table></div>`;
+  if (btChart){ btChart.remove(); btChart = null; }
+  btChart = LW.createChart($('#btChart'), { autoSize:true, layout:{ background:{ type:'solid', color:'transparent' }, textColor:C.text, fontSize:11, attributionLogo:false },
+    grid:{ vertLines:{ visible:false }, horzLines:{ color:C.grid } }, rightPriceScale:{ borderVisible:false }, timeScale:{ borderVisible:false, tickMarkFormatter:tickFmt }, localization:{ timeFormatter:timeFmt } });
+  const ls = btChart.addBaselineSeries({ baseValue:{ type:'price', price:cfg.bal }, lineWidth:2, topLineColor:C.up, bottomLineColor:C.down,
+    topFillColor1:'rgba(8,153,129,.25)', topFillColor2:'rgba(8,153,129,0)', bottomFillColor1:'rgba(242,54,69,0)', bottomFillColor2:'rgba(242,54,69,.25)' });
+  ls.setData(r.curve); btChart.timeScale().fitContent();
+  $('#btMark').onclick = () => {
+    const list = [];
+    for (const t of r.trades){
+      list.push({ time:t.t0, position:t.dir > 0 ? 'belowBar' : 'aboveBar', color:'#2962ff', shape:t.dir > 0 ? 'arrowUp' : 'arrowDown', text:t.dir > 0 ? '매수' : '매도' });
+      list.push({ time:t.t1, position:t.dir > 0 ? 'aboveBar' : 'belowBar', color:t.net >= 0 ? C.up : C.down, shape:'circle', text:`${t.why} ${money(t.net)}` });
+    }
+    S.btMarks = { sym:btData.sym, tf:btData.tf[0], list }; renderMarkers(); $('#btModal').hidden = true;
+  };
+  $('#btUnmark').onclick = () => { S.btMarks = null; renderMarkers(); };
+}
+$('#btExport').onclick = async () => {
+  const tf = $('#bt-xtf').value;
+  if (S.sym.feed !== 'mt5' || !S.mt5ok) return toast('한텍 MT5 연결이 필요합니다', '한텍 종목(예: XAUUSD.b)을 띄운 상태에서 저장하세요.');
+  toast('데이터 받는 중', `${S.sym.id} ${tfLabel(tf)} 봉을 MT5 에서 가져옵니다. 잠시 기다려 주세요.`);
+  try {
+    const bars = (await mt5Get(`/bars?symbol=${encodeURIComponent(S.sym.id)}&tf=${tf}&count=200000`)).bars;
+    const rows = ['time_utc,time_kst,open,high,low,close'];
+    for (const b of bars){ const u = new Date(b.t * 1000).toISOString().slice(0, 19).replace('T', ' '), k = new Date((b.t + KST) * 1000).toISOString().slice(0, 19).replace('T', ' ');
+      rows.push(`${u},${k},${b.o},${b.h},${b.l},${b.c}`); }
+    const blob = new Blob([rows.join('\n')], { type:'text/csv' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${S.sym.id}_${tf}_${bars.length}봉.csv`; document.body.append(a); a.click(); a.remove();
+    toast('CSV 저장됨', `${bars.length.toLocaleString()}봉을 저장했습니다. 다운로드 폴더의 파일을 Claude 대화창에 올려 주세요.`);
+  } catch (e) { toast('저장 실패', e.message || 'MT5 연결 프로그램을 확인하세요.'); }
+};
+$('#btBtn').onclick = async () => { $('#btModal').hidden = false; await btLoad(); };
+$('#btClose').onclick = () => { $('#btModal').hidden = true; };
+$('#btForm').addEventListener('submit', async e => {
+  e.preventDefault(); const cfg = readBt(); if (!btData || btData.sym !== S.sym.id || btData.tf !== S.tf) await btLoad();
+  showResult(backtest(btData.bars, btData.I, cfg), cfg, '');
+});
+$('#btOpt').onclick = async () => {
+  if (!btData || btData.sym !== S.sym.id || btData.tf !== S.tf) await btLoad();
+  const base = readBt(), { bars, I } = btData, cut = Math.floor(bars.length * .7);
+  $('#btRes').innerHTML = '<p class="note" style="padding:20px">조합을 시험하는 중입니다…</p>';
+  await new Promise(r => setTimeout(r, 30));
+  const res = [];
+  for (const tp of [3, 5, 8, 10, 15, 20, 30]) for (const sl of [15, 20, 30, 40, 60, 80]) for (const gap of [5, 10, 15, 20, 30]){
+    const cfg = { ...base, tp, sl, gap };
+    const a = backtest(bars, I, cfg, 0, cut); if (a.trades.length < 10) continue;
+    res.push({ cfg, a });
+  }
+  // 학습 구간 순위: 낙폭 대비 순이익
+  res.sort((x, y) => (y.a.net / (y.a.mdd + 1)) - (x.a.net / (x.a.mdd + 1)));
+  const seen = new Set(), uniq = res.filter(x => { const k = `${x.a.net.toFixed(2)}|${x.a.trades.length}`; if (seen.has(k)) return false; seen.add(k); return true; });
+  const top = uniq.slice(0, 8).map(x => ({ ...x, b:backtest(bars, I, x.cfg, cut, bars.length) }));
+  const pass = x => x.b.net > 0 && x.b.mddPct < 20 && x.b.trades.length >= 20 && x.b.pf >= 1.2 && !(x.a.avgL > x.a.avgW * 5);
+  const row = (x, k) => `<tr class="pick" data-k="${k}"><td>익절 ${x.cfg.tp} · 손절 ${x.cfg.sl} · 간격 ${x.cfg.gap}</td><td class="${x.a.net >= 0 ? 'upc' : 'dnc'}">${money(x.a.net)}</td><td>${x.a.mddPct.toFixed(1)}%</td><td>${x.a.trades.length}</td><td class="${x.b.net >= 0 ? 'upc' : 'dnc'}">${money(x.b.net)}</td><td>${x.b.mddPct.toFixed(1)}%</td><td>${x.b.trades.length}</td><td>${pass(x) ? '✅ 통과' : '❌ 탈락'}</td></tr>`;
+  const okN = top.filter(pass).length;
+  $('#btRes').innerHTML = `<div class="warn">앞 70% 데이터로만 고른 상위 설정을, 고를 때 쓰지 않은 뒤 30% 데이터에서 다시 시험한 결과입니다. 통과 기준: 검증 구간에서 수익, 손익비 1.2 이상, 낙폭 20% 미만, 거래 20회 이상, 그리고 <b>한 번 잃을 때 평균 이익의 5배 넘게 잃지 않을 것</b>(물타기 함정 거르기). ${top.length}개 중 ${okN}개 통과.${btData.src === '시뮬레이션' ? '<br>⚠ 지금은 가짜 시뮬레이션 데이터라 결과에 의미가 없습니다.' : ''}</div>
+    <div style="overflow:auto"><table class="ttab"><tr><th>설정 (포인트)</th><th>학습 순이익</th><th>학습 낙폭</th><th>거래</th><th>검증 순이익</th><th>검증 낙폭</th><th>거래</th><th>판정</th></tr>${top.map(row).join('') || '<tr><td colspan="8">거래가 10회 이상인 조합이 없습니다.</td></tr>'}</table></div>
+    <p class="note">줄을 누르면 그 설정이 왼쪽에 들어가고 전체 기간으로 다시 시험합니다.</p>`;
+  $('#btRes').querySelectorAll('tr.pick').forEach(tr => tr.onclick = () => {
+    const x = top[+tr.dataset.k]; $('#bt-tp').value = x.cfg.tp; $('#bt-sl').value = x.cfg.sl; $('#bt-gap').value = x.cfg.gap;
+    showResult(backtest(bars, I, x.cfg), x.cfg, `익절 ${x.cfg.tp} · 손절 ${x.cfg.sl} · 간격 ${x.cfg.gap} (전체 기간)`);
+  });
+};
 
 /* ---------- 오른쪽 클릭 메뉴 ---------- */
 const RESET_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 7.5A6 6 0 1 1 4 12"/><path d="M4 3.5v4h4"/></svg>';
