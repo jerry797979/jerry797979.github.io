@@ -1634,6 +1634,7 @@ function renderOhlc(){
     const set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
     set('v-bb', (P.bb.ma120 ? v('bma120', '#FF9800') : '') + (P.bb.ma20 ? v('bma20', '#00E676') : '') + (P.bb.bb1 ? v('ui', '#F23645') + v('m', 'rgba(242,54,69,.7)') + v('li', '#F23645') : '') + (P.bb.bb2 ? v('uo', '#FFFFFF') + v('m2', 'rgba(255,255,255,.6)') + v('lo', '#FFFFFF') : ''));
     set('v-ma', v('ma1', C.ma1) + v('ma2', C.ma2) + v('ma3', C.ma3));
+    set('v-us', S.usLine ? `<em style="color:#00FF00" title="어제 미장 고점">${fmt(S.usLine.hi)}</em><em style="color:#FF0000" title="어제 미장 저점">${fmt(S.usLine.lo)}</em>` : S.show.us ? '<em style="color:var(--sub)">미장 데이터 부족</em>' : '');
     set('v-low', S.lowPrice != null ? `<em style="color:#4caf50">${fmt(S.lowPrice)}</em>` : '');
   }
   const di = S.ind && S.ind.di[i];
