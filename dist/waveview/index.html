@@ -954,7 +954,7 @@ function applyChartType(){
   $('#ctBtn').innerHTML = CT_ICON[t] || CT_ICON.candle;
 }
 const ln = (color, width = 1) => chart.addLineSeries({ color, lineWidth:width, priceLineVisible:false, lastValueVisible:false, crosshairMarkerVisible:false });
-const L = { bma120: ln('#FF9800', 2), bma20: ln('#4CAF50', 1), m: ln('rgba(242,54,69,.5)'), ui: ln('#F23645'), li: ln('#F23645'), m2: ln('rgba(255,255,255,.5)'), uo: ln('#FFFFFF'), lo: ln('#FFFFFF'), ma1: ln(C.ma1), ma2: ln(C.ma2), ma3: ln(C.ma3, 1) };
+const L = { bma120: ln('#FF9800', 2), bma20: ln('#00E676', 2), m: ln('rgba(242,54,69,.5)'), ui: ln('#F23645'), li: ln('#F23645'), m2: ln('rgba(255,255,255,.5)'), uo: ln('#FFFFFF'), lo: ln('#FFFFFF'), ma1: ln(C.ma1), ma2: ln(C.ma2), ma3: ln(C.ma3, 1) };
 const diSeries = diChart.addBaselineSeries({ baseValue:{ type:'price', price:0 }, lineWidth:2,
   topLineColor:'#22c522', topFillColor1:'rgba(76,175,80,0)', topFillColor2:'rgba(76,175,80,0)',
   bottomLineColor:'#ff2424', bottomFillColor1:'rgba(242,54,69,0)', bottomFillColor2:'rgba(242,54,69,0)', priceLineVisible:false });
@@ -1410,7 +1410,7 @@ function drawOverlay(){
     const n = S.bars.length - 1, x = ts.logicalToCoordinate(n);
     if (x != null && x < pw - 4){
       ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
-      const tags = [[P.bb.ma120, S.ind.bma120[n], '#FF9800', '120이평'], [P.bb.ma20, S.ind.bma20[n], '#4CAF50', '20이평']]
+      const tags = [[P.bb.ma120, S.ind.bma120[n], '#FF9800', '120이평'], [P.bb.ma20, S.ind.bma20[n], '#00E676', '20이평']]
         .filter(t => t[0] && t[1] != null).map(t => ({ y:candle.priceToCoordinate(t[1]), col:t[2], txt:t[3] })).filter(t => t.y != null);
       if (tags.length === 2 && Math.abs(tags[0].y - tags[1].y) < 13){ const mid = (tags[0].y + tags[1].y) / 2, up = tags[0].y <= tags[1].y ? 0 : 1; tags[up].y = mid - 7; tags[1 - up].y = mid + 7; }
       for (const t of tags){ ctx.fillStyle = t.col; ctx.fillText(t.txt, x + 8, t.y); }
@@ -1630,7 +1630,7 @@ function renderOhlc(){
     const VN = { bma120:'120일 이평선', bma20:'20일 이평선', ui:'BB1 상단', m:'BB1 중심', li:'BB1 하단', uo:'BB2 상단', m2:'BB2 중심', lo:'BB2 하단' };
     const v = (k, c) => S.ind[k][i] == null ? '' : `<em style="color:${c}" title="${VN[k] || ''}">${fmt(S.ind[k][i])}</em>`;
     const set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
-    set('v-bb', (P.bb.ma120 ? v('bma120', '#FF9800') : '') + (P.bb.ma20 ? v('bma20', '#4CAF50') : '') + (P.bb.bb1 ? v('ui', '#F23645') + v('m', 'rgba(242,54,69,.7)') + v('li', '#F23645') : '') + (P.bb.bb2 ? v('uo', '#FFFFFF') + v('m2', 'rgba(255,255,255,.6)') + v('lo', '#FFFFFF') : ''));
+    set('v-bb', (P.bb.ma120 ? v('bma120', '#FF9800') : '') + (P.bb.ma20 ? v('bma20', '#00E676') : '') + (P.bb.bb1 ? v('ui', '#F23645') + v('m', 'rgba(242,54,69,.7)') + v('li', '#F23645') : '') + (P.bb.bb2 ? v('uo', '#FFFFFF') + v('m2', 'rgba(255,255,255,.6)') + v('lo', '#FFFFFF') : ''));
     set('v-ma', v('ma1', C.ma1) + v('ma2', C.ma2) + v('ma3', C.ma3));
     set('v-low', S.lowPrice != null ? `<em style="color:#4caf50">${fmt(S.lowPrice)}</em>` : '');
   }
