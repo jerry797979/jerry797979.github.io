@@ -721,13 +721,14 @@ let SYMS = [
 ];
 const DEF_P = { bb:{ ma120:true, ma20:true, bb1:true, bb2:true, len:20, k1:2, len2:4, k2:4, ob:false }, ma:{ l1:20, l2:60, l3:200 }, db:{ band:'안쪽', mode:'몸통 전체' },
   ses:{ lstyle:'Solid', lwidth:1, tsize:'Small', ostyle:'Dashed', ocolor:'#ffffff', asiaOp:15, euOp:15, usOp:15 }, low:{ len:500 }, di:{ len:14, lv1:1, lv2:0.5 }, us:{},
-  ktr:{ view:'현재장' }, vp:{ bins:60, width:22 }, news:{ before:30, after:60, spike:3.5 }, sr:{ touch:3, show:4 } };
+  ktr:{ view:'현재장' }, vp:{ bins:60, width:22 }, news:{ before:30, after:60, spike:3.5 }, gcb:{ near:10 }, sr:{ touch:3, show:4 } };
 const SCHEMA = {
   bb:[['ma120','120MA 표시','bool'],['ma20','20MA 표시','bool'],['bb1','BB1 표시 (종가기준, 빨간색)','bool'],['bb2','BB2 표시 (시가기준, 흰색)','bool'],['len','BB1 길이','int'],['k1','BB1 표준편차','num'],['len2','BB2 길이','int'],['k2','BB2 표준편차','num'],['ob','1B 신호 표시 (한쪽만 터치)','bool']],
   ma:[['l1','MA1 기간','int'],['l2','MA2 기간','int'],['l3','MA3 기간','int']],
   db:[['band','기준 밴드','sel',['안쪽','바깥']],['mode','마감 조건','sel',['몸통 전체','종가만']]],
   ses:[['lstyle','박스 테두리 스타일','sel',['Solid','Dashed','Dotted']],['lwidth','박스 선 두께','int'],['tsize','글씨 크기','sel',['Tiny','Small','Normal','Large']],['ostyle','아시아 시가선 모양','sel',['Solid','Dashed','Dotted']],['ocolor','아시아 시가선 색상','text'],['asiaOp','아시아 투명도','int'],['euOp','유로 투명도','int'],['usOp','미장 투명도','int']],
   ktr:[['view','표시할 세션','sel',['현재장','아시아','유로','미장']]],
+  gcb:[['near','근처 범위 (BB1 밴드 폭의 %, 0이면 정확히 터치만)','num']],
   news:[['before','발표 전 대기 (분)','int'],['after','발표 후 대기 (분)','int'],['spike','급변동 기준 (평소 봉 크기의 몇 배)','num']],
   vp:[['bins','가격 칸 수','int'],['width','막대 최대 폭 (% 화면)','int']],
   sr:[['touch','최소 터치 횟수','int'],['show','표시할 매물대 수','int']],
@@ -738,12 +739,12 @@ const P = {}; { const saved = (() => { try { return JSON.parse(localStorage.getI
   for (const k in DEF_P) P[k] = { ...DEF_P[k], ...(saved[k] || {}) }; }
 const pText = {
   bb: () => '', ma: p => `${p.l1} ${p.l2} ${p.l3}`, db: p => `${p.band} ${p.mode}`,
-  news: p => `전 ${p.before}분 · 후 ${p.after}분`, vp: p => `${p.bins}칸`, sr: p => `${p.touch}회 이상`,
+  gcb: p => `근처 ${p.near}%`, news: p => `전 ${p.before}분 · 후 ${p.after}분`, vp: p => `${p.bins}칸`, sr: p => `${p.touch}회 이상`,
   ses: p => `${p.lstyle} ${p.lwidth} ${p.tsize} ${p.ostyle} ${p.asiaOp} ${p.euOp} ${p.usOp}`, us: () => '', ktr: p => p.view, low: p => `${p.len}`, di: p => `${p.len} close`,
 };
 const IND = [
   ['bb','더블 볼린저밴드'], ['ma','SMA 멀티 이평선'], ['ses','세션박스'],
-  ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['news','경제지표 발표 · 급변동 표시'], ['vp','매물대 (볼륨 프로파일)'], ['sr','매물대 지지·저항 자동'], ['di','DI 이격도'],
+  ['us','어제 미장 구간 고저 라인'], ['ktr','KTR 전용 대시보드'], ['gcb','골든·데드크로스 후 1B 터치'], ['news','경제지표 발표 · 급변동 표시'], ['vp','매물대 (볼륨 프로파일)'], ['sr','매물대 지지·저항 자동'], ['di','DI 이격도'],
 ];
 const EYE = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/></svg>';
 const EYE_OFF = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 9S4.5 4 9 4s7.5 5 7.5 5-3 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/><path d="M3 15L15 3"/></svg>';
@@ -758,7 +759,7 @@ const S = {
   sym: SYMS.find(s => s.id === store.get('sym')) || SYMS[0],
   tf: TFS.find(t => t[0] === store.get('tf')) || tfBy('4h'), range: null,
   bars: [], ind: null, sess: [], mode: 'cursor', ticks: 0,
-  show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, news:true, vp:true, sr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
+  show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, gcb:true, news:true, vp:true, sr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
   removed: store.get('removed', []),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
   cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
@@ -820,7 +821,28 @@ function compute(bars){
     dn.push(lb != null && top < lb);
     up.push(ub != null && bot > ub);
   }
-  return { m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
+  // 골든·데드크로스 후 1B 터치: 20MA가 120MA를 위로 뚫은 뒤(골든) 가격이 BB1 하단에 닿거나 근처(밴드 폭의 N%)까지 오면 '눌림',
+  // 아래로 뚫은 뒤(데드) BB1 상단에 닿거나 근처까지 오면 '반등'. 한 번 울리면 가격이 BB1 중심선을 다시 넘어간 뒤에야 다음 번을 센다
+  const a20 = sma(c, 20), a120 = sma(c, 120), gcbUp = [], gcbDn = [], gcbN = [];
+  let tr = 0, armed = false, cnt = 0;
+  const near = (P.gcb ? P.gcb.near : 10) / 100;
+  for (let i = 0; i < N; i++){
+    gcbUp.push(false); gcbDn.push(false); gcbN.push(0);
+    if (i && a20[i] != null && a120[i] != null && a20[i - 1] != null && a120[i - 1] != null){
+      if (a20[i] > a120[i] && a20[i - 1] <= a120[i - 1]){ tr = 1; armed = true; cnt = 0; continue; }
+      if (a20[i] < a120[i] && a20[i - 1] >= a120[i - 1]){ tr = -1; armed = true; cnt = 0; continue; }
+    }
+    if (!tr || ui[i] == null) continue;
+    const b = bars[i], w = ui[i] - li[i];
+    if (tr > 0){
+      if (armed && b.low <= li[i] + w * near){ gcbUp[i] = true; gcbN[i] = ++cnt; armed = false; }
+      else if (!armed && b.close > m[i]) armed = true;
+    } else {
+      if (armed && b.high >= ui[i] - w * near){ gcbDn[i] = true; gcbN[i] = ++cnt; armed = false; }
+      else if (!armed && b.close < m[i]) armed = true;
+    }
+  }
+  return { gcbUp, gcbDn, gcbN, m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
 }
 const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
 const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
@@ -1009,6 +1031,10 @@ function renderMarkers(){
       if (isDn(i)) mk.push({ time:t, position:'belowBar', color:C.signal, shape:'arrowDown', size:0, text:'↓ 돌파' });
       if (isUp(i)) mk.push({ time:t, position:'aboveBar', color:C.signal, shape:'arrowUp', size:0, text:'↑ 돌파' });
     }
+  }
+  if (S.show.gcb) for (let i = 1; i < S.bars.length; i++){
+    if (I.gcbUp[i]) mk.push({ time:S.bars[i].time, position:'belowBar', color:'#00bcd4', shape:'arrowUp', size:1, text:`GC 눌림 ${I.gcbN[i]}` });
+    if (I.gcbDn[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#e040fb', shape:'arrowDown', size:1, text:`DC 반등 ${I.gcbN[i]}` });
   }
   if (S.show.news) mk.push(...spikeMarks());
   if (S.btMarks && S.btMarks.sym === S.sym.id && S.btMarks.tf === S.tf[0]) mk.push(...S.btMarks.list);
@@ -2457,6 +2483,7 @@ const COND = {
   db:{ name:'더블 볼린저 1B (한쪽 밴드만)', ops:[['obUp','↑ 1B (한쪽 상단 터치)'],['obDn','↓ 1B (한쪽 하단 터치)']] },
   price:{ name:'가격', ops:[['xup','위로 교차'],['xdn','아래로 교차']], val:true },
   usl:{ name:'어제 미장 구간 고저 라인', ops:[['hiUp','고점 위로 돌파'],['loDn','저점 아래로 돌파']] },
+  gcb:{ name:'골든·데드크로스 후 1B 터치', ops:[['up','골든크로스 후 BB1 하단 터치·근처 (눌림)'],['dn','데드크로스 후 BB1 상단 터치·근처 (반등)']] },
   ma:{ name:'이평선 (20MA·120MA)', ops:[['gold','정배열 전환 (20MA > 120MA)'],['dead','역배열 전환 (20MA < 120MA)']] },
   di:{ name:'DI 이격도', ops:[['xup','값 위로 올라감'],['xdn','값 아래로 내려감']], val:true },
   ses:{ name:'세션 시작', ops:[['asia','아시아 시작'],['eu','유로 시작'],['us','미장 시작']] },
@@ -2470,6 +2497,11 @@ if (!ALERTS){
 }
 // 예전 규칙(DB) → 돌파 더블비로 옮기기
 ALERTS.forEach(a => a.conds.forEach(c => { if (c.src === 'db' && (c.op === 'dbUp' || c.op === 'dbDn')){ c.src = 'hhj'; c.op = c.op === 'dbUp' ? 'up' : 'dn'; } }));
+if (!store.get('autoGcbV1')){
+  for (const [op, n] of [['up', '골든크로스 후 1B 하단 눌림'], ['dn', '데드크로스 후 1B 상단 반등']])
+    ALERTS.push({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'gcb', op }], trig:'close', exp:null, name:`5분 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:Date.now() });
+  store.set('autoGcbV1', 1); store.set('ralerts', ALERTS);
+}
 let ALOG = store.get('alog', []);
 const saveAlerts = () => { store.set('ralerts', ALERTS); syncBridge(); }, saveLog = () => store.set('alog', ALOG.slice(0, 300));
 function condText(c){ const d = COND[c.src]; if (!d) return '?'; const o = d.ops.find(x => x[0] === c.op); return `${d.name}: ${o ? o[1] : c.op}${d.val ? ' ' + c.val : ''}`; }
@@ -2478,6 +2510,7 @@ function evalCond(c, bars, I, i, tf){
   switch (c.src){
     case 'db': return !!I[c.op][i];
     case 'hhj': return c.op === 'up' ? !!I.dbUp[i] : !!I.dbDn[i];
+    case 'gcb': return c.op === 'up' ? !!I.gcbUp[i] : !!I.gcbDn[i];
     case 'price': { const v = +c.val; return c.op === 'xup' ? p.close < v && b.close >= v : p.close > v && b.close <= v; }
     case 'usl': { const u = computeUsLine(bars, tf, i); if (!u) return false; return c.op === 'hiUp' ? p.close <= u.hi && b.close > u.hi : p.close >= u.lo && b.close < u.lo; }
     case 'ma': { const a = I.bma20, z = I.bma120; if (a[i] == null || z[i] == null || a[i - 1] == null || z[i - 1] == null) return false;
@@ -2548,11 +2581,11 @@ function notify(n){
 
 /* 한텍 연결 시 기본 얼러트 자동 등록 (사장님 트레이딩뷰 구성: 2·5·10분·1시간 × 상방·하방) */
 function autoSetupAlerts(){
-  if (store.get('autoAlertsV1')) return;
   const pick = re => (SYMS.find(x => x.feed === 'mt5' && re.test(x.id)) || {}).id;
   const gold = pick(/^XAUUSD/i), nas = pick(/^(US100|NAS100|USTEC|NDX)/i);
-  // 예전 기본 알림(XAUUSD)은 한텍 종목으로 옮긴다
-  if (gold) ALERTS.forEach(a => { if (a.sym === 'XAUUSD') a.sym = gold; });
+  // 기본 알림(XAUUSD)은 한텍 종목으로 옮긴다 (연결될 때마다 확인)
+  if (gold && gold !== 'XAUUSD' && ALERTS.some(a => a.sym === 'XAUUSD')){ ALERTS.forEach(a => { if (a.sym === 'XAUUSD') a.sym = gold; }); saveAlerts(); renderAlertList(); }
+  if (store.get('autoAlertsV1')) return;
   let added = 0;
   for (const [sym, label] of [[gold, ''], [nas, ' 나스닥']]){
     if (!sym) continue;
