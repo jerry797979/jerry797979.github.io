@@ -1028,6 +1028,11 @@ function computeUsLine(bars = S.bars, tf = S.tf[1], upto = bars.length){
     } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i }; }
     prevIn = inS;
   }
+  // 미장 마지막 봉(06:00에 끝나는 봉)까지 왔으면 다음 봉을 기다리지 않고 확정한다 (금요일 미장은 토요일 휴장이라 다음 봉이 없다)
+  if (prevIn && sh != null && upto > 0){
+    const d = new Date(bars[upto - 1].time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
+    if (m < 360 && m + tf / 60 >= 360) fin = { hi:sh, lo:sl, i0:upto };
+  }
   return fin;
 }
 function renderRefLines(){
