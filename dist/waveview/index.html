@@ -1654,6 +1654,8 @@ function renderLegend(){
   }).join('');
   renderOhlc(); fitLegend();
 }
+$('#lgName').addEventListener('click', () => { if (S.live === 'paxg') openGuide(); });
+$('#lgName').addEventListener('mouseenter', () => { $('#lgName').style.cursor = S.live === 'paxg' ? 'pointer' : ''; $('#lgName').title = S.live === 'paxg' ? '누르면 한텍 연결 설치 안내' : ''; });
 const lgEl = document.querySelector('.legend');
 lgEl.classList.toggle('folded', !!store.get('lgFold', false));
 $('#lgFold').onclick = () => { const f = !lgEl.classList.contains('folded'); lgEl.classList.toggle('folded', f); store.set('lgFold', f); fitLegend();
@@ -1933,7 +1935,7 @@ async function load(){
   applyRange();
   restoreDrawings(); resetHistory(); seedLowLine();
   if (live && sym.feed === 'mt5'){ setFeed(true, '한텍 MT5 · 실시간'); startMT5Poll(sym, tf, id); }
-  else if (live && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
+  else if (live === true && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
   else if (live === 'paxg'){ setFeed(true, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 참고 시세(PAXG)' : '실시간 참고 시세(PAXG)'); openSocket(sym, tf, id); }
   else if (live){ setFeed(true); openSocket(sym, tf, id); }
   else { setFeed(false, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 시뮬레이션' : '시뮬레이션'); startSim(); }
