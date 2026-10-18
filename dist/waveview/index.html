@@ -1885,6 +1885,14 @@ function openSocket(sym, tf, id){
       else onBar({ time:tf[4] ? k.t / 1000 + KST : t, open:+k.o, high:+k.h, low:+k.l, close:+k.c }); };
     ws.onclose = () => { if (id === S.loadId){ setFeed(false); startSim(); } };
     S.ws = ws;
+    // 거래가 없는 동안에는 거래소가 새 봉을 안 보내므로, 시간이 되면 직전 종가로 새 봉을 직접 연다 (MT5·트레이딩뷰처럼 봉이 제때 생기게)
+    clearInterval(S.timer);
+    S.timer = setInterval(() => {
+      if (id !== S.loadId || !S.bars.length) return;
+      const now = Date.now() / 1000, t = Math.floor((now + KST) / tf[1]) * tf[1], last = S.bars[S.bars.length - 1];
+      if (t <= last.time || (sym.feed === 'td' && goldClosed(t - KST))) return;
+      onBar({ time:t, open:last.close, high:last.close, low:last.close, close:last.close });
+    }, 1000);
   } catch { setFeed(false); startSim(); }
 }
 async function load(){
