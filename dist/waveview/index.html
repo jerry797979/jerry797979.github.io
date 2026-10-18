@@ -760,7 +760,7 @@ const S = {
   tf: TFS.find(t => t[0] === store.get('tf')) || tfBy('4h'), range: null,
   bars: [], ind: null, sess: [], mode: 'cursor', ticks: 0,
   show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, gcb:true, news:true, vp:true, sr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
-  removed: store.get('removed', []),
+  removed: store.get('removed', []).filter(k => store.get('restoreUsV1') || (k !== 'us' && k !== 'ses')),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
   cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {})), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
 };
@@ -1658,6 +1658,8 @@ const lgEl = document.querySelector('.legend');
 lgEl.classList.toggle('folded', !!store.get('lgFold', false));
 $('#lgFold').onclick = () => { const f = !lgEl.classList.contains('folded'); lgEl.classList.toggle('folded', f); store.set('lgFold', f); fitLegend();
   $('#lgFold').setAttribute('aria-label', f ? '지표 목록 펼치기' : '지표 목록 접기'); };
+// 실수로 지운·끈 '어제 미장 고저 라인'과 '세션박스'를 한 번 되살린다
+if (!store.get('restoreUsV1')){ S.show.us = true; S.show.ses = true; store.set('show', S.show); store.set('showv', 2); store.set('removed', S.removed); store.set('restoreUsV1', 1); }
 function toggleInd(k){ S.show[k] = !S.show[k]; store.set('show', S.show); store.set('showv', 2); applyVisibility(); }
 function removeInd(k){ S.removed = [...S.removed, k]; S.show[k] = false; store.set('removed', S.removed); store.set('show', S.show); applyVisibility();
   toast('지표 지움', `${IND.find(x => x[0] === k)[1]} 를 지웠습니다. 상단 '지표' 메뉴에서 다시 켤 수 있습니다.`); }
@@ -1666,7 +1668,13 @@ $('#lgInds').addEventListener('click', e => {
   const k = row.dataset.k, act = e.target.closest('[data-act]')?.dataset.act;
   if (act === 'eye') toggleInd(k);
   else if (act === 'set') openParams(k);
-  else if (act === 'del') removeInd(k);
+  else if (act === 'del'){
+    const btn = e.target.closest('[data-act]');
+    if (btn.dataset.armed){ removeInd(k); return; }
+    btn.dataset.armed = '1'; btn.style.color = '#f23645'; btn.title = '한 번 더 누르면 지웁니다';
+    toast('지표 지우기', `${IND.find(x => x[0] === k)[1]} — 휴지통을 한 번 더 누르면 지웁니다. (잠깐 숨기기만 하려면 눈 모양을 누르세요)`);
+    setTimeout(() => { delete btn.dataset.armed; btn.style.color = ''; btn.title = '지우기'; }, 3000);
+  }
   else if (act === 'more') openMore(k, e.target.closest('button'));
 });
 $('#lgInds').addEventListener('dblclick', e => { const row = e.target.closest('.ind'); if (row && SCHEMA[row.dataset.k]) openParams(row.dataset.k); });
