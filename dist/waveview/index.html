@@ -1405,6 +1405,18 @@ function drawOverlay(){
   // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
   drawNews(pw, h); drawPlan(pw); drawPaper(pw);
   drawVP(pw, h); drawZones(pw);
+  // 이평선 이름표: 마지막 봉 오른쪽 끝에 선과 같은 색으로 (120이평 주황 · 20이평 초록)
+  if (S.show.bb && S.ind && S.bars.length){
+    const n = S.bars.length - 1, x = ts.logicalToCoordinate(n);
+    if (x != null && x < pw - 4){
+      ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
+      const tags = [[P.bb.ma120, S.ind.bma120[n], '#FF9800', '120이평'], [P.bb.ma20, S.ind.bma20[n], '#4CAF50', '20이평']]
+        .filter(t => t[0] && t[1] != null).map(t => ({ y:candle.priceToCoordinate(t[1]), col:t[2], txt:t[3] })).filter(t => t.y != null);
+      if (tags.length === 2 && Math.abs(tags[0].y - tags[1].y) < 13){ const mid = (tags[0].y + tags[1].y) / 2, up = tags[0].y <= tags[1].y ? 0 : 1; tags[up].y = mid - 7; tags[1 - up].y = mid + 7; }
+      for (const t of tags){ ctx.fillStyle = t.col; ctx.fillText(t.txt, x + 8, t.y); }
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
   if (S.usLine){
     const x0 = ts.logicalToCoordinate(S.usLine.i0);
     for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', '어제 미장 고점'], [S.usLine.lo, '#FF0000', '어제 미장 저점']]){
@@ -1615,7 +1627,8 @@ function renderOhlc(){
   const ch = b.close - prev, pct = ch / prev * 100, cls = b.close >= b.open ? 'upc' : 'dnc', sg = ch >= 0 ? '+' : '';
   $('#lgOhlc').innerHTML = `<span>시<em class="${cls}">${fmt(b.open)}</em></span><span>고<em class="${cls}">${fmt(b.high)}</em></span><span>저<em class="${cls}">${fmt(b.low)}</em></span><span>종<em class="${cls}">${fmt(b.close)}</em></span><span class="${ch >= 0 ? 'upc' : 'dnc'}">${sg}${fmt(ch)} (${sg}${pct.toFixed(2)}%)</span>`;
   if (S.ind && i >= 0){
-    const v = (k, c) => S.ind[k][i] == null ? '' : `<em style="color:${c}">${fmt(S.ind[k][i])}</em>`;
+    const VN = { bma120:'120일 이평선', bma20:'20일 이평선', ui:'BB1 상단', m:'BB1 중심', li:'BB1 하단', uo:'BB2 상단', m2:'BB2 중심', lo:'BB2 하단' };
+    const v = (k, c) => S.ind[k][i] == null ? '' : `<em style="color:${c}" title="${VN[k] || ''}">${fmt(S.ind[k][i])}</em>`;
     const set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
     set('v-bb', (P.bb.ma120 ? v('bma120', '#FF9800') : '') + (P.bb.ma20 ? v('bma20', '#4CAF50') : '') + (P.bb.bb1 ? v('ui', '#F23645') + v('m', 'rgba(242,54,69,.7)') + v('li', '#F23645') : '') + (P.bb.bb2 ? v('uo', '#FFFFFF') + v('m2', 'rgba(255,255,255,.6)') + v('lo', '#FFFFFF') : ''));
     set('v-ma', v('ma1', C.ma1) + v('ma2', C.ma2) + v('ma3', C.ma3));
