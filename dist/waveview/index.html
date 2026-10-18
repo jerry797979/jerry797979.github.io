@@ -1045,19 +1045,19 @@ let refLines = [], lowLine = null;
 // 어제 미장 구간 고저 라인 (원본 Pine 로직 그대로: 한국시간 22:00~06:00, 끝난 직후 봉부터 오른쪽으로)
 function computeUsLine(bars = S.bars, tf = S.tf[1], upto = bars.length){
   if (tf >= 86400) return null;
-  let sh = null, sl = null, fin = null, prevIn = false;
+  let sh = null, sl = null, fin = null, prevIn = false, s0 = 0;
   for (let i = 0; i < upto; i++){
     const b = bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
     const inS = m >= 1320 || m < 360;
     if (inS){
-      if (!prevIn){ sh = b.high; sl = b.low; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
-    } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i }; }
+      if (!prevIn){ sh = b.high; sl = b.low; s0 = i; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
+    } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i, s0 }; }
     prevIn = inS;
   }
   // 미장 마지막 봉(06:00에 끝나는 봉)까지 왔으면 다음 봉을 기다리지 않고 확정한다 (금요일 미장은 토요일 휴장이라 다음 봉이 없다)
   if (prevIn && sh != null && upto > 0){
     const d = new Date(bars[upto - 1].time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
-    if (m < 360 && m + tf / 60 >= 360) fin = { hi:sh, lo:sl, i0:upto };
+    if (m < 360 && m + tf / 60 >= 360) fin = { hi:sh, lo:sl, i0:upto, s0 };
   }
   return fin;
 }
@@ -1418,7 +1418,9 @@ function drawOverlay(){
     }
   }
   if (S.usLine){
-    const x0 = ts.logicalToCoordinate(S.usLine.i0);
+    // 원본처럼 미장이 끝난 자리부터 오른쪽으로 긋되, 그 자리가 화면 오른쪽 끝에 붙어 선이 안 보이면(주말·휴장 직후) 미장 시작부터 긋는다
+    let x0 = ts.logicalToCoordinate(S.usLine.i0);
+    if (x0 == null || x0 > pw - 200) x0 = ts.logicalToCoordinate(S.usLine.s0);
     for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', '어제 미장 고점'], [S.usLine.lo, '#FF0000', '어제 미장 저점']]){
       const y = candle.priceToCoordinate(pr); if (x0 == null || y == null) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
