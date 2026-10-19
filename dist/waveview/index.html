@@ -1429,18 +1429,6 @@ function drawOverlay(){
   // 어제 미장 고저: 미장이 끝난 곳부터 오른쪽으로
   drawNews(pw, h); drawPlan(pw); drawPaper(pw);
   drawVP(pw, h); drawZones(pw);
-  // 이평선 이름표: 마지막 봉 오른쪽 끝에 선과 같은 색으로 (120이평 주황 · 20이평 초록)
-  if (S.show.bb && S.ind && S.bars.length){
-    const n = S.bars.length - 1, x = ts.logicalToCoordinate(n);
-    if (x != null && x < pw - 4){
-      ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
-      const tags = [[P.bb.ma120, S.ind.bma120[n], '#FF9800', '120이평'], [P.bb.ma20, S.ind.bma20[n], '#00E676', '20이평']]
-        .filter(t => t[0] && t[1] != null).map(t => ({ y:candle.priceToCoordinate(t[1]), col:t[2], txt:t[3] })).filter(t => t.y != null);
-      if (tags.length === 2 && Math.abs(tags[0].y - tags[1].y) < 13){ const mid = (tags[0].y + tags[1].y) / 2, up = tags[0].y <= tags[1].y ? 0 : 1; tags[up].y = mid - 7; tags[1 - up].y = mid + 7; }
-      for (const t of tags){ ctx.fillStyle = t.col; ctx.fillText(t.txt, x + 8, t.y); }
-      ctx.textBaseline = 'alphabetic';
-    }
-  }
   if (S.usLine){
     // 원본처럼 미장이 끝난 자리부터 오른쪽으로 긋되, 그 자리가 화면 오른쪽 끝에 붙어 선이 안 보이면(주말·휴장 직후) 미장 시작부터 긋는다
     let x0 = ts.logicalToCoordinate(S.usLine.i0);
@@ -1475,6 +1463,18 @@ function drawOverlay(){
   const shapes = S.trends.slice(); if (S.measure) shapes.push(S.measure); if (S.stroke) shapes.push(S.stroke);
   if (S.draft && S.draft.b) shapes.push(S.draft);
   for (const t of shapes) drawShape(t, pw, h);
+  // 이평선 이름표: 마지막 봉 오른쪽 끝에 선과 같은 색으로 (120이평 주황 · 20이평 초록)
+  if (S.show.bb && S.ind && S.bars.length){
+    const n = S.bars.length - 1, x = ts.logicalToCoordinate(n);
+    if (x != null && x < pw - 4){
+      ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.textBaseline = 'middle';
+      const tags = [[P.bb.ma120, S.ind.bma120[n], '#FF9800', '120이평'], [P.bb.ma20, S.ind.bma20[n], '#00E676', '20이평']]
+        .filter(t => t[0] && t[1] != null).map(t => ({ y:candle.priceToCoordinate(t[1]), col:t[2], txt:t[3] })).filter(t => t.y != null);
+      if (tags.length === 2 && Math.abs(tags[0].y - tags[1].y) < 13){ const mid = (tags[0].y + tags[1].y) / 2, up = tags[0].y <= tags[1].y ? 0 : 1; tags[up].y = mid - 7; tags[1 - up].y = mid + 7; }
+      for (const t of tags){ const tw = ctx.measureText(t.txt).width; ctx.fillStyle = C.bg; ctx.fillRect(x + 6, t.y - 7, tw + 4, 14); ctx.fillStyle = t.col; ctx.fillText(t.txt, x + 8, t.y); }
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
   ctx.restore();
   // 가격축: 수평 레이 가격표, 봉 마감 카운트다운
   for (const g of axisTags){ ctx.fillStyle = g.col; ctx.fillRect(pw + 1, g.y - 9, w - pw - 1, 18); ctx.fillStyle = g.col === '#00FF00' ? '#131313' : '#fff'; ctx.font = '12px -apple-system, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(g.text, pw + 6, g.y); ctx.textBaseline = 'alphabetic'; }
@@ -1501,7 +1501,8 @@ function linePriceAt(t, i){ const ia = timeToIdx(t.a.t), ib = timeToIdx(t.b.t); 
 // 선 종류 도형의 화면 선분 목록 (그리기·클릭 판정 공용)
 function segsOf(t, c, pw, h){
   const type = t.type, { xa, ya, xb, yb } = c, dx = xb - xa, dy = yb - ya, at = x => ya + (x - xa) * dy / (dx || 1e-9);
-  if (type === 'extended') return Math.abs(dx) < .5 ? [[xa, 0, xa, h]] : [[0, at(0), pw, at(pw)]];
+  if (type === 'extended' || (type === 'trend' && t.ext === 'both')) return Math.abs(dx) < .5 ? [[xa, 0, xa, h]] : [[0, at(0), pw, at(pw)]];
+  if (type === 'trend' && t.ext === 'right'){ if (Math.abs(dx) < .5) return [[xa, ya, xa, dy > 0 ? h : 0]]; const xe = dx > 0 ? pw : 0; return [[xa, ya, xe, at(xe)]]; }
   if (type === 'tray'){ if (Math.abs(dx) < .5) return [[xa, ya, xa, dy > 0 ? h : 0]]; const xe = dx > 0 ? pw : 0; return [[xa, ya, xe, at(xe)]]; }
   if (type === 'fib'){ const x1 = Math.min(xa, xb), x2 = Math.max(xa, xb);
     return FIB.map(([l]) => { const y = candle.priceToCoordinate(t.b.p + (t.a.p - t.b.p) * l); return y == null ? null : [x1, y, x2, y]; }).filter(Boolean); }
@@ -1630,7 +1631,7 @@ function drawShape(t, pw, h){
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(l1, mx, by + 16); ctx.fillText(l2, mx, by + 32); ctx.textAlign = 'start'; return;
   }
   const [s0] = segsOf(t, { xa, ya, xb, yb }, pw, h);
-  ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s0[2], s0[3]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s0[2], s0[3]); ctx.stroke(); ctx.setLineDash([]); ctx.lineCap = 'butt';
   if (type === 'arrow'){ const a = Math.atan2(yb - ya, xb - xa), L = 10 + (t.width || 1) * 3; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(xb, yb);
     ctx.lineTo(xb - L * Math.cos(a - .4), yb - L * Math.sin(a - .4)); ctx.lineTo(xb - L * Math.cos(a + .4), yb - L * Math.sin(a + .4)); ctx.closePath(); ctx.fill(); }
   if (t.text){ ctx.fillStyle = col; ctx.fillText(t.text, xb + 6, yb - 6); }
@@ -2251,7 +2252,7 @@ function hitTest(x, y){
     if (Math.hypot(x - c.xa, y - c.ya) < 8) return { kind:'trend', obj:t, end:'a' };
     if (Math.hypot(x - c.xb, y - c.yb) < 8) return { kind:'trend', obj:t, end:'b' };
     if (['pricerange', 'daterange', 'pdrange', 'ellipse'].includes(type)){ if (x >= Math.min(c.xa, c.xb) - 4 && x <= Math.max(c.xa, c.xb) + 4 && y >= Math.min(c.ya, c.yb) - 4 && y <= Math.max(c.ya, c.yb) + 4) return { kind:'trend', obj:t, end:null }; continue; }
-    if (['extended', 'tray', 'fib', 'channel', 'fibchan'].includes(type)){ const pwid = wrapEl.clientWidth - chart.priceScale('right').width();
+    if (['extended', 'tray', 'fib', 'channel', 'fibchan'].includes(type) || (type === 'trend' && t.ext)){ const pwid = wrapEl.clientWidth - chart.priceScale('right').width();
       if (segsOf(t, c, pwid, wrapEl.clientHeight).some(sg => segD(x, y, sg) < 5)) return { kind:'trend', obj:t, end:null }; continue; }
     if (type === 'rect'){ if (x >= Math.min(c.xa, c.xb) - 4 && x <= Math.max(c.xa, c.xb) + 4 && y >= Math.min(c.ya, c.yb) - 4 && y <= Math.max(c.ya, c.yb) + 4) return { kind:'trend', obj:t, end:null }; continue; }
     const dx = c.xb - c.xa, dy = c.yb - c.ya, L2 = dx * dx + dy * dy || 1;
@@ -2295,7 +2296,8 @@ function renderDrawBar(){
     else if (dpop === 'text') pop.innerHTML = `<input id="dbText" placeholder="선에 표시할 글씨 (예: 지지선)" value="${(o.text || '').replace(/"/g, '&quot;')}">`;
     else if (dpop === 'width') pop.innerHTML = (o.hl ? [8, 14, 20, 28] : [1, 2, 3, 4]).map(w => `<button class="opt${o.width === w ? ' on' : ''}" data-w="${w}"><svg viewBox="0 0 30 8" width="30" height="8"><line x1="1" y1="4" x2="29" y2="4" stroke="currentColor" stroke-width="${w}"/></svg>${w}px</button>`).join('');
     else if (dpop === 'style') pop.innerHTML = [[0, '실선'], [2, '파선'], [1, '점선']].map(([st, n]) => `<button class="opt${o.style === st ? ' on' : ''}" data-s="${st}">${styleIc(st)}${n}</button>`).join('');
-    else if (dpop === 'more') pop.innerHTML = '<button class="opt" data-a="clone">복제</button><button class="opt" data-a="del">지우기</button>';
+    else if (dpop === 'more') pop.innerHTML = ((o.type || 'trend') === 'trend' && !o.line && !o.pts ? [['none', '연장 안 함'], ['right', '오른쪽으로 연장'], ['both', '양쪽으로 연장']].map(([k, n]) => `<button class="opt${(o.ext || 'none') === k ? ' on' : ''}" data-ext="${k}">${n}</button>`).join('') : '')
+      + '<button class="opt" data-a="clone">복제</button><button class="opt" data-a="del">지우기</button>';
     pop.style.left = (at.offsetLeft) + 'px'; bar.append(pop);
   }
   bar.hidden = false;
@@ -2319,6 +2321,7 @@ $('#drawBar').addEventListener('click', e => {
   if (b.dataset.c){ o.color = b.dataset.c; dpop = null; if (o.type === 'brush') store.set(o.hl ? 'hlColor' : 'brushColor', o.color); }
   else if (b.dataset.w){ o.width = +b.dataset.w; dpop = null; }
   else if (b.dataset.s){ o.style = +b.dataset.s; dpop = null; }
+  else if (b.dataset.ext){ o.ext = b.dataset.ext === 'none' ? undefined : b.dataset.ext; dpop = null; }
   else if (b.dataset.a === 'del') return deleteSel();
   else if (b.dataset.a === 'lock') o.locked = !o.locked;
   else if (b.dataset.a === 'alert'){
