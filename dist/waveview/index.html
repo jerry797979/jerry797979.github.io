@@ -3223,7 +3223,7 @@ function ptRender(){
   const tm = t => new Date(t + KST * 1000).toISOString().slice(5, 16).replace('T', ' ');
   if ($('[data-pt="pos"]').getAttribute('aria-pressed') === 'true'){
     const rows = PT.pos.map(p => { const cur = q ? (p.dir > 0 ? q.bid : q.ask) : null, pl = ptPnl(p);
-      return `<tr><td>${p.id}</td><td>${tm(p.time)}</td><td class="${p.dir > 0 ? 'upc' : 'dnc'}">${p.dir > 0 ? 'buy' : 'sell'}</td><td>${p.lots.toFixed(2)}</td><td>${fmt(p.open)}</td><td>${p.sl != null ? fmt(p.sl) : ''}</td><td>${p.tp != null ? fmt(p.tp) : ''}</td><td>${cur != null ? fmt(cur) : ''}</td><td>${p.strat === 'grid' ? '물타기' : p.strat === 'trail' ? '끌고 가기' : '수동'}</td><td class="${pl >= 0 ? 'upc' : 'dnc'}">${f2(pl)}</td><td><button class="x" data-cl="${p.id}" title="청산">✕</button></td></tr>`; }).join('');
+      return `<tr><td>${p.id}</td><td>${tm(p.time)}</td><td class="${p.dir > 0 ? 'upc' : 'dnc'}">${p.dir > 0 ? 'buy' : 'sell'}</td><td>${p.lots.toFixed(2)}</td><td>${fmt(p.open)}</td><td>${p.sl != null ? fmt(p.sl) : ''}</td><td>${p.tp != null ? fmt(p.tp) : ''}</td><td>${cur != null ? fmt(cur) : ''}</td><td>${p.strat === 'grid' ? '물타기' : p.strat === 'trail' ? '끌고 가기' : p.strat === 'ai' ? 'AI 판단' : '수동'}</td><td class="${pl >= 0 ? 'upc' : 'dnc'}">${f2(pl)}</td><td><button class="x" data-cl="${p.id}" title="청산">✕</button></td></tr>`; }).join('');
     $('#ptBody').innerHTML = `<table class="ptab"><thead><tr><th>티켓</th><th>시간</th><th>종류</th><th>랏</th><th>가격</th><th>S/L</th><th>T/P</th><th>현재가</th><th>전략</th><th>손익</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="11" style="text-align:left;color:var(--sub)">열린 포지션이 없습니다. BUY/SELL 을 누르거나 자동매매를 켜세요.</td></tr>'}</tbody><tfoot><tr><td colspan="9">잔액 $${f2(PT.bal)} · 평가금 $${f2(eq)}</td><td class="${float >= 0 ? 'upc' : 'dnc'}">${f2(float)}</td><td></td></tr></tfoot></table>`;
   } else {
     const n = PT.hist.length, w = PT.hist.filter(h => h.pnl > 0).length, tot = PT.hist.reduce((a, h) => a + h.pnl, 0);
@@ -3236,7 +3236,7 @@ function drawPaper(pw){
   for (const p of PT.pos){
     if (p.sym !== S.sym.id) continue;
     const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
-    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.strat === 'grid' ? '물타기 자동 ' : p.strat === 'trail' ? '끌고가기 자동 ' : '직접 '}${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
+    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.strat === 'grid' ? '물타기 자동 ' : p.strat === 'trail' ? '끌고가기 자동 ' : p.strat === 'ai' ? 'AI 판단 ' : '직접 '}${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
     if (p.sl != null) L.push([p.sl, '#f23645', `모의 손절 S/L #${p.id}`, [2, 3]]);
     if (p.tp != null) L.push([p.tp, '#22ab94', `모의 익절 T/P #${p.id}`, [2, 3]]);
     for (const [pr, col, name, dash] of L){ const yy = candle.priceToCoordinate(pr); if (yy == null) continue;
@@ -3250,16 +3250,16 @@ S.botRemote = false; let botSent = '', botAdopted = false;
 async function botSync(){
   if (!S.mt5ok){ S.botRemote = false; return; }
   try {
-    const want = JSON.stringify({ cfg:PT.cfg, auto:PT.auto, race:PT.race });
+    const want = JSON.stringify({ cfg:PT.cfg, auto:{ ...PT.auto, ai:true }, race:PT.race });
     if (want !== botSent){
-      const body = { cfg:PT.cfg, auto:PT.auto, race:PT.race };
+      const body = { cfg:PT.cfg, auto:{ ...PT.auto, ai:true }, race:PT.race };
       if (!botAdopted) body.adopt = { bal:PT.bal, pos:PT.pos.filter(p => ptOwn(p) === 'bot') };
       const r = await fetch(S.cfg.mt5url + '/paper', { method:'POST', body:JSON.stringify(body) }); const j = await r.json(); if (!j.ok) throw new Error();
       botSent = want; botAdopted = true;
     }
     const j = await mt5Get('/paper'); if (!j.ok || j.race !== PT.race) throw new Error();
     if (!S.botRemote) toast('웨이브뷰 계좌 24시간', 'PC 연결 프로그램이 웨이브뷰 계좌를 맡았습니다. 이제 창을 닫아도 자동 전략이 거래합니다.');
-    S.botRemote = true;
+    S.botRemote = true; S.botAi = j.ai || null;
     PT.bal = j.bal;
     PT.pos = PT.pos.filter(p => ptOwn(p) === 'me').concat(j.pos);
     const ids = new Set(PT.hist.map(h => h.id)); let add = 0;
@@ -3623,10 +3623,10 @@ function renderInfo(){
   if (S.show.news && typeof newsEvents === 'function'){ const now = nowSec(), nx = newsEvents(now, now + 3 * 86400).filter(e => e.imp >= 3).slice(0, 3);
     if (nx.length) out.push(`<section><h4>다음 중요 경제지표</h4>${nx.map(e => row('#f23645', e.ko, `${md(e.t)} ${hm(e.t)}`)).join('')}</section>`); }
   if (typeof PT !== 'undefined'){ const a = ptEq('me'), b = ptEq('bot');
-    out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}</section>`); }
+    out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}${S.botAi ? `<div style="color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:4px">🤖 ${S.botAi.note}</div>` : ''}</section>`); }
   if (typeof PT !== 'undefined' && PT.pos.length){
     out.push(`<section><h4>모의 거래 (연습 계좌)</h4>${PT.pos.map(p => { const pl = ptPnl(p);
-      return row(pl >= 0 ? '#22ab94' : '#f23645', `${p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : '직접'} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }
+      return row(pl >= 0 ? '#22ab94' : '#f23645', `${STRN(p)} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }
   out.push(`<button class="tb" data-open="stats" style="justify-content:center;border:1px solid var(--border);height:32px">📊 모의 거래 기록 · 통계 (${PT.hist.length}건)</button>`);
   el.innerHTML = out.join('');
 }
@@ -3634,7 +3634,7 @@ setInterval(renderInfo, 1000);
 $('#cinfo').addEventListener('click', e => { if (e.target.closest('[data-open="stats"]')) openStats(); });
 
 /* 모의 거래 기록 · 통계 */
-const STRN = p => p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : '직접';
+const STRN = p => p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? 'AI 판단' : '직접';
 const kst = ms => { const d = new Date(ms + KST * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
 function statOf(list){
   const w = list.filter(t => t.pnl > 0), l = list.filter(t => t.pnl <= 0), gw = w.reduce((a, t) => a + t.pnl, 0), gl = -l.reduce((a, t) => a + t.pnl, 0);
@@ -3653,7 +3653,7 @@ function renderStats(){
     <div style="font-size:12px;color:var(--sub);margin-top:4px">수익률 <b style="font-size:12px;color:${x.ret >= 0 ? '#22ab94' : '#f23645'}">${x.ret >= 0 ? '+' : ''}${x.ret.toFixed(2)}%</b> · 거래 ${x.n}건 · 승률 ${x.win.toFixed(0)}%</div></div>`;
   const board = `<div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">${card('🧑 사장님 계좌', me)}<div style="display:grid;place-items:center;font-weight:700;padding:0 6px">VS<br><small style="color:var(--sub);font-weight:500">${lead}</small></div>${card('🤖 웨이브뷰 계좌 (자동 전략)', bot)}</div>`;
   const kp = (k, v, c) => `<div class="kpi"><small>${k}</small><b${c ? ` style="color:${c}"` : ''}>${v}</b></div>`;
-  const by = [['물타기 자동', 'grid'], ['끌고가기 자동', 'trail'], ['직접', null]].map(([n, k]) => [n, statOf(T.filter(t => (t.strat || null) === k))]).filter(([, x]) => x.n);
+  const by = [['AI 판단', 'ai'], ['물타기 자동', 'grid'], ['끌고가기 자동', 'trail'], ['직접', null]].map(([n, k]) => [n, statOf(T.filter(t => (t.strat || null) === k))]).filter(([, x]) => x.n);
   const days = new Map(); for (const t of T){ const d = new Date(t.ctime + KST * 1000), k = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; const v = days.get(k) || { n:0, pnl:0 }; v.n++; v.pnl += t.pnl; days.set(k, v); }
   $('#stBody').innerHTML = board + (!T.length ? '<div class="warn">이 기간에 끝난 모의 거래가 없습니다. 모의 거래 창에서 자동 전략을 켜 두거나 직접 사고팔면 여기에 쌓입니다.</div>' : `
     <div class="kpis">${kp('순손익', money(A.net), A.net >= 0 ? '#22ab94' : '#f23645')}${kp('거래 수', A.n + '건')}${kp('승률', A.win.toFixed(1) + '%')}${kp('손익비 (PF)', pf(A.pf))}

@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 3
+VERSION = 4
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -189,6 +189,8 @@ class Handler(BaseHTTPRequestHandler):
                 with plock:
                     st = dict(paper)
                     st["hist"] = [h for h in paper.get("hist", []) if h.get("ctime", 0) > int(q.get("since", 0))][:1000]
+                    st["ai"] = {"note": ai["note"], "at": ai["at"], "pick": ai["pick"]["name"] if ai["pick"] else None,
+                                "board": [{"name": x["name"], "ok": x["ok"], **{k: round(v, 2) for k, v in x["full"].items()}} for x in ai["board"]]}
                 return self._send(200, {"ok": True, **st})
             return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": VERSION, "paper": True,
                                     "telegram": bool(cfg.get("telegram_token") and cfg.get("telegram_chat_id")),
@@ -310,6 +312,7 @@ PAPER_DEF = {"bal": 1000.0, "pos": [], "hist": [], "seq": 500000, "lastSig": {},
                      "grid": {"tf": "5m", "dir": "rev", "lot1": 0.01, "adds": "30:0.02, 60:0.03", "tp": 5, "be": 1, "stop": 100},
                      "trail": {"tf": "5m", "dir": "trend", "lot": 0.01, "sl": 10, "act": 10, "mode": "half", "dist": 10}}}
 news = {"at": 0, "ev": []}
+ai = {"at": 0, "pick": None, "board": [], "note": "아직 판단 전"}
 
 
 def paper_load():
@@ -382,7 +385,7 @@ def p_open(q, d, lots, strat, group, sl=None):
     p = {"id": paper["seq"], "sym": q["sym"], "dir": d, "lots": lots, "open": price, "time": int(time.time() * 1000),
          "sl": sl, "tp": None, "strat": strat, "group": group, "peak": 0}
     paper["pos"].append(p)
-    p_log(f"{'BUY' if d > 0 else 'SELL'} {lots}랏 체결", f"{q['sym']} @ {price:,.2f} · {'물타기 회복' if strat == 'grid' else '끌고 가기'}"
+    p_log(f"{'BUY' if d > 0 else 'SELL'} {lots}랏 체결", f"{q['sym']} @ {price:,.2f} · {'물타기 회복' if strat == 'grid' else 'AI 판단' if strat == 'ai' else '끌고 가기'}"
           + (f" · S/L {sl:,.2f}" if sl else ""))
     return p
 
@@ -429,12 +432,13 @@ def p_step(q):
             r = p_close(p, q, "손절" if (p["sl"] - p["open"]) * p["dir"] < 0 else "트레일링 스탑")
             p_log(f"청산 · {p['lots']}랏", f"{r:+.2f}$ · 잔액 ${paper['bal']:.2f}")
             continue
-        if p.get("strat") == "trail":
+        if p.get("strat") in ("trail", "ai"):
             t = c["trail"]
             fav = (cur - p["open"]) * p["dir"] / v
             p["peak"] = max(p.get("peak", 0), fav)
-            if p["peak"] >= t["act"]:
-                keep = p["peak"] / 2 if t["mode"] == "half" else p["peak"] - t["dist"]
+            act, mode = (p["act"], "half") if p.get("strat") == "ai" else (t["act"], t["mode"])
+            if p["peak"] >= act:
+                keep = p["peak"] / 2 if mode == "half" else p["peak"] - t["dist"]
                 ns = round(p["open"] + p["dir"] * max(0, keep) * v, 2)
                 if p.get("sl") is None or (ns > p["sl"] if p["dir"] > 0 else ns < p["sl"]):
                     p["sl"] = ns
@@ -498,8 +502,217 @@ def sig_to_dir(mode, up, dn, st):
     return -1 if (up if st == "grid" else dn) else 0
 
 
+# ---------- AI 판단: 후보 전략을 최근 차트로 매시간 겨뤄 보고 가장 잘 맞는 것으로 거래 ----------
+def _sma(v, n):
+    out, s = [None] * len(v), 0.0
+    for i, x in enumerate(v):
+        s += x
+        if i >= n:
+            s -= v[i - n]
+        if i >= n - 1:
+            out[i] = s / n
+    return out
+
+
+def _bands(v, n, k):
+    m = _sma(v, n)
+    up, lo = [None] * len(v), [None] * len(v)
+    for i in range(n - 1, len(v)):
+        w = v[i - n + 1:i + 1]
+        sd = math.sqrt(sum((x - m[i]) ** 2 for x in w) / n)
+        up[i], lo[i] = m[i] + k * sd, m[i] - k * sd
+    return m, up, lo
+
+
+def ai_features(bars):
+    """봉마다 신호: 돌파 더블비(db), 골든·데드크로스 후 1B 터치(gcb), 지난 미장 고저 돌파(usl), 그리고 ATR."""
+    n = len(bars)
+    c = [b["c"] for b in bars]
+    o = [b["o"] for b in bars]
+    m1, u1, l1 = _bands(c, int(cfg["bb_len"]), float(cfg["bb_mult"]))
+    _, u2, l2 = _bands(o, int(cfg.get("bb2_len", 4)), float(cfg.get("bb2_mult", 4.0)))
+    a20, a120 = _sma(c, 20), _sma(c, 120)
+    tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
+    atr = _sma(tr, 14)
+    f = [dict(db=0, gcb=0, usl=0, atr=atr[i], trend=0) for i in range(n)]
+    tr_state, armed = 0, False
+    sh = sl_ = None
+    prev_in = False
+    fin = None
+    for i in range(n):
+        b = bars[i]
+        if u1[i] is not None and u2[i] is not None:
+            if b["h"] >= u1[i] and b["h"] >= u2[i]:
+                f[i]["db"] = 1
+            elif b["l"] <= l1[i] and b["l"] <= l2[i]:
+                f[i]["db"] = -1
+        if a20[i] is not None and a120[i] is not None:
+            f[i]["trend"] = 1 if a20[i] > a120[i] else -1
+            if i and a20[i - 1] is not None and a120[i - 1] is not None:
+                if a20[i] > a120[i] and a20[i - 1] <= a120[i - 1]:
+                    tr_state, armed = 1, True
+                elif a20[i] < a120[i] and a20[i - 1] >= a120[i - 1]:
+                    tr_state, armed = -1, True
+        if tr_state and u1[i] is not None:
+            w = u1[i] - l1[i]
+            if tr_state > 0:
+                if armed and b["l"] <= l1[i] + w * 0.1:
+                    f[i]["gcb"], armed = 1, False
+                elif not armed and c[i] > m1[i]:
+                    armed = True
+            else:
+                if armed and b["h"] >= u1[i] - w * 0.1:
+                    f[i]["gcb"], armed = -1, False
+                elif not armed and c[i] < m1[i]:
+                    armed = True
+        # 미장(한국 22:00~06:00) 고저
+        k = datetime.fromtimestamp(b["t"], KST)
+        mm = k.hour * 60 + k.minute
+        ins = mm >= 1320 or mm < 360
+        if ins and (not prev_in or (i and b["t"] - bars[i - 1]["t"] > 8 * 3600)):
+            if prev_in and sh is not None:
+                fin = (sh, sl_)
+            sh, sl_ = b["h"], b["l"]
+        elif ins:
+            sh, sl_ = max(sh, b["h"]), min(sl_, b["l"])
+        elif prev_in and sh is not None:
+            fin = (sh, sl_)
+        prev_in = ins
+        if fin and i and not ins:
+            if c[i - 1] <= fin[0] < c[i]:
+                f[i]["usl"] = 1
+            elif c[i - 1] >= fin[1] > c[i]:
+                f[i]["usl"] = -1
+    return f
+
+
+AI_SIGNALS = [
+    ("db", -1, "돌파 더블비 역추세 (위로 뚫으면 매도·아래로 뚫으면 매수)"),
+    ("db", 1, "돌파 더블비 추세 따라가기"),
+    ("gcb", 1, "골든·데드크로스 후 1B 눌림·반등"),
+    ("usl", 1, "지난 미장 고점·저점 돌파 따라가기"),
+    ("usl", -1, "지난 미장 고점·저점 돌파 실패 노리기"),
+]
+AI_EXITS = [(1.5, 1.0, "손절 ATR×1.5"), (2.5, 2.0, "손절 ATR×2.5")]
+
+
+def ai_experts():
+    out = []
+    for sig, way, name in AI_SIGNALS:
+        for slk, actk, en in AI_EXITS:
+            for flt in (False, True):
+                out.append({"sig": sig, "way": way, "slk": slk, "actk": actk, "flt": flt,
+                            "name": f"{name} · {en}{' · 20·120이평 방향만' if flt else ''}"})
+    return out
+
+
+def ai_dir(e, f):
+    s = f[e["sig"]] * e["way"]
+    if not s:
+        return 0
+    if e["flt"] and f["trend"] != s:
+        return 0
+    return s
+
+
+def ai_backtest(e, bars, f, start, spread=0.2):
+    """한 번에 한 포지션. 진입은 신호 봉 종가, 청산은 손절(추적 손절 포함). 손익은 가격 차이(1랏 0.01 기준 ×1달러)."""
+    trades, pos = [], None
+    for i in range(start, len(bars)):
+        b = bars[i]
+        if pos:
+            d = pos["d"]
+            if (b["l"] <= pos["sl"]) if d > 0 else (b["h"] >= pos["sl"]):
+                trades.append((pos["sl"] - pos["px"]) * d - spread)
+                pos = None
+            else:
+                fav = (b["c"] - pos["px"]) * d  # 종가 기준으로 보수적으로
+                pos["peak"] = max(pos["peak"], fav)
+                if pos["peak"] >= pos["act"]:
+                    ns = pos["px"] + d * pos["peak"] / 2
+                    pos["sl"] = max(pos["sl"], ns) if d > 0 else min(pos["sl"], ns)
+            continue
+        if f[i]["atr"] is None:
+            continue
+        d = ai_dir(e, f[i])
+        if d:
+            a = f[i]["atr"]
+            pos = {"d": d, "px": b["c"], "sl": b["c"] - d * e["slk"] * a, "act": e["actk"] * a, "peak": 0}
+    return trades
+
+
+def ai_score(tr):
+    if not tr:
+        return {"n": 0, "net": 0, "pf": 0, "win": 0, "mdd": 0}
+    gw = sum(x for x in tr if x > 0)
+    gl = -sum(x for x in tr if x <= 0)
+    eq = peak = mdd = 0
+    for x in tr:
+        eq += x
+        peak = max(peak, eq)
+        mdd = max(mdd, peak - eq)
+    return {"n": len(tr), "net": gw - gl, "pf": gw / gl if gl else (9.9 if gw else 0), "win": sum(1 for x in tr if x > 0) / len(tr) * 100, "mdd": mdd}
+
+
+def ai_learn(sym, tf):
+    """최근 약 10일 봉으로 후보 전략을 모두 시험. 전체 기간 손익비 1.15 이상, 최근 3일도 이익, 거래 8번 이상인 것 중 1등을 고른다."""
+    bars = rates(sym, tf, 3000)[:-1]
+    f = ai_features(bars)
+    recent = max(130, len(bars) - 3 * 24 * 3600 // TF_SEC.get(tf, 300))
+    board = []
+    for e in ai_experts():
+        full = ai_score(ai_backtest(e, bars, f, 130))
+        rec = ai_score(ai_backtest(e, bars, f, recent))
+        ok = full["n"] >= 8 and full["pf"] >= 1.15 and rec["net"] > 0 and full["mdd"] < max(1e-9, full["net"]) * 1.5
+        board.append({**e, "full": full, "rec": rec, "ok": ok, "score": full["net"] - full["mdd"] * 0.5 + rec["net"] * 0.5})
+    board.sort(key=lambda x: (x["ok"], x["score"]), reverse=True)
+    pick = board[0] if board and board[0]["ok"] else None
+    prev = ai["pick"]["name"] if ai["pick"] else None
+    ai.update(at=time.time(), pick=pick, board=board[:5],
+              note=(f"지금 쓰는 전략: {pick['name']} (최근 10일 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f})"
+                    if pick else "요즘 장에 잘 맞는 전략이 없어 쉬는 중"))
+    if (pick["name"] if pick else None) != prev:
+        p_log("AI 판단 · 전략 바꿈", ai["note"])
+
+
+def ai_signal(q, tf):
+    if not ai["pick"] or any(p.get("strat") == "ai" for p in paper["pos"]):
+        return
+    bars = rates(q["sym"], tf, 400)[:-1]
+    key = f"ai|{q['sym']}|{tf}"
+    bt = bars[-1]["t"]
+    if paper["lastSig"].get(key) == bt:
+        return
+    first = key not in paper["lastSig"]
+    paper["lastSig"][key] = bt
+    if first:
+        return
+    f = ai_features(bars)
+    e = ai["pick"]
+    d = ai_dir(e, f[-1])
+    if not d or f[-1]["atr"] is None:
+        return
+    if news_block():
+        p_log("진입 건너뜀", "중요 경제지표 발표 전후라 대기합니다.")
+        return
+    a = f[-1]["atr"]
+    px = q["ask"] if d > 0 else q["bid"]
+    p = p_open(q, d, paper["cfg"].get("aiLot", 0.01), "ai", f"A{int(time.time() * 1000)}", round(px - d * e["slk"] * a, 2))
+    if p:
+        p["act"] = round(e["actk"] * a / paper["cfg"].get("ptv", 1), 2)
+        p["why"] = e["name"]
+        p_log("AI 판단 · 진입 이유", f"{e['name']}\n최근 10일 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f}\n"
+              f"손절 {p['sl']:,.2f} (ATR {a:.2f}) · 수익 {e['actk']}ATR 넘으면 절반 지키며 따라감")
+
+
 def p_signals(q):
     c = paper["cfg"]
+    if paper["auto"].get("ai", True):
+        tf = c.get("aiTf", "5m")
+        if time.time() - ai["at"] > 3600:
+            ai_learn(q["sym"], tf)
+        ai_signal(q, tf)
+        return
     for st in ("grid", "trail"):
         if not paper["auto"].get(st) or any(p.get("strat") == st for p in paper["pos"]):
             continue
@@ -567,13 +780,40 @@ def self_update():
                     f.write(new)
                 os.replace(me + ".new", me)
                 print("새 버전으로 바꾸고 다시 시작합니다")
-                os.execv(sys.executable, [sys.executable, me])
+                os.execv(sys.executable, [sys.executable, me, "--restart"])
         except Exception as e:  # noqa: BLE001
             print("업데이트 확인 실패:", e)
 
 
+def keep_mt5():
+    """MT5 가 꺼지거나 끊기면 30초마다 다시 연결한다 (MT5 가 꺼져 있으면 initialize 가 MT5 를 켠다)."""
+    while True:
+        time.sleep(30)
+        try:
+            with lock:
+                ok = mt5.terminal_info() is not None and mt5.account_info() is not None
+                if not ok:
+                    mt5.shutdown()
+                    ok = mt5.initialize()
+            if ok and not server_offset:
+                detect_offset()
+        except Exception as e:  # noqa: BLE001
+            print("MT5 다시 연결 실패:", e)
+
+
+def already_running(port):
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=2) as r:
+            return b"waveview-mt5-bridge" in r.read()
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def main():
     load_config()
+    if "--restart" not in sys.argv and already_running(int(cfg["port"])):
+        print("이미 켜져 있습니다")
+        return
     paper_load()
     while not mt5.initialize():
         print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인하면 자동으로 연결합니다. (10초 뒤 다시 시도)", mt5.last_error())
@@ -587,6 +827,7 @@ def main():
     else:
         print("텔레그램 설정 전입니다. 웨이브뷰 ⚙ 설정에서 봇 토큰과 채팅 ID를 저장하면 자동으로 켜집니다.")
     threading.Thread(target=paper_loop, daemon=True).start()
+    threading.Thread(target=keep_mt5, daemon=True).start()
     threading.Thread(target=self_update, daemon=True).start()
     port = int(cfg["port"])
     print(f"웨이브뷰 연결 주소: http://127.0.0.1:{port}  (이 창을 닫으면 연결이 끊깁니다)")
