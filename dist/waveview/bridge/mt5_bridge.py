@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 4
+VERSION = 5
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -185,6 +185,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"bars": rates(q["symbol"], tf, min(int(q.get("count", 1500)), 200000))})
             if u.path == "/quotes":
                 return self._send(200, {"quotes": quotes()})
+            if u.path == "/mt5/trades":
+                return self._send(200, mt5_trades(int(q.get("since", 0))))
             if u.path == "/paper":
                 with plock:
                     st = dict(paper)
@@ -300,6 +302,39 @@ def watcher():
                 except Exception as e:  # noqa: BLE001
                     print(f"{key} 확인 실패: {e}")
         time.sleep(5)
+
+
+# ---------- 사장님 MT5 실제 거래 (읽기만 한다. 주문은 내지 않는다) ----------
+def mt5_trades(since_ms):
+    """since_ms 이후 청산된 거래와 지금 보유 중인 포지션. 시간은 UTC 밀리초."""
+    frm = datetime.fromtimestamp(max(since_ms / 1000, time.time() - 120 * 86400) + server_offset - 86400, timezone.utc)
+    to = datetime.fromtimestamp(time.time() + server_offset + 86400, timezone.utc)
+    with lock:
+        deals = mt5.history_deals_get(frm, to) or []
+        pos = mt5.positions_get() or []
+        acc = mt5.account_info()
+    opens = {}
+    for d in deals:
+        if d.entry == 0:  # 진입
+            opens[d.position_id] = d
+    closed = []
+    for d in deals:
+        if d.entry not in (1, 2, 3) or d.symbol == "":  # 청산 거래만
+            continue
+        t = (d.time_msc - server_offset * 1000) if getattr(d, "time_msc", 0) else (d.time - server_offset) * 1000
+        if t <= since_ms:
+            continue
+        o = opens.get(d.position_id)
+        closed.append({"id": f"m{d.ticket}", "sym": d.symbol, "dir": -1 if d.type == 0 else 1, "lots": d.volume,
+                       "open": o.price if o else None, "close": d.price,
+                       "time": ((o.time_msc - server_offset * 1000) if o and getattr(o, "time_msc", 0) else t),
+                       "ctime": t, "pnl": d.profit + d.commission + d.swap + (o.commission if o else 0),
+                       "why": "MT5 청산", "strat": None, "mt5": True})
+    openp = [{"id": f"m{p.ticket}", "sym": p.symbol, "dir": 1 if p.type == 0 else -1, "lots": p.volume, "open": p.price_open,
+              "sl": p.sl or None, "tp": p.tp or None, "time": (p.time - server_offset) * 1000, "strat": None, "mt5": True,
+              "profit": p.profit + p.swap} for p in pos]
+    return {"ok": True, "closed": closed, "pos": openp,
+            "account": {"balance": acc.balance, "equity": acc.equity, "currency": acc.currency} if acc else None}
 
 
 # ---------- 웨이브뷰 계좌 (모의 거래 자동 전략) 24시간 ----------

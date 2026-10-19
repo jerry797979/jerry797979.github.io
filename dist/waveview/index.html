@@ -3033,12 +3033,12 @@ if (!PT.raceV1){ PT.me = { bal:1000 }; PT.bal = 1000; PT.pos = []; PT.race = Dat
 S.ptq = null;
 const ptSym = () => PT.cfg.sym || (SYMS.find(x => x.feed === 'mt5' && /^XAU/i.test(x.id)) || S.sym).id;
 const parseAdds = t => String(t).split(',').map(x => x.split(':').map(Number)).filter(([d, l]) => d > 0 && l > 0).map(([d, l]) => ({ d, l }));
-const ptPnl = p => { const q = S.ptq; if (!q) return 0; const cur = p.dir > 0 ? q.bid : q.ask; return (cur - p.open) * p.dir * p.lots * PT.cfg.cs; };
+const ptPnl = p => { if (p.mt5) return p.profit || 0; const q = S.ptq; if (!q) return 0; const cur = p.dir > 0 ? q.bid : q.ask; return (cur - p.open) * p.dir * p.lots * PT.cfg.cs; };
 // 대결: 사장님 계좌(직접 주문)와 웨이브뷰 계좌(자동 전략)를 따로 센다. 둘 다 $1,000 에서 시작
 const ptOwn = p => p.strat ? 'bot' : 'me';
 const ptBal = o => o === 'me' ? PT.me.bal : PT.bal;
 const ptAddBal = (o, v) => { if (o === 'me') PT.me.bal += v; else PT.bal += v; };
-const ptMargin = o => PT.pos.filter(p => !o || ptOwn(p) === o).reduce((a, p) => a + p.lots * PT.cfg.cs * p.open / PT.cfg.lev, 0);
+const ptMargin = o => PT.pos.filter(p => !p.mt5 && (!o || ptOwn(p) === o)).reduce((a, p) => a + p.lots * PT.cfg.cs * p.open / PT.cfg.lev, 0);
 const ptEq = o => ptBal(o) + PT.pos.filter(p => ptOwn(p) === o).reduce((a, p) => a + ptPnl(p), 0);
 async function ptQuote(){
   const sym = ptSym();
@@ -3076,7 +3076,7 @@ function ptStep(){
   const v = PT.cfg.ptv;
   // 개별 S/L · T/P (웨이브뷰 계좌를 PC 연결 프로그램이 맡고 있으면 그 포지션은 건드리지 않는다)
   for (const p of PT.pos.slice()){
-    if (S.botRemote && ptOwn(p) === 'bot') continue;
+    if (p.mt5 || (S.botRemote && ptOwn(p) === 'bot')) continue;
     const cur = p.dir > 0 ? q.bid : q.ask;
     if (p.sl != null && (p.dir > 0 ? cur <= p.sl : cur >= p.sl)){ const r = ptClose(p, '손절'); ptLog(`손절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
     if (p.tp != null && (p.dir > 0 ? cur >= p.tp : cur <= p.tp)){ const r = ptClose(p, '익절'); ptLog(`익절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
@@ -3101,7 +3101,7 @@ function ptStep(){
     else if (hasAdd ? sum >= gc.be : sum >= gc.tp) ptCloseGroup(g, hasAdd ? '물타기 탈출' : '물타기 익절');
   }
   // 스톱아웃 (마진 레벨 50%)
-  for (const o of S.botRemote ? ['me'] : ['me', 'bot']){
+  for (const o of [S.mt5Me ? null : 'me', S.botRemote ? null : 'bot'].filter(Boolean)){
     let m = ptMargin(o);
     while (m > 0){
       if (ptEq(o) / m * 100 >= 50) break;
@@ -3226,7 +3226,7 @@ function ptRender(){
   const tm = t => new Date(t + KST * 1000).toISOString().slice(5, 16).replace('T', ' ');
   if ($('[data-pt="pos"]').getAttribute('aria-pressed') === 'true'){
     const rows = PT.pos.map(p => { const cur = q ? (p.dir > 0 ? q.bid : q.ask) : null, pl = ptPnl(p);
-      return `<tr><td>${p.id}</td><td>${tm(p.time)}</td><td class="${p.dir > 0 ? 'upc' : 'dnc'}">${p.dir > 0 ? 'buy' : 'sell'}</td><td>${p.lots.toFixed(2)}</td><td>${fmt(p.open)}</td><td>${p.sl != null ? fmt(p.sl) : ''}</td><td>${p.tp != null ? fmt(p.tp) : ''}</td><td>${cur != null ? fmt(cur) : ''}</td><td>${p.strat === 'grid' ? '물타기' : p.strat === 'trail' ? '끌고 가기' : p.strat === 'ai' ? 'AI 판단' : '수동'}</td><td class="${pl >= 0 ? 'upc' : 'dnc'}">${f2(pl)}</td><td><button class="x" data-cl="${p.id}" title="청산">✕</button></td></tr>`; }).join('');
+      return `<tr><td>${p.id}</td><td>${tm(p.time)}</td><td class="${p.dir > 0 ? 'upc' : 'dnc'}">${p.dir > 0 ? 'buy' : 'sell'}</td><td>${p.lots.toFixed(2)}</td><td>${fmt(p.open)}</td><td>${p.sl != null ? fmt(p.sl) : ''}</td><td>${p.tp != null ? fmt(p.tp) : ''}</td><td>${cur != null ? fmt(cur) : ''}</td><td>${p.mt5 ? 'MT5 실거래' : p.strat === 'grid' ? '물타기' : p.strat === 'trail' ? '끌고 가기' : p.strat === 'ai' ? 'AI 판단' : '수동'}</td><td class="${pl >= 0 ? 'upc' : 'dnc'}">${f2(pl)}</td><td><button class="x" data-cl="${p.id}" title="청산">✕</button></td></tr>`; }).join('');
     $('#ptBody').innerHTML = `<table class="ptab"><thead><tr><th>티켓</th><th>시간</th><th>종류</th><th>랏</th><th>가격</th><th>S/L</th><th>T/P</th><th>현재가</th><th>전략</th><th>손익</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="11" style="text-align:left;color:var(--sub)">열린 포지션이 없습니다. BUY/SELL 을 누르거나 자동매매를 켜세요.</td></tr>'}</tbody><tfoot><tr><td colspan="9">잔액 $${f2(PT.bal)} · 평가금 $${f2(eq)}</td><td class="${float >= 0 ? 'upc' : 'dnc'}">${f2(float)}</td><td></td></tr></tfoot></table>`;
   } else {
     const n = PT.hist.length, w = PT.hist.filter(h => h.pnl > 0).length, tot = PT.hist.reduce((a, h) => a + h.pnl, 0);
@@ -3239,7 +3239,7 @@ function drawPaper(pw){
   for (const p of PT.pos){
     if (p.sym !== S.sym.id) continue;
     const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
-    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.strat === 'grid' ? '물타기 자동 ' : p.strat === 'trail' ? '끌고가기 자동 ' : p.strat === 'ai' ? 'AI 판단 ' : '직접 '}${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
+    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.strat === 'grid' ? '물타기 자동 ' : p.strat === 'trail' ? '끌고가기 자동 ' : p.strat === 'ai' ? 'AI 판단 ' : p.mt5 ? 'MT5 실거래 ' : '직접 '}${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
     if (p.sl != null) L.push([p.sl, '#f23645', `모의 손절 S/L #${p.id}`, [2, 3]]);
     if (p.tp != null) L.push([p.tp, '#22ab94', `모의 익절 T/P #${p.id}`, [2, 3]]);
     for (const [pr, col, name, dash] of L){ const yy = candle.priceToCoordinate(pr); if (yy == null) continue;
@@ -3272,6 +3272,23 @@ async function botSync(){
   } catch { S.botRemote = false; }
 }
 setInterval(botSync, 2000);
+/* 사장님 계좌 = MT5 실거래: 연결 프로그램(v5 이상)이 MT5 체결 내역·보유 포지션을 읽어 준다 (읽기만, 주문은 안 냄) */
+S.mt5Me = false;
+async function mt5MeSync(){
+  if (!S.mt5ok){ S.mt5Me = false; return; }
+  try {
+    const j = await mt5Get('/mt5/trades?since=' + (PT.mt5Since || 0)); if (!j.ok || !Array.isArray(j.closed)) throw new Error();
+    if (!S.mt5Me) toast('사장님 계좌 = MT5 실거래', 'MT5에서 사고판 거래가 대결 점수와 통계에 자동으로 기록됩니다.');
+    S.mt5Me = true; S.mt5Acct = j.account;
+    const ids = new Set(PT.hist.map(h => h.id)); let add = 0;
+    for (const h of j.closed) if (!ids.has(h.id)){ PT.hist.push(h); add++; PT.mt5Since = Math.max(PT.mt5Since || 0, h.ctime); }
+    if (add){ PT.hist.sort((a, b) => b.ctime - a.ctime); PT.hist = PT.hist.slice(0, 5000); }
+    PT.pos = PT.pos.filter(p => !p.mt5).concat(j.pos);
+    PT.me.bal = 1000 + PT.hist.filter(h => ptOwn(h) === 'me' && h.ctime >= (PT.race || 0)).reduce((a, h) => a + h.pnl, 0);
+    savePT();
+  } catch { S.mt5Me = false; }
+}
+setInterval(mt5MeSync, 3000);
 setInterval(ptSignals, 10000);
 // UI
 $('#ptBtn').onclick = () => { const t = $('#term'); t.hidden = !t.hidden; $('#ptBtn').setAttribute('aria-pressed', !t.hidden); store.set('ptOpen', !t.hidden); ptRender(); };
@@ -3281,6 +3298,7 @@ $('#ptBuy').onclick = () => { ptOpen(1, lotVal(), null, 'M' + Date.now()); ptRen
 $('#ptSell').onclick = () => { ptOpen(-1, lotVal(), null, 'M' + Date.now()); ptRender(); };
 $('#ptCloseAll').onclick = () => { let sum = 0; PT.pos.filter(p => ptOwn(p) === 'me').forEach(p => { sum += ptClose(p, '수동 전체 청산') || 0; }); ptLog('내 포지션 전체 청산', `합계 ${money(sum)} · 내 잔액 $${PT.me.bal.toFixed(2)}`); ptRender(); };
 $('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl);
+  if (p && p.mt5){ toast('MT5 실거래', 'MT5 포지션은 MT5에서 청산해 주세요. 청산하면 여기에 자동으로 기록됩니다.'); return; }
   if (p && S.botRemote && ptOwn(p) === 'bot'){ fetch(S.cfg.mt5url + '/paper/close', { method:'POST', body:JSON.stringify({ id:p.id }) }).then(() => botSync()); return; }
   if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); ptRender(); } });
 document.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pt]').forEach(x => x.setAttribute('aria-pressed', x === b)); ptRender(); });
@@ -3626,9 +3644,9 @@ function renderInfo(){
   if (S.show.news && typeof newsEvents === 'function'){ const now = nowSec(), nx = newsEvents(now, now + 3 * 86400).filter(e => e.imp >= 3).slice(0, 3);
     if (nx.length) out.push(`<section><h4>다음 중요 경제지표</h4>${nx.map(e => row('#f23645', e.ko, `${md(e.t)} ${hm(e.t)}`)).join('')}</section>`); }
   if (typeof PT !== 'undefined'){ const a = ptEq('me'), b = ptEq('bot');
-    out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}${S.botAi ? `<div style="color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:4px">🤖 ${S.botAi.note}</div>` : ''}</section>`); }
+    out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', S.mt5Me ? '🧑 사장님 (MT5 실거래)' : '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}${S.botAi ? `<div style="color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:4px">🤖 ${S.botAi.note}</div>` : ''}</section>`); }
   if (typeof PT !== 'undefined' && PT.pos.length){
-    out.push(`<section><h4>모의 거래 (연습 계좌)</h4>${PT.pos.map(p => { const pl = ptPnl(p);
+    out.push(`<section><h4>보유 포지션</h4>${PT.pos.map(p => { const pl = ptPnl(p);
       return row(pl >= 0 ? '#22ab94' : '#f23645', `${STRN(p)} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }
   out.push(`<button class="tb" data-open="stats" style="justify-content:center;border:1px solid var(--border);height:32px">📊 모의 거래 기록 · 통계 (${PT.hist.length}건)</button>`);
   el.innerHTML = out.join('');
@@ -3637,7 +3655,7 @@ setInterval(renderInfo, 1000);
 $('#cinfo').addEventListener('click', e => { if (e.target.closest('[data-open="stats"]')) openStats(); });
 
 /* 모의 거래 기록 · 통계 */
-const STRN = p => p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? 'AI 판단' : '직접';
+const STRN = p => p.mt5 ? 'MT5 실거래' : p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? 'AI 판단' : '직접';
 const kst = ms => { const d = new Date(ms + KST * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
 function statOf(list){
   const w = list.filter(t => t.pnl > 0), l = list.filter(t => t.pnl <= 0), gw = w.reduce((a, t) => a + t.pnl, 0), gl = -l.reduce((a, t) => a + t.pnl, 0);
@@ -3652,9 +3670,10 @@ function renderStats(){
   $('#stSub').textContent = `대결 시작 ${PT.race ? kst(PT.race) : ''} · 둘 다 $1,000`;
   const R = PT.hist.filter(t => t.ctime >= (PT.race || 0)), side = o => { const x = statOf(R.filter(t => ptOwn(t) === o)), e = ptEq(o); return { ...x, e, ret:(e - 1000) / 10 }; };
   const me = side('me'), bot = side('bot'), lead = Math.abs(me.e - bot.e) < .005 ? '동점' : me.e > bot.e ? '🧑 사장님 앞섬' : '🤖 웨이브뷰 앞섬';
+  const meName = S.mt5Me ? '🧑 사장님 계좌 (MT5 실거래)' : '🧑 사장님 계좌';
   const card = (n, x) => `<div class="kpi" style="flex:1"><small>${n}</small><b style="font-size:20px;color:${x.e >= 1000 ? '#22ab94' : '#f23645'}">$${x.e.toFixed(2)}</b>
     <div style="font-size:12px;color:var(--sub);margin-top:4px">수익률 <b style="font-size:12px;color:${x.ret >= 0 ? '#22ab94' : '#f23645'}">${x.ret >= 0 ? '+' : ''}${x.ret.toFixed(2)}%</b> · 거래 ${x.n}건 · 승률 ${x.win.toFixed(0)}%</div></div>`;
-  const board = `<div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">${card('🧑 사장님 계좌', me)}<div style="display:grid;place-items:center;font-weight:700;padding:0 6px">VS<br><small style="color:var(--sub);font-weight:500">${lead}</small></div>${card('🤖 웨이브뷰 계좌 (자동 전략)', bot)}</div>`;
+  const board = `<div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">${card(meName, me)}<div style="display:grid;place-items:center;font-weight:700;padding:0 6px">VS<br><small style="color:var(--sub);font-weight:500">${lead}</small></div>${card('🤖 웨이브뷰 계좌 (자동 전략)', bot)}</div>`;
   const kp = (k, v, c) => `<div class="kpi"><small>${k}</small><b${c ? ` style="color:${c}"` : ''}>${v}</b></div>`;
   const by = [['AI 판단', 'ai'], ['물타기 자동', 'grid'], ['끌고가기 자동', 'trail'], ['직접', null]].map(([n, k]) => [n, statOf(T.filter(t => (t.strat || null) === k))]).filter(([, x]) => x.n);
   const days = new Map(); for (const t of T){ const d = new Date(t.ctime + KST * 1000), k = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; const v = days.get(k) || { n:0, pnl:0 }; v.n++; v.pnl += t.pnl; days.set(k, v); }
