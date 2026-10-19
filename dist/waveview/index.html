@@ -335,6 +335,16 @@ svg{display:block}
 .detail .nm{color:var(--sub);font-size:12px}
 .detail .px{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
 .detail .ch{font-size:12.5px;font-variant-numeric:tabular-nums}
+.cinfo{border-top:1px solid var(--border);padding:10px 12px 14px;display:flex;flex-direction:column;gap:12px;font-size:12.5px;overflow-y:auto}
+.cinfo h4{margin:0 0 6px;font-size:11.5px;font-weight:600;color:var(--sub);letter-spacing:.3px}
+.cinfo .r{display:flex;align-items:center;gap:8px;padding:2px 0}
+.cinfo .r .k{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cinfo .r .v{font-variant-numeric:tabular-nums;font-weight:600}
+.cinfo .dot{width:8px;height:8px;border-radius:2px;flex:none}
+.cinfo .ktrg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center}
+.cinfo .ktrg div{background:var(--hover);border-radius:4px;padding:5px 0;line-height:1.35}
+.cinfo .ktrg b{display:block;font-variant-numeric:tabular-nums}
+.cinfo .warn{color:#fff;background:#f23645;border-radius:4px;padding:6px 8px}
 .upc{color:var(--up)} .dnc{color:var(--down)}
 .sec{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)}
 .sec h3{margin:0;font-size:12px;color:var(--sub);font-weight:600}
@@ -471,6 +481,7 @@ svg{display:block}
         <div class="autos">
           <label class="sw"><input type="checkbox" id="ptAutoGrid"><span>물타기 회복</span></label>
           <label class="sw"><input type="checkbox" id="ptAutoTrail"><span>끌고 가기</span></label>
+          <button class="tb" id="ptStat" title="거래 기록·통계">📊 통계</button>
           <button class="tb" id="ptSet" title="모의 거래 설정">⚙</button>
           <button class="tb" id="ptCloseAll">전체 청산</button>
         </div>
@@ -495,6 +506,7 @@ svg{display:block}
       <div class="wl-head"><span>심볼</span><span>현재가</span><span class="wl-chg">체인지</span><span>변동%</span></div>
       <div id="wl"></div>
       <div class="detail" id="detail"></div>
+      <div class="cinfo" id="cinfo"></div>
     </div>
     <div class="pb" id="tab-al" hidden>
       <div class="seg" role="tablist"><button data-sub="list" aria-pressed="true">얼러트</button><button data-sub="log" aria-pressed="false">기록 <span class="badge" id="logBadge" hidden></span></button></div>
@@ -602,6 +614,15 @@ svg{display:block}
       <p class="note" id="alNote"></p>
     </form>
     <footer><button class="btn sub" type="button" id="alDel" style="margin-right:auto;color:#f23645" hidden>삭제</button><button class="btn sub" type="button" id="alCancel">취소</button><button class="btn" type="submit" form="alForm">저장</button></footer>
+  </div>
+</div>
+<div class="modal" id="stModal" hidden>
+  <div class="dlg bt" role="dialog" aria-modal="true" aria-labelledby="stTitle">
+    <header><span id="stTitle">모의 거래 통계</span><span class="btsub" id="stSub"></span><span style="flex:1"></span>
+      <select class="inp" id="stWho" style="height:30px;width:auto;font-size:13px;font-weight:400"><option value="">두 계좌 모두</option><option value="me">🧑 사장님</option><option value="bot">🤖 웨이브뷰</option></select>
+      <select class="inp" id="stRange" style="height:30px;width:auto;font-size:13px;font-weight:400"><option value="0">전체 기간</option><option value="1">오늘</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select>
+      <button class="tb" id="stCsv" title="거래 기록을 엑셀(CSV)로 받기">CSV</button><button class="tb" id="stClose" aria-label="닫기">✕</button></header>
+    <div class="btres" id="stBody"></div>
   </div>
 </div>
 <div class="modal" id="btModal" hidden>
@@ -1138,7 +1159,7 @@ function computeKTR(bars){
 }
 function renderKTR(){
   const el = $('#ktr');
-  if (!S.show.ktr || !S.bars.length || S.tf[1] >= 86400){ el.hidden = true; return; }
+  if (!S.show.ktr || !S.bars.length || S.tf[1] >= 86400){ el.hidden = true; S.ktrNow = null; return; }
   const bars = S.bars;
   const k = computeKTR(bars), last = bars[bars.length - 1], d = new Date(last.time * 1000), h = d.getUTCHours();
   const as = usDst(d) ? 7 : 8, es = euDst(d) ? 16 : 17, us = usDst(d) ? 22 : 23;
@@ -1148,7 +1169,7 @@ function renderKTR(){
   const f = x => String(Number(x.toFixed(2)));
   $('#ktrName').textContent = '세션: ' + name; $('#ktrName').style.color = col;
   $('#ktr05').textContent = f(v * .5); $('#ktr10').textContent = f(v); $('#ktr20').textContent = f(v * 2);
-  el.hidden = false; placeKTR();
+  S.ktrNow = { name, col, v }; el.hidden = true; // 표는 오른쪽 '차트 정보'에
 }
 // KTR 표: 기본은 오른쪽 아래(가격축 옆). 끌어서 원하는 곳으로 옮기면 그 자리를 기억한다 (더블클릭하면 기본 자리로)
 function placeKTR(){
@@ -1354,7 +1375,7 @@ function drawZones(pw){
     ctx.beginPath(); ctx.moveTo(0, Math.round(y1) + .5); ctx.lineTo(pw, Math.round(y1) + .5); ctx.moveTo(0, Math.round(y2) + .5); ctx.lineTo(pw, Math.round(y2) + .5); ctx.stroke(); ctx.setLineDash([]);
     ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.fillStyle = `rgba(${rgb},.95)`; ctx.textBaseline = 'middle';
     const ym = (y1 + y2) / 2; if (lastY.some(y => Math.abs(y - ym) < 14)) continue; lastY.push(ym);
-    ctx.textBaseline = 'alphabetic'; zoneLabels.push([`${res ? '저항' : '지지'} 매물대 · ${z.n}회 터치`, ym, `rgba(${rgb},.95)`]);
+    ctx.textBaseline = 'alphabetic'; 
   }
 }
 
@@ -1432,8 +1453,9 @@ function drawOverlay(){
       const y = candle.priceToCoordinate(pr); if (x0 == null || y == null) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
       ctx.beginPath(); ctx.moveTo(Math.max(0, x0), Math.round(y) + .5); ctx.lineTo(pw, Math.round(y) + .5); ctx.stroke();
-      lineLabel(name, y, col, pw); axisTags.push({ text:fmt(pr), y, col });
+      axisTags.push({ text:fmt(pr), y, col }); // 이름·숫자는 오른쪽 '차트 정보'에
     }
+    S.usWho = who;
   }
   if (S.lowPrice != null){ const y = candle.priceToCoordinate(S.lowPrice); if (y != null){ lineLabel('최저점꼬리', y, '#4caf50', pw);
     const x = ts.logicalToCoordinate(S.lowIdx); if (x != null && x < pw){ ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = '#2962ff'; ctx.fillStyle = C.bg; ctx.fillRect(x - 4, y - 4, 8, 8); ctx.strokeRect(x - 3.5, y - 3.5, 8, 8); } } }
@@ -1449,7 +1471,6 @@ function drawOverlay(){
   }
 
   // 매물대 글씨는 선 이름표(미장 고저·수평선)를 먼저 놓은 뒤, 겹치지 않게 왼쪽으로 비켜 놓는다
-  for (const [t, y, c] of zoneLabels) lineLabel(t, y, c, pw - (S.show.vp ? pw * (P.vp.width || 22) / 100 : 0));
   zoneLabels.length = 0;
   const shapes = S.trends.slice(); if (S.measure) shapes.push(S.measure); if (S.stroke) shapes.push(S.stroke);
   if (S.draft && S.draft.b) shapes.push(S.draft);
@@ -2996,7 +3017,7 @@ function drawPlan(pw){
 }
 
 /* ---------- 모의 거래 (MT5 처럼) + 자동매매 ---------- */
-const PT_DEF = { bal:1000, pos:[], hist:[], seq:100000, auto:{ grid:false, trail:false }, lastSig:{}, day:'', dayStart:1000,
+const PT_DEF = { bal:1000, me:{ bal:1000 }, race:0, pos:[], hist:[], seq:100000, auto:{ grid:false, trail:false }, lastSig:{}, day:'', dayStart:1000,
   cfg:{ sym:'', tf:'5m', lev:500, cs:100, ptv:1, tg:true,
     grid:{ tf:'5m', dir:'rev', lot1:0.01, adds:'30:0.02, 60:0.03', tp:5, be:1, stop:100 },
     trail:{ tf:'5m', dir:'trend', lot:0.01, sl:10, act:10, mode:'half', dist:10 } } };
@@ -3004,11 +3025,18 @@ let PT = (() => { const x = store.get('paper', null); if (!x) return JSON.parse(
   return { ...JSON.parse(JSON.stringify(PT_DEF)), ...x, cfg:{ ...PT_DEF.cfg, ...x.cfg, grid:{ ...PT_DEF.cfg.grid, ...(x.cfg || {}).grid }, trail:{ ...PT_DEF.cfg.trail, ...(x.cfg || {}).trail } } }; })();
 if (/0\.2\b|0\.3\b/.test(PT.cfg.grid.adds)) PT.cfg.grid.adds = '30:0.02, 60:0.03';
 const savePT = () => store.set('paper', PT);
+// 대결 시작: 두 계좌 모두 $1,000 에서 다시 출발 (지난 거래 기록은 통계용으로 남긴다)
+if (!PT.raceV1){ PT.me = { bal:1000 }; PT.bal = 1000; PT.pos = []; PT.race = Date.now(); PT.raceV1 = 1; PT.auto = { grid:true, trail:true }; PT.dayStart = 1000; PT.dayStartBot = 1000; savePT(); }
 S.ptq = null;
 const ptSym = () => PT.cfg.sym || (SYMS.find(x => x.feed === 'mt5' && /^XAU/i.test(x.id)) || S.sym).id;
 const parseAdds = t => String(t).split(',').map(x => x.split(':').map(Number)).filter(([d, l]) => d > 0 && l > 0).map(([d, l]) => ({ d, l }));
 const ptPnl = p => { const q = S.ptq; if (!q) return 0; const cur = p.dir > 0 ? q.bid : q.ask; return (cur - p.open) * p.dir * p.lots * PT.cfg.cs; };
-const ptMargin = () => PT.pos.reduce((a, p) => a + p.lots * PT.cfg.cs * p.open / PT.cfg.lev, 0);
+// 대결: 사장님 계좌(직접 주문)와 웨이브뷰 계좌(자동 전략)를 따로 센다. 둘 다 $1,000 에서 시작
+const ptOwn = p => p.strat ? 'bot' : 'me';
+const ptBal = o => o === 'me' ? PT.me.bal : PT.bal;
+const ptAddBal = (o, v) => { if (o === 'me') PT.me.bal += v; else PT.bal += v; };
+const ptMargin = o => PT.pos.filter(p => !o || ptOwn(p) === o).reduce((a, p) => a + p.lots * PT.cfg.cs * p.open / PT.cfg.lev, 0);
+const ptEq = o => ptBal(o) + PT.pos.filter(p => ptOwn(p) === o).reduce((a, p) => a + ptPnl(p), 0);
 async function ptQuote(){
   const sym = ptSym();
   try {
@@ -3022,8 +3050,8 @@ function ptLog(title, msg){
 }
 function ptOpen(dir, lots, strat, group, sl = null, tp = null){
   const q = S.ptq; if (!q) return null;
-  const price = dir > 0 ? q.ask : q.bid, need = lots * PT.cfg.cs * price / PT.cfg.lev, eq = PT.bal + PT.pos.reduce((a, p) => a + ptPnl(p), 0);
-  if (eq - ptMargin() < need){ ptLog('증거금 부족', `${lots}랏 ${dir > 0 ? '매수' : '매도'}에 필요한 증거금 $${need.toFixed(2)} 이 모자라 주문하지 않았습니다.`); return null; }
+  const price = dir > 0 ? q.ask : q.bid, need = lots * PT.cfg.cs * price / PT.cfg.lev, ow = strat ? 'bot' : 'me', eq = ptEq(ow);
+  if (eq - ptMargin(ow) < need){ ptLog('증거금 부족', `${lots}랏 ${dir > 0 ? '매수' : '매도'}에 필요한 증거금 $${need.toFixed(2)} 이 모자라 주문하지 않았습니다.`); return null; }
   const p = { id:++PT.seq, sym:q.sym, dir, lots, open:price, time:Date.now(), sl, tp, strat, group, peak:0 };
   PT.pos.push(p); savePT();
   ptLog(`${dir > 0 ? 'BUY' : 'SELL'} ${lots}랏 체결`, `${q.sym} @ ${fmt(price)}${strat ? ` · ${strat === 'grid' ? '물타기 회복' : '끌고 가기'}` : ''}${sl ? ` · S/L ${fmt(sl)}` : ''}`);
@@ -3032,8 +3060,8 @@ function ptOpen(dir, lots, strat, group, sl = null, tp = null){
 function ptClose(p, why){
   const q = S.ptq; if (!q) return;
   const price = p.dir > 0 ? q.bid : q.ask, pnl = (price - p.open) * p.dir * p.lots * PT.cfg.cs;
-  PT.bal += pnl; PT.pos = PT.pos.filter(x => x !== p);
-  PT.hist.unshift({ ...p, close:price, ctime:Date.now(), pnl, why }); PT.hist = PT.hist.slice(0, 500); savePT();
+  ptAddBal(ptOwn(p), pnl); PT.pos = PT.pos.filter(x => x !== p);
+  PT.hist.unshift({ ...p, close:price, ctime:Date.now(), pnl, why }); PT.hist = PT.hist.slice(0, 5000); savePT();
   return pnl;
 }
 function ptCloseGroup(g, why){
@@ -3046,8 +3074,8 @@ function ptStep(){
   // 개별 S/L · T/P
   for (const p of PT.pos.slice()){
     const cur = p.dir > 0 ? q.bid : q.ask;
-    if (p.sl != null && (p.dir > 0 ? cur <= p.sl : cur >= p.sl)){ const r = ptClose(p, '손절'); ptLog(`손절 · ${p.lots}랏`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); continue; }
-    if (p.tp != null && (p.dir > 0 ? cur >= p.tp : cur <= p.tp)){ const r = ptClose(p, '익절'); ptLog(`익절 · ${p.lots}랏`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); continue; }
+    if (p.sl != null && (p.dir > 0 ? cur <= p.sl : cur >= p.sl)){ const r = ptClose(p, '손절'); ptLog(`손절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
+    if (p.tp != null && (p.dir > 0 ? cur >= p.tp : cur <= p.tp)){ const r = ptClose(p, '익절'); ptLog(`익절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
     // 끌고 가기: 본전 → 추적
     if (p.strat === 'trail'){
       const t = PT.cfg.trail, fav = (cur - p.open) * p.dir / v; p.peak = Math.max(p.peak, fav);
@@ -3069,12 +3097,13 @@ function ptStep(){
     else if (hasAdd ? sum >= gc.be : sum >= gc.tp) ptCloseGroup(g, hasAdd ? '물타기 탈출' : '물타기 익절');
   }
   // 스톱아웃 (마진 레벨 50%)
-  let m = ptMargin();
-  while (PT.pos.length && m > 0){
-    const eq = PT.bal + PT.pos.reduce((a, p) => a + ptPnl(p), 0);
-    if (eq / m * 100 >= 50) break;
-    const worst = PT.pos.reduce((a, p) => ptPnl(p) < ptPnl(a) ? p : a); const r = ptClose(worst, '스톱아웃');
-    ptLog('스톱아웃 (마진 레벨 50% 미만)', `${worst.lots}랏 강제 청산 ${money(r)}`); m = ptMargin();
+  for (const o of ['me', 'bot']){
+    let m = ptMargin(o);
+    while (m > 0){
+      if (ptEq(o) / m * 100 >= 50) break;
+      const mine = PT.pos.filter(p => ptOwn(p) === o), worst = mine.reduce((a, p) => ptPnl(p) < ptPnl(a) ? p : a); const r = ptClose(worst, '스톱아웃');
+      ptLog(`스톱아웃 · ${o === 'me' ? '사장님' : '웨이브뷰'} 계좌 (마진 레벨 50% 미만)`, `${worst.lots}랏 강제 청산 ${money(r)}`); m = ptMargin(o);
+    }
   }
 }
 async function ptSignals(){
@@ -3182,11 +3211,11 @@ setTimeout(() => autoPaperOptimize(false), 8000); setInterval(() => autoPaperOpt
 
 function ptRender(){
   if ($('#term').hidden) return;
-  const q = S.ptq, float = PT.pos.reduce((a, p) => a + ptPnl(p), 0), eq = PT.bal + float, m = ptMargin();
+  const q = S.ptq, eq = ptEq('me'), eb = ptEq('bot'), m = ptMargin('me');
   const today = new Date(Date.now() + KST * 1000).toISOString().slice(0, 10);
-  if (PT.day !== today){ PT.day = today; PT.dayStart = PT.bal; savePT(); }
+  if (PT.day !== today){ PT.day = today; PT.dayStart = PT.me.bal; PT.dayStartBot = PT.bal; savePT(); }
   const f2 = v => v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
-  $('#ptAcct').innerHTML = `<span>잔액<b>$${f2(PT.bal)}</b></span><span>평가금<b>$${f2(eq)}</b></span><span>증거금<b>$${f2(m)}</b></span><span>가용<b>$${f2(eq - m)}</b></span><span>마진 레벨<b>${m ? f2(eq / m * 100) + '%' : '—'}</b></span><span>오늘<b class="${eq - PT.dayStart >= 0 ? 'upc' : 'dnc'}">${money(eq - PT.dayStart)}</b></span>`;
+  $('#ptAcct').innerHTML = `<span>🧑 사장님 평가금<b>$${f2(eq)}</b></span><span>🤖 웨이브뷰 평가금<b class="${eb >= eq ? 'upc' : 'dnc'}">$${f2(eb)}</b></span><span>내 잔액<b>$${f2(PT.me.bal)}</b></span><span>증거금<b>$${f2(m)}</b></span><span>가용<b>$${f2(eq - m)}</b></span><span>마진 레벨<b>${m ? f2(eq / m * 100) + '%' : '—'}</b></span><span>오늘<b class="${eq - PT.dayStart >= 0 ? 'upc' : 'dnc'}">${money(eq - PT.dayStart)}</b></span>`;
   $('#ptBid').textContent = q ? fmt(q.bid) : '—'; $('#ptAsk').textContent = q ? fmt(q.ask) : '—';
   $('#ptInfo').textContent = `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)} · ${S.ptOptRunning ? '숫자 찾는 중… · ' : ''}${q ? (q.live ? '한텍 실시간 호가' : '시뮬레이션 가격') : '가격 대기'}${PT.auto.grid || PT.auto.trail ? ' · 자동매매 켜짐' : ''}`;
   const tm = t => new Date(t + KST * 1000).toISOString().slice(5, 16).replace('T', ' ');
@@ -3221,8 +3250,8 @@ if (store.get('ptOpen')){ $('#term').hidden = false; $('#ptBtn').setAttribute('a
 const lotVal = () => Math.max(0.01, Math.round((parseFloat($('#ptLot').value) || 0.01) * 100) / 100);
 $('#ptBuy').onclick = () => { ptOpen(1, lotVal(), null, 'M' + Date.now()); ptRender(); };
 $('#ptSell').onclick = () => { ptOpen(-1, lotVal(), null, 'M' + Date.now()); ptRender(); };
-$('#ptCloseAll').onclick = () => { let sum = 0; PT.pos.slice().forEach(p => { sum += ptClose(p, '수동 전체 청산') || 0; }); ptLog('전체 청산', `합계 ${money(sum)} · 잔액 $${PT.bal.toFixed(2)}`); ptRender(); };
-$('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl); if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${PT.bal.toFixed(2)}`); ptRender(); } });
+$('#ptCloseAll').onclick = () => { let sum = 0; PT.pos.filter(p => ptOwn(p) === 'me').forEach(p => { sum += ptClose(p, '수동 전체 청산') || 0; }); ptLog('내 포지션 전체 청산', `합계 ${money(sum)} · 내 잔액 $${PT.me.bal.toFixed(2)}`); ptRender(); };
+$('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl); if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); ptRender(); } });
 document.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pt]').forEach(x => x.setAttribute('aria-pressed', x === b)); ptRender(); });
 $('#ptAutoGrid').checked = PT.auto.grid; $('#ptAutoTrail').checked = PT.auto.trail;
 $('#ptAutoGrid').onchange = e => { PT.auto.grid = e.target.checked; savePT(); ptLog(`물타기 회복 ${PT.auto.grid ? '켜짐' : '꺼짐'}`, `${ptSym()} ${tfLabel(PT.cfg.grid.tf)} 돌파 더블비 신호로 자동 진입합니다.`); };
@@ -3245,7 +3274,7 @@ $('#ptForm').addEventListener('submit', e => {
     trail:{ tf:$('#pt-ttf').value, dir:$('#pt-tdir').value, lot:n('tlot'), sl:n('tsl'), act:n('tact'), mode:$('#pt-tmode').value, dist:n('tdist') } };
   PT.lastSig = {}; savePT(); $('#ptModal').hidden = true; toast('모의 거래 설정 저장됨', `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)}`);
 });
-$('#ptReset').onclick = () => { const keep = PT.cfg; PT = JSON.parse(JSON.stringify(PT_DEF)); PT.cfg = keep; savePT(); $('#ptAutoGrid').checked = false; $('#ptAutoTrail').checked = false; $('#ptModal').hidden = true; toast('계좌 초기화', '잔액 $1,000 으로 다시 시작합니다.'); ptRender(); };
+$('#ptReset').onclick = () => { const keep = PT.cfg, hist = PT.hist, seq = PT.seq; PT = JSON.parse(JSON.stringify(PT_DEF)); PT.cfg = keep; PT.hist = hist; PT.seq = seq; PT.race = Date.now(); PT.raceV1 = 1; /* 거래 기록은 통계용으로 남긴다 */ savePT(); $('#ptAutoGrid').checked = false; $('#ptAutoTrail').checked = false; $('#ptModal').hidden = true; toast('계좌 초기화', '잔액 $1,000 으로 다시 시작합니다.'); ptRender(); };
 
 /* ---------- 오른쪽 클릭 메뉴 ---------- */
 const RESET_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4.5 7.5A6 6 0 1 1 4 12"/><path d="M4 3.5v4h4"/></svg>';
@@ -3548,6 +3577,87 @@ function updateQuote(){
   else S.quotes[S.sym.id] = quoteFrom(S.bars, S.tf[1]);
   renderWL();
 }
+// 오른쪽 '차트 정보': 차트 위 글씨 대신 여기에 모아서 보여준다
+function renderInfo(){
+  const el = $('#cinfo'); if (!el || !S.bars.length) return;
+  const out = [], row = (col, k, v) => `<div class="r"><i class="dot" style="background:${col}"></i><span class="k">${k}</span><span class="v" style="color:${col}">${v}</span></div>`;
+  const px = S.bars[S.bars.length - 1].close;
+  const nb = S.show.news && typeof newsBlock === 'function' ? newsBlock() : null;
+  if (nb) out.push(`<div class="warn">⛔ 거래 대기 · ${nb.ko} ${hm(nb.t)} 발표 전후</div>`);
+  if (S.usLine){ const w = S.usWho || '어제';
+    out.push(`<section><h4>${w} 미장 고점 · 저점</h4>${row('#00FF00', '고점', fmt(S.usLine.hi))}${row('#FF0000', '저점', fmt(S.usLine.lo))}</section>`); }
+  if (S.ktrNow){ const { name, col, v } = S.ktrNow, f = x => String(Number(x.toFixed(2)));
+    out.push(`<section><h4>KTR · <span style="color:${col}">세션: ${name}</span></h4><div class="ktrg"><div>0.5 KTR<b>${f(v * .5)}</b></div><div style="color:#f5c518">1.0 KTR<b>${f(v)}</b></div><div>2.0 KTR<b>${f(v * 2)}</b></div></div></section>`); }
+  if (S.show.sr && S.zones && S.zones.length){
+    const z = S.zones.slice().sort((a, b) => Math.abs((a.lo + a.hi) / 2 - px) - Math.abs((b.lo + b.hi) / 2 - px)).slice(0, P.sr.show || 4).sort((a, b) => b.hi - a.hi);
+    out.push(`<section><h4>매물대 (가까운 순 ${z.length}개)</h4>${z.map(q => { const res = (q.lo + q.hi) / 2 > px;
+      return row(res ? '#f23645' : '#22ab94', `${res ? '저항' : '지지'} · ${q.n}회 터치`, `${fmt(q.lo)}~${fmt(q.hi)}`); }).join('')}</section>`); }
+  if (S.show.news && typeof newsEvents === 'function'){ const now = nowSec(), nx = newsEvents(now, now + 3 * 86400).filter(e => e.imp >= 3).slice(0, 3);
+    if (nx.length) out.push(`<section><h4>다음 중요 경제지표</h4>${nx.map(e => row('#f23645', e.ko, `${md(e.t)} ${hm(e.t)}`)).join('')}</section>`); }
+  if (typeof PT !== 'undefined'){ const a = ptEq('me'), b = ptEq('bot');
+    out.push(`<section><h4>모의 거래 대결 ($1,000 시작)</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}</section>`); }
+  if (typeof PT !== 'undefined' && PT.pos.length){
+    out.push(`<section><h4>모의 거래 (연습 계좌)</h4>${PT.pos.map(p => { const pl = ptPnl(p);
+      return row(pl >= 0 ? '#22ab94' : '#f23645', `${p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : '직접'} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }
+  out.push(`<button class="tb" data-open="stats" style="justify-content:center;border:1px solid var(--border);height:32px">📊 모의 거래 기록 · 통계 (${PT.hist.length}건)</button>`);
+  el.innerHTML = out.join('');
+}
+setInterval(renderInfo, 1000);
+$('#cinfo').addEventListener('click', e => { if (e.target.closest('[data-open="stats"]')) openStats(); });
+
+/* 모의 거래 기록 · 통계 */
+const STRN = p => p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : '직접';
+const kst = ms => { const d = new Date(ms + KST * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+function statOf(list){
+  const w = list.filter(t => t.pnl > 0), l = list.filter(t => t.pnl <= 0), gw = w.reduce((a, t) => a + t.pnl, 0), gl = -l.reduce((a, t) => a + t.pnl, 0);
+  let eq = 0, peak = 0, mdd = 0; for (const t of list.slice().reverse()){ eq += t.pnl; peak = Math.max(peak, eq); mdd = Math.max(mdd, peak - eq); }
+  return { n:list.length, net:gw - gl, win:list.length ? w.length / list.length * 100 : 0, pf:gl ? gw / gl : (gw ? Infinity : 0), aw:w.length ? gw / w.length : 0, al:l.length ? gl / l.length : 0, mdd };
+}
+function stTrades(){ const d = +$('#stRange').value, from = d === 1 ? (() => { const n = new Date(Date.now() + KST * 1000); return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()) - KST * 1000; })() : d ? Date.now() - d * 86400000 : 0;
+  const who = $('#stWho').value; return PT.hist.filter(t => t.ctime >= from && (!who || ptOwn(t) === who)); }
+function openStats(){ $('#stModal').hidden = false; renderStats(); }
+function renderStats(){
+  const T = stTrades(), A = statOf(T), pf = x => x === Infinity ? '∞' : x.toFixed(2);
+  $('#stSub').textContent = `대결 시작 ${PT.race ? kst(PT.race) : ''} · 둘 다 $1,000`;
+  const R = PT.hist.filter(t => t.ctime >= (PT.race || 0)), side = o => { const x = statOf(R.filter(t => ptOwn(t) === o)), e = ptEq(o); return { ...x, e, ret:(e - 1000) / 10 }; };
+  const me = side('me'), bot = side('bot'), lead = Math.abs(me.e - bot.e) < .005 ? '동점' : me.e > bot.e ? '🧑 사장님 앞섬' : '🤖 웨이브뷰 앞섬';
+  const card = (n, x) => `<div class="kpi" style="flex:1"><small>${n}</small><b style="font-size:20px;color:${x.e >= 1000 ? '#22ab94' : '#f23645'}">$${x.e.toFixed(2)}</b>
+    <div style="font-size:12px;color:var(--sub);margin-top:4px">수익률 <b style="font-size:12px;color:${x.ret >= 0 ? '#22ab94' : '#f23645'}">${x.ret >= 0 ? '+' : ''}${x.ret.toFixed(2)}%</b> · 거래 ${x.n}건 · 승률 ${x.win.toFixed(0)}%</div></div>`;
+  const board = `<div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">${card('🧑 사장님 계좌', me)}<div style="display:grid;place-items:center;font-weight:700;padding:0 6px">VS<br><small style="color:var(--sub);font-weight:500">${lead}</small></div>${card('🤖 웨이브뷰 계좌 (자동 전략)', bot)}</div>`;
+  const kp = (k, v, c) => `<div class="kpi"><small>${k}</small><b${c ? ` style="color:${c}"` : ''}>${v}</b></div>`;
+  const by = [['물타기 자동', 'grid'], ['끌고가기 자동', 'trail'], ['직접', null]].map(([n, k]) => [n, statOf(T.filter(t => (t.strat || null) === k))]).filter(([, x]) => x.n);
+  const days = new Map(); for (const t of T){ const d = new Date(t.ctime + KST * 1000), k = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; const v = days.get(k) || { n:0, pnl:0 }; v.n++; v.pnl += t.pnl; days.set(k, v); }
+  $('#stBody').innerHTML = board + (!T.length ? '<div class="warn">이 기간에 끝난 모의 거래가 없습니다. 모의 거래 창에서 자동 전략을 켜 두거나 직접 사고팔면 여기에 쌓입니다.</div>' : `
+    <div class="kpis">${kp('순손익', money(A.net), A.net >= 0 ? '#22ab94' : '#f23645')}${kp('거래 수', A.n + '건')}${kp('승률', A.win.toFixed(1) + '%')}${kp('손익비 (PF)', pf(A.pf))}
+      ${kp('평균 이익', money(A.aw), '#22ab94')}${kp('평균 손실', money(-A.al), '#f23645')}${kp('최대 낙폭', '−$' + A.mdd.toFixed(2), '#f23645')}${kp('보유 중', PT.pos.length + '건')}</div>
+    <div class="btchart"><canvas id="stCv" style="width:100%;height:100%"></canvas></div>
+    <h4 style="margin:0;font-size:12px;color:var(--sub)">전략별</h4>
+    <table class="ttab"><tr><th>전략</th><th>거래</th><th>승률</th><th>손익비</th><th>순손익</th></tr>${by.map(([n, x]) => `<tr><td>${n}</td><td>${x.n}</td><td>${x.win.toFixed(1)}%</td><td>${pf(x.pf)}</td><td style="color:${x.net >= 0 ? '#22ab94' : '#f23645'}">${money(x.net)}</td></tr>`).join('')}</table>
+    <h4 style="margin:0;font-size:12px;color:var(--sub)">날짜별</h4>
+    <table class="ttab"><tr><th>날짜 (한국)</th><th>거래</th><th>순손익</th></tr>${[...days].map(([k, v]) => `<tr><td>${k}</td><td>${v.n}</td><td style="color:${v.pnl >= 0 ? '#22ab94' : '#f23645'}">${money(v.pnl)}</td></tr>`).join('')}</table>
+    <h4 style="margin:0;font-size:12px;color:var(--sub)">거래 기록 (최근 순)</h4>
+    <div style="overflow:auto;max-height:340px"><table class="ttab"><tr><th>청산 시각</th><th>전략</th><th>방향</th><th>랏</th><th>진입가</th><th>청산가</th><th>손익</th><th>청산 이유</th></tr>
+      ${T.slice(0, 500).map(t => `<tr><td>${kst(t.ctime)}</td><td>${ptOwn(t) === 'me' ? '🧑 ' : '🤖 '}${STRN(t)}</td><td style="color:${t.dir > 0 ? '#2962ff' : '#f23645'}">${t.dir > 0 ? '매수' : '매도'}</td><td>${t.lots}</td><td>${fmt(t.open)}</td><td>${fmt(t.close)}</td><td style="color:${t.pnl >= 0 ? '#22ab94' : '#f23645'}">${money(t.pnl)}</td><td style="text-align:left">${t.why || ''}</td></tr>`).join('')}</table></div>`);
+  const cv = $('#stCv'); if (!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr;
+  const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  const pts = []; let eq = 0; pts.push(0); for (const t of T.slice().reverse()){ eq += t.pnl; pts.push(eq); }
+  const mn = Math.min(0, ...pts), mx = Math.max(0, ...pts), W = r.width, H = r.height, pad = 22, Y = v => H - pad - (v - mn) / ((mx - mn) || 1) * (H - pad * 2), X = i => 40 + i / Math.max(1, pts.length - 1) * (W - 52);
+  g.font = '11px -apple-system, sans-serif'; g.fillStyle = getComputedStyle(document.body).getPropertyValue('--sub') || '#868993';
+  g.fillText('누적 손익', 8, 14); g.fillText(money(mx), 4, Y(mx) + 4); g.fillText(money(mn), 4, Y(mn) - 2);
+  g.strokeStyle = 'rgba(134,137,147,.4)'; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(40, Y(0)); g.lineTo(W - 12, Y(0)); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = eq >= 0 ? '#22ab94' : '#f23645'; g.lineWidth = 1.6; g.beginPath(); pts.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))); g.stroke();
+}
+$('#ptStat').onclick = openStats;
+$('#stClose').onclick = () => { $('#stModal').hidden = true; };
+$('#stModal').addEventListener('click', e => { if (e.target.id === 'stModal') $('#stModal').hidden = true; });
+$('#stRange').onchange = renderStats; $('#stWho').onchange = renderStats;
+$('#stCsv').onclick = () => {
+  const rows = [['청산시각(KST)', '진입시각(KST)', '종목', '전략', '방향', '랏', '진입가', '청산가', '손익($)', '청산이유']]
+    .concat(stTrades().map(t => [kst(t.ctime), kst(t.time), t.sym, STRN(t), t.dir > 0 ? '매수' : '매도', t.lots, t.open, t.close, t.pnl.toFixed(2), t.why || '']));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')], { type:'text/csv' }));
+  a.download = `웨이브뷰_모의거래_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
 function renderWL(){
   $('#wl').innerHTML = SYMS.map(s => {
     const q = S.quotes[s.id], cls = q && q.c < 0 ? 'dnc' : 'upc';
