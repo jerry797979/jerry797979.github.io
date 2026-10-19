@@ -1048,7 +1048,9 @@ function computeUsLine(bars = S.bars, tf = S.tf[1], upto = bars.length){
   let sh = null, sl = null, fin = null, prevIn = false, s0 = 0;
   for (let i = 0; i < upto; i++){
     const b = bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
-    const inS = m >= 1320 || m < 360;
+    let inS = m >= 1320 || m < 360;
+    // 봉 사이가 8시간 넘게 비면(주말·휴장) 앞 미장은 끝난 것으로 본다
+    if (inS && prevIn && i && b.time - bars[i - 1].time > 8 * 3600){ if (sh != null) fin = { hi:sh, lo:sl, i0:i, s0 }; prevIn = false; }
     if (inS){
       if (!prevIn){ sh = b.high; sl = b.low; s0 = i; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
     } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i, s0 }; }
@@ -1339,6 +1341,7 @@ function computeZones(bars){
   for (const z of zs.sort((a, b) => b.n - a.n)) if (!out.some(o => z.lo <= o.hi + tol * .5 && z.hi >= o.lo - tol * .5)) out.push(z);
   return out;
 }
+const zoneLabels = [];
 function drawZones(pw){
   if (!S.show.sr || !S.zones || !S.zones.length) return;
   const px = S.bars[S.bars.length - 1].close, maxN = Math.max(...S.zones.map(z => z.n));
@@ -1351,7 +1354,7 @@ function drawZones(pw){
     ctx.beginPath(); ctx.moveTo(0, Math.round(y1) + .5); ctx.lineTo(pw, Math.round(y1) + .5); ctx.moveTo(0, Math.round(y2) + .5); ctx.lineTo(pw, Math.round(y2) + .5); ctx.stroke(); ctx.setLineDash([]);
     ctx.font = '600 11px -apple-system, "Malgun Gothic", sans-serif'; ctx.fillStyle = `rgba(${rgb},.95)`; ctx.textBaseline = 'middle';
     const ym = (y1 + y2) / 2; if (lastY.some(y => Math.abs(y - ym) < 14)) continue; lastY.push(ym);
-    ctx.textAlign = 'right'; ctx.fillText(`${res ? '저항' : '지지'} 매물대 · ${z.n}회 터치`, pw - (S.show.vp ? pw * (P.vp.width || 22) / 100 : 0) - 8, (y1 + y2) / 2); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.textBaseline = 'alphabetic'; zoneLabels.push([`${res ? '저항' : '지지'} 매물대 · ${z.n}회 터치`, ym, `rgba(${rgb},.95)`]);
   }
 }
 
@@ -1421,7 +1424,11 @@ function drawOverlay(){
     // 원본처럼 미장이 끝난 자리부터 오른쪽으로 긋되, 그 자리가 화면 오른쪽 끝에 붙어 선이 안 보이면(주말·휴장 직후) 미장 시작부터 긋는다
     let x0 = ts.logicalToCoordinate(S.usLine.i0);
     if (x0 == null || x0 > pw - 200) x0 = ts.logicalToCoordinate(S.usLine.s0);
-    for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', '어제 미장 고점'], [S.usLine.lo, '#FF0000', '어제 미장 저점']]){
+    // 미장이 열린 날이 바로 어제가 아니면(월요일이면 금요일 미장) 요일로 부른다
+    const sd = new Date(S.bars[S.usLine.s0].time * 1000), today = new Date((Date.now() / 1000 + KST) * 1000);
+    const dayGap = Math.round((Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) - Date.UTC(sd.getUTCFullYear(), sd.getUTCMonth(), sd.getUTCDate() - (sd.getUTCHours() < 6 ? 1 : 0))) / 86400000);
+    const who = dayGap <= 1 ? '어제' : '일월화수목금토'[(sd.getUTCDay() + 7 - (sd.getUTCHours() < 6 ? 1 : 0)) % 7] + '요일';
+    for (const [pr, col, name] of [[S.usLine.hi, '#00FF00', `${who} 미장 고점`], [S.usLine.lo, '#FF0000', `${who} 미장 저점`]]){
       const y = candle.priceToCoordinate(pr); if (x0 == null || y == null) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
       ctx.beginPath(); ctx.moveTo(Math.max(0, x0), Math.round(y) + .5); ctx.lineTo(pw, Math.round(y) + .5); ctx.stroke();
@@ -1441,6 +1448,9 @@ function drawOverlay(){
     }
   }
 
+  // 매물대 글씨는 선 이름표(미장 고저·수평선)를 먼저 놓은 뒤, 겹치지 않게 왼쪽으로 비켜 놓는다
+  for (const [t, y, c] of zoneLabels) lineLabel(t, y, c, pw - (S.show.vp ? pw * (P.vp.width || 22) / 100 : 0));
+  zoneLabels.length = 0;
   const shapes = S.trends.slice(); if (S.measure) shapes.push(S.measure); if (S.stroke) shapes.push(S.stroke);
   if (S.draft && S.draft.b) shapes.push(S.draft);
   for (const t of shapes) drawShape(t, pw, h);
@@ -3194,9 +3204,9 @@ function drawPaper(pw){
   for (const p of PT.pos){
     if (p.sym !== S.sym.id) continue;
     const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
-    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `${p.dir > 0 ? 'BUY' : 'SELL'} ${p.lots} · ${money(pl)}`, [6, 4]]];
-    if (p.sl != null) L.push([p.sl, '#f23645', `S/L #${p.id}`, [2, 3]]);
-    if (p.tp != null) L.push([p.tp, '#22ab94', `T/P #${p.id}`, [2, 3]]);
+    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
+    if (p.sl != null) L.push([p.sl, '#f23645', `모의 손절 S/L #${p.id}`, [2, 3]]);
+    if (p.tp != null) L.push([p.tp, '#22ab94', `모의 익절 T/P #${p.id}`, [2, 3]]);
     for (const [pr, col, name, dash] of L){ const yy = candle.priceToCoordinate(pr); if (yy == null) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(0, Math.round(yy) + .5); ctx.lineTo(pw, Math.round(yy) + .5); ctx.stroke(); ctx.setLineDash([]);
       lineLabel(name, yy, col, pw); axisTags.push({ text:fmt(pr), y:yy, col }); }
