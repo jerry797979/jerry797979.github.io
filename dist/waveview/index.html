@@ -3071,8 +3071,9 @@ function ptCloseGroup(g, why){
 function ptStep(){
   const q = S.ptq; if (!q) return;
   const v = PT.cfg.ptv;
-  // 개별 S/L · T/P
+  // 개별 S/L · T/P (웨이브뷰 계좌를 PC 연결 프로그램이 맡고 있으면 그 포지션은 건드리지 않는다)
   for (const p of PT.pos.slice()){
+    if (S.botRemote && ptOwn(p) === 'bot') continue;
     const cur = p.dir > 0 ? q.bid : q.ask;
     if (p.sl != null && (p.dir > 0 ? cur <= p.sl : cur >= p.sl)){ const r = ptClose(p, '손절'); ptLog(`손절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
     if (p.tp != null && (p.dir > 0 ? cur >= p.tp : cur <= p.tp)){ const r = ptClose(p, '익절'); ptLog(`익절 · ${p.lots}랏`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); continue; }
@@ -3087,7 +3088,7 @@ function ptStep(){
     }
   }
   // 물타기 회복 바스켓
-  const groups = [...new Set(PT.pos.filter(p => p.strat === 'grid').map(p => p.group))];
+  const groups = S.botRemote ? [] : [...new Set(PT.pos.filter(p => p.strat === 'grid').map(p => p.group))];
   for (const g of groups){
     const ps = PT.pos.filter(p => p.group === g), first = ps.reduce((a, p) => p.time < a.time ? p : a), d = first.dir, gc = PT.cfg.grid;
     const against = (d > 0 ? first.open - q.bid : q.ask - first.open) / v, adds = parseAdds(gc.adds), done = ps.length - 1;
@@ -3097,7 +3098,7 @@ function ptStep(){
     else if (hasAdd ? sum >= gc.be : sum >= gc.tp) ptCloseGroup(g, hasAdd ? '물타기 탈출' : '물타기 익절');
   }
   // 스톱아웃 (마진 레벨 50%)
-  for (const o of ['me', 'bot']){
+  for (const o of S.botRemote ? ['me'] : ['me', 'bot']){
     let m = ptMargin(o);
     while (m > 0){
       if (ptEq(o) / m * 100 >= 50) break;
@@ -3107,6 +3108,7 @@ function ptStep(){
   }
 }
 async function ptSignals(){
+  if (S.botRemote) return; // PC 연결 프로그램이 24시간 대신 돌린다
   const sym = ptSym();
   for (const st of ['grid', 'trail']){
     if (!PT.auto[st] || PT.pos.some(p => p.strat === st)) continue;
@@ -3217,7 +3219,7 @@ function ptRender(){
   const f2 = v => v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
   $('#ptAcct').innerHTML = `<span>🧑 사장님 평가금<b>$${f2(eq)}</b></span><span>🤖 웨이브뷰 평가금<b class="${eb >= eq ? 'upc' : 'dnc'}">$${f2(eb)}</b></span><span>내 잔액<b>$${f2(PT.me.bal)}</b></span><span>증거금<b>$${f2(m)}</b></span><span>가용<b>$${f2(eq - m)}</b></span><span>마진 레벨<b>${m ? f2(eq / m * 100) + '%' : '—'}</b></span><span>오늘<b class="${eq - PT.dayStart >= 0 ? 'upc' : 'dnc'}">${money(eq - PT.dayStart)}</b></span>`;
   $('#ptBid').textContent = q ? fmt(q.bid) : '—'; $('#ptAsk').textContent = q ? fmt(q.ask) : '—';
-  $('#ptInfo').textContent = `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)} · ${S.ptOptRunning ? '숫자 찾는 중… · ' : ''}${q ? (q.live ? '한텍 실시간 호가' : '시뮬레이션 가격') : '가격 대기'}${PT.auto.grid || PT.auto.trail ? ' · 자동매매 켜짐' : ''}`;
+  $('#ptInfo').textContent = `${ptSym()} · 물타기 ${tfLabel(PT.cfg.grid.tf)} · 끌고 가기 ${tfLabel(PT.cfg.trail.tf)} · ${S.ptOptRunning ? '숫자 찾는 중… · ' : ''}${q ? (q.live ? '한텍 실시간 호가' : '시뮬레이션 가격') : '가격 대기'}${PT.auto.grid || PT.auto.trail ? (S.botRemote ? ' · 웨이브뷰 계좌: PC가 24시간 자동 거래 중' : ' · 웨이브뷰 계좌: 이 창이 켜져 있을 때만 자동 거래 (연결 프로그램 업데이트 필요)') : ''}`;
   const tm = t => new Date(t + KST * 1000).toISOString().slice(5, 16).replace('T', ' ');
   if ($('[data-pt="pos"]').getAttribute('aria-pressed') === 'true'){
     const rows = PT.pos.map(p => { const cur = q ? (p.dir > 0 ? q.bid : q.ask) : null, pl = ptPnl(p);
@@ -3243,6 +3245,30 @@ function drawPaper(pw){
   }
 }
 setInterval(async () => { await ptQuote(); ptStep(); ptRender(); }, 1000);
+/* 웨이브뷰 계좌 24시간: 한텍 연결 프로그램(v3 이상)이 있으면 그쪽이 자동 전략을 돌리고, 여기는 결과만 받아 보여준다 */
+S.botRemote = false; let botSent = '', botAdopted = false;
+async function botSync(){
+  if (!S.mt5ok){ S.botRemote = false; return; }
+  try {
+    const want = JSON.stringify({ cfg:PT.cfg, auto:PT.auto, race:PT.race });
+    if (want !== botSent){
+      const body = { cfg:PT.cfg, auto:PT.auto, race:PT.race };
+      if (!botAdopted) body.adopt = { bal:PT.bal, pos:PT.pos.filter(p => ptOwn(p) === 'bot') };
+      const r = await fetch(S.cfg.mt5url + '/paper', { method:'POST', body:JSON.stringify(body) }); const j = await r.json(); if (!j.ok) throw new Error();
+      botSent = want; botAdopted = true;
+    }
+    const j = await mt5Get('/paper'); if (!j.ok || j.race !== PT.race) throw new Error();
+    if (!S.botRemote) toast('웨이브뷰 계좌 24시간', 'PC 연결 프로그램이 웨이브뷰 계좌를 맡았습니다. 이제 창을 닫아도 자동 전략이 거래합니다.');
+    S.botRemote = true;
+    PT.bal = j.bal;
+    PT.pos = PT.pos.filter(p => ptOwn(p) === 'me').concat(j.pos);
+    const ids = new Set(PT.hist.map(h => h.id)); let add = 0;
+    for (const h of j.hist) if (!ids.has(h.id)){ PT.hist.push(h); add++; }
+    if (add){ PT.hist.sort((a, b) => b.ctime - a.ctime); PT.hist = PT.hist.slice(0, 5000); }
+    savePT();
+  } catch { S.botRemote = false; }
+}
+setInterval(botSync, 2000);
 setInterval(ptSignals, 10000);
 // UI
 $('#ptBtn').onclick = () => { const t = $('#term'); t.hidden = !t.hidden; $('#ptBtn').setAttribute('aria-pressed', !t.hidden); store.set('ptOpen', !t.hidden); ptRender(); };
@@ -3251,7 +3277,9 @@ const lotVal = () => Math.max(0.01, Math.round((parseFloat($('#ptLot').value) ||
 $('#ptBuy').onclick = () => { ptOpen(1, lotVal(), null, 'M' + Date.now()); ptRender(); };
 $('#ptSell').onclick = () => { ptOpen(-1, lotVal(), null, 'M' + Date.now()); ptRender(); };
 $('#ptCloseAll').onclick = () => { let sum = 0; PT.pos.filter(p => ptOwn(p) === 'me').forEach(p => { sum += ptClose(p, '수동 전체 청산') || 0; }); ptLog('내 포지션 전체 청산', `합계 ${money(sum)} · 내 잔액 $${PT.me.bal.toFixed(2)}`); ptRender(); };
-$('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl); if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); ptRender(); } });
+$('#ptBody').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const p = PT.pos.find(x => x.id === +b.dataset.cl);
+  if (p && S.botRemote && ptOwn(p) === 'bot'){ fetch(S.cfg.mt5url + '/paper/close', { method:'POST', body:JSON.stringify({ id:p.id }) }).then(() => botSync()); return; }
+  if (p){ const r = ptClose(p, '수동 청산'); ptLog(`청산 #${p.id}`, `${money(r)} · 잔액 $${ptBal(ptOwn(p)).toFixed(2)}`); ptRender(); } });
 document.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pt]').forEach(x => x.setAttribute('aria-pressed', x === b)); ptRender(); });
 $('#ptAutoGrid').checked = PT.auto.grid; $('#ptAutoTrail').checked = PT.auto.trail;
 $('#ptAutoGrid').onchange = e => { PT.auto.grid = e.target.checked; savePT(); ptLog(`물타기 회복 ${PT.auto.grid ? '켜짐' : '꺼짐'}`, `${ptSym()} ${tfLabel(PT.cfg.grid.tf)} 돌파 더블비 신호로 자동 진입합니다.`); };
@@ -3595,7 +3623,7 @@ function renderInfo(){
   if (S.show.news && typeof newsEvents === 'function'){ const now = nowSec(), nx = newsEvents(now, now + 3 * 86400).filter(e => e.imp >= 3).slice(0, 3);
     if (nx.length) out.push(`<section><h4>다음 중요 경제지표</h4>${nx.map(e => row('#f23645', e.ko, `${md(e.t)} ${hm(e.t)}`)).join('')}</section>`); }
   if (typeof PT !== 'undefined'){ const a = ptEq('me'), b = ptEq('bot');
-    out.push(`<section><h4>모의 거래 대결 ($1,000 시작)</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}</section>`); }
+    out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}</section>`); }
   if (typeof PT !== 'undefined' && PT.pos.length){
     out.push(`<section><h4>모의 거래 (연습 계좌)</h4>${PT.pos.map(p => { const pl = ptPnl(p);
       return row(pl >= 0 ? '#22ab94' : '#f23645', `${p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : '직접'} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }

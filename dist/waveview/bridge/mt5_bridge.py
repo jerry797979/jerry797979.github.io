@@ -10,6 +10,8 @@ PC에 켜 둔 MT5 터미널에서 시세를 읽어 웨이브뷰 차트에 그대
   4. 웨이브뷰 설정에서 "한텍 MT5 연결"을 켠다.
 
 텔레그램 알림은 같은 폴더의 mt5_bridge.json 에 적는다 (처음 실행하면 예시 파일이 생긴다).
+웨이브뷰 모의 거래의 '웨이브뷰 계좌'(자동 전략)도 여기서 24시간 돌린다 (paper_bot.json 에 기록).
+한 시간마다 웹사이트의 최신 버전을 확인해 바뀌었으면 스스로 바꾸고 다시 시작한다.
 """
 import json
 import math
@@ -32,6 +34,9 @@ import MetaTrader5 as mt5
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
+PAPER_FILE = os.path.join(HERE, "paper_bot.json")
+SITE = "https://jerry797979.github.io/waveview"
+VERSION = 3
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -151,6 +156,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             n = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+            if u.path == "/paper":
+                return self._send(200, paper_config(body))
+            if u.path == "/paper/close":
+                return self._send(200, paper_close_id(int(body.get("id", 0)), "수동 청산"))
             if u.path == "/config":
                 for k in ("telegram_token", "telegram_chat_id", "rules"):
                     if k in body:
@@ -176,7 +185,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"bars": rates(q["symbol"], tf, min(int(q.get("count", 1500)), 200000))})
             if u.path == "/quotes":
                 return self._send(200, {"quotes": quotes()})
-            return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": 2,
+            if u.path == "/paper":
+                with plock:
+                    st = dict(paper)
+                    st["hist"] = [h for h in paper.get("hist", []) if h.get("ctime", 0) > int(q.get("since", 0))][:1000]
+                return self._send(200, {"ok": True, **st})
+            return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": VERSION, "paper": True,
                                     "telegram": bool(cfg.get("telegram_token") and cfg.get("telegram_chat_id")),
                                     "rules": len(cfg.get("rules", []))})
         except Exception as e:  # noqa: BLE001
@@ -286,8 +300,281 @@ def watcher():
         time.sleep(5)
 
 
+# ---------- 웨이브뷰 계좌 (모의 거래 자동 전략) 24시간 ----------
+# 웹(index.html)의 ptStep · ptSignals 와 같은 규칙. 사장님 계좌(직접 주문)는 웹에서만 다룬다.
+plock = threading.RLock()
+paper = {}
+PAPER_DEF = {"bal": 1000.0, "pos": [], "hist": [], "seq": 500000, "lastSig": {}, "race": 0,
+             "auto": {"grid": False, "trail": False},
+             "cfg": {"sym": "", "lev": 500, "cs": 100, "ptv": 1, "tg": True,
+                     "grid": {"tf": "5m", "dir": "rev", "lot1": 0.01, "adds": "30:0.02, 60:0.03", "tp": 5, "be": 1, "stop": 100},
+                     "trail": {"tf": "5m", "dir": "trend", "lot": 0.01, "sl": 10, "act": 10, "mode": "half", "dist": 10}}}
+news = {"at": 0, "ev": []}
+
+
+def paper_load():
+    global paper
+    try:
+        with open(PAPER_FILE, encoding="utf-8") as f:
+            paper = {**json.loads(json.dumps(PAPER_DEF)), **json.load(f)}
+    except (OSError, ValueError):
+        paper = json.loads(json.dumps(PAPER_DEF))
+
+
+def paper_save():
+    tmp = PAPER_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(paper, f, ensure_ascii=False)
+    os.replace(tmp, PAPER_FILE)
+
+
+def paper_config(body):
+    """웹이 보내는 설정. race(대결 시작 시각)가 바뀌면 $1,000 으로 새로 시작, 처음이면 웹의 계좌를 넘겨받는다."""
+    with plock:
+        if "cfg" in body:
+            paper["cfg"] = {**paper["cfg"], **body["cfg"]}
+        if "auto" in body:
+            paper["auto"] = body["auto"]
+        race = body.get("race")
+        if race and race != paper.get("race"):
+            adopt = body.get("adopt") if not paper.get("race") else None
+            paper["race"] = race
+            paper["bal"] = float(adopt["bal"]) if adopt else 1000.0
+            paper["pos"] = list(adopt.get("pos", [])) if adopt else []
+            paper["lastSig"] = {}
+        paper_save()
+        return {"ok": True, "race": paper["race"]}
+
+
+def p_quote():
+    sym = paper["cfg"].get("sym") or next((s["name"] for s in symbols() if s["name"].upper().startswith("XAU")), "")
+    if not sym:
+        return None
+    with lock:
+        t = mt5.symbol_info_tick(sym)
+    return {"sym": sym, "bid": t.bid, "ask": t.ask} if t and t.bid else None
+
+
+def p_pnl(p, q):
+    cur = q["bid"] if p["dir"] > 0 else q["ask"]
+    return (cur - p["open"]) * p["dir"] * p["lots"] * paper["cfg"]["cs"]
+
+
+def p_log(title, msg):
+    print("[모의·웨이브뷰]", title, msg)
+    if paper["cfg"].get("tg", True):
+        try:
+            send_telegram(f"[모의 · 웨이브뷰 계좌] {title}\n{msg}")
+        except Exception as e:  # noqa: BLE001
+            print("텔레그램 실패:", e)
+
+
+def p_open(q, d, lots, strat, group, sl=None):
+    c = paper["cfg"]
+    price = q["ask"] if d > 0 else q["bid"]
+    need = lots * c["cs"] * price / c["lev"]
+    eq = paper["bal"] + sum(p_pnl(p, q) for p in paper["pos"])
+    margin = sum(p["lots"] * c["cs"] * p["open"] / c["lev"] for p in paper["pos"])
+    if eq - margin < need:
+        p_log("증거금 부족", f"{lots}랏 주문을 하지 않았습니다.")
+        return None
+    paper["seq"] += 1
+    p = {"id": paper["seq"], "sym": q["sym"], "dir": d, "lots": lots, "open": price, "time": int(time.time() * 1000),
+         "sl": sl, "tp": None, "strat": strat, "group": group, "peak": 0}
+    paper["pos"].append(p)
+    p_log(f"{'BUY' if d > 0 else 'SELL'} {lots}랏 체결", f"{q['sym']} @ {price:,.2f} · {'물타기 회복' if strat == 'grid' else '끌고 가기'}"
+          + (f" · S/L {sl:,.2f}" if sl else ""))
+    return p
+
+
+def p_close(p, q, why):
+    price = q["bid"] if p["dir"] > 0 else q["ask"]
+    pnl = (price - p["open"]) * p["dir"] * p["lots"] * paper["cfg"]["cs"]
+    paper["bal"] += pnl
+    paper["pos"] = [x for x in paper["pos"] if x is not p]
+    paper["hist"].insert(0, {**p, "close": price, "ctime": int(time.time() * 1000), "pnl": pnl, "why": why})
+    paper["hist"] = paper["hist"][:5000]
+    return pnl
+
+
+def paper_close_id(pid, why):
+    with plock:
+        q = p_quote()
+        p = next((x for x in paper["pos"] if x["id"] == pid), None)
+        if not q or not p:
+            return {"ok": False}
+        r = p_close(p, q, why)
+        p_log(f"청산 #{pid}", f"{r:+.2f}$ · 잔액 ${paper['bal']:.2f}")
+        paper_save()
+        return {"ok": True, "pnl": r}
+
+
+def parse_adds(t):
+    out = []
+    for part in str(t).split(","):
+        try:
+            d, l = (float(x) for x in part.split(":"))
+            if d > 0 and l > 0:
+                out.append((d, l))
+        except ValueError:
+            pass
+    return out
+
+
+def p_step(q):
+    c, v = paper["cfg"], paper["cfg"].get("ptv", 1)
+    for p in list(paper["pos"]):
+        cur = q["bid"] if p["dir"] > 0 else q["ask"]
+        if p.get("sl") is not None and (cur <= p["sl"] if p["dir"] > 0 else cur >= p["sl"]):
+            r = p_close(p, q, "손절" if (p["sl"] - p["open"]) * p["dir"] < 0 else "트레일링 스탑")
+            p_log(f"청산 · {p['lots']}랏", f"{r:+.2f}$ · 잔액 ${paper['bal']:.2f}")
+            continue
+        if p.get("strat") == "trail":
+            t = c["trail"]
+            fav = (cur - p["open"]) * p["dir"] / v
+            p["peak"] = max(p.get("peak", 0), fav)
+            if p["peak"] >= t["act"]:
+                keep = p["peak"] / 2 if t["mode"] == "half" else p["peak"] - t["dist"]
+                ns = round(p["open"] + p["dir"] * max(0, keep) * v, 2)
+                if p.get("sl") is None or (ns > p["sl"] if p["dir"] > 0 else ns < p["sl"]):
+                    p["sl"] = ns
+    groups = []
+    for p in paper["pos"]:
+        if p.get("strat") == "grid" and p["group"] not in groups:
+            groups.append(p["group"])
+    for g in groups:
+        ps = [p for p in paper["pos"] if p["group"] == g]
+        first = min(ps, key=lambda p: p["time"])
+        d, gc = first["dir"], c["grid"]
+        against = ((first["open"] - q["bid"]) if d > 0 else (q["ask"] - first["open"])) / v
+        done = len(ps) - 1
+        for k, (dist, lot) in enumerate(parse_adds(gc["adds"])):
+            if k >= done and against >= dist and not any(p["group"] == g and p.get("addIdx") == k for p in paper["pos"]):
+                np = p_open(q, d, lot, "grid", g)
+                if np:
+                    np["addIdx"] = k
+        ps = [p for p in paper["pos"] if p["group"] == g]
+        total = sum(p_pnl(p, q) for p in ps)
+        has_add = any(p.get("addIdx") is not None for p in ps)
+        why = None
+        if against >= gc["stop"]:
+            why = f"물타기 전체 손절 ({gc['stop']}포인트)"
+        elif total >= (gc["be"] if has_add else gc["tp"]):
+            why = "물타기 탈출" if has_add else "물타기 익절"
+        if why:
+            s = sum(p_close(p, q, why) for p in ps)
+            p_log(f"{why} · {len(ps)}건 청산", f"합계 {s:+.2f}$ · 잔액 ${paper['bal']:.2f}")
+    margin = lambda: sum(p["lots"] * c["cs"] * p["open"] / c["lev"] for p in paper["pos"])
+    while paper["pos"] and margin() > 0:
+        eq = paper["bal"] + sum(p_pnl(p, q) for p in paper["pos"])
+        if eq / margin() * 100 >= 50:
+            break
+        worst = min(paper["pos"], key=lambda p: p_pnl(p, q))
+        r = p_close(worst, q, "스톱아웃")
+        p_log("스톱아웃 (마진 레벨 50% 미만)", f"{worst['lots']}랏 강제 청산 {r:+.2f}$")
+
+
+def news_block():
+    """웹과 같은 경제지표 일정(calendar.json)으로 중요 지표 30분 전 ~ 60분 후에는 새로 진입하지 않는다."""
+    now = time.time()
+    if now - news["at"] > 3600:
+        news["at"] = now
+        try:
+            with urllib.request.urlopen(SITE + "/calendar.json", timeout=15) as r:
+                rows = json.loads(r.read().decode())
+            news["ev"] = [datetime.fromisoformat(e["date"]).timestamp() for e in rows if e.get("impact") == "High"]
+        except Exception as e:  # noqa: BLE001
+            print("경제지표 일정 받기 실패:", e)
+    return any(t - 1800 <= now <= t + 3600 for t in news["ev"])
+
+
+def sig_to_dir(mode, up, dn, st):
+    if mode == "rev":
+        return 1 if dn else -1
+    if mode == "trend":
+        return 1 if up else -1
+    if mode == "long":
+        return 1 if (dn if st == "grid" else up) else 0
+    return -1 if (up if st == "grid" else dn) else 0
+
+
+def p_signals(q):
+    c = paper["cfg"]
+    for st in ("grid", "trail"):
+        if not paper["auto"].get(st) or any(p.get("strat") == st for p in paper["pos"]):
+            continue
+        tf = c[st]["tf"]
+        if tf not in TF:
+            continue
+        bars = rates(q["sym"], tf, 200)
+        i = len(bars) - 2
+        if i < 130:
+            continue
+        key = f"{st}|{q['sym']}|{tf}"
+        bt = bars[i]["t"]
+        if key not in paper["lastSig"]:
+            paper["lastSig"][key] = bt
+            continue
+        if paper["lastSig"][key] == bt:
+            continue
+        paper["lastSig"][key] = bt
+        s = db_signal(bars, i)
+        if not s:
+            continue
+        d = sig_to_dir(c[st]["dir"], s == "up", s == "dn", st)
+        if not d:
+            continue
+        if news_block():
+            p_log("진입 건너뜀", "중요 경제지표 발표 전후라 대기합니다.")
+            continue
+        if st == "grid":
+            p_open(q, d, c["grid"]["lot1"], "grid", f"G{int(time.time() * 1000)}")
+        else:
+            px = q["ask"] if d > 0 else q["bid"]
+            p_open(q, d, c["trail"]["lot"], "trail", f"T{int(time.time() * 1000)}", round(px - d * c["trail"]["sl"] * c.get("ptv", 1), 2))
+
+
+def paper_loop():
+    last_sig = 0
+    while True:
+        try:
+            with plock:
+                if paper.get("race"):
+                    q = p_quote()
+                    if q:
+                        p_step(q)
+                        if time.time() - last_sig >= 10:
+                            last_sig = time.time()
+                            p_signals(q)
+                        paper_save()
+        except Exception as e:  # noqa: BLE001
+            print("모의 거래 오류:", e)
+        time.sleep(1)
+
+
+def self_update():
+    """한 시간마다 웹사이트의 최신 연결 프로그램과 비교해 바뀌었으면 바꾸고 다시 시작한다."""
+    me = os.path.abspath(__file__)
+    while True:
+        time.sleep(3600)
+        try:
+            with urllib.request.urlopen(SITE + "/bridge/mt5_bridge.py?" + str(int(time.time())), timeout=30) as r:
+                new = r.read()
+            with open(me, "rb") as f:
+                old = f.read()
+            if new and new != old and b"waveview-mt5-bridge" in new:
+                with open(me + ".new", "wb") as f:
+                    f.write(new)
+                os.replace(me + ".new", me)
+                print("새 버전으로 바꾸고 다시 시작합니다")
+                os.execv(sys.executable, [sys.executable, me])
+        except Exception as e:  # noqa: BLE001
+            print("업데이트 확인 실패:", e)
+
+
 def main():
     load_config()
+    paper_load()
     while not mt5.initialize():
         print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인하면 자동으로 연결합니다. (10초 뒤 다시 시도)", mt5.last_error())
         time.sleep(10)
@@ -299,9 +586,17 @@ def main():
         print("텔레그램 신호 감시 중:", ", ".join(f"{r['sym']} {r['tf']}" for r in current_rules()) or "(규칙 없음)")
     else:
         print("텔레그램 설정 전입니다. 웨이브뷰 ⚙ 설정에서 봇 토큰과 채팅 ID를 저장하면 자동으로 켜집니다.")
+    threading.Thread(target=paper_loop, daemon=True).start()
+    threading.Thread(target=self_update, daemon=True).start()
     port = int(cfg["port"])
     print(f"웨이브뷰 연결 주소: http://127.0.0.1:{port}  (이 창을 닫으면 연결이 끊깁니다)")
-    ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+    for _ in range(30):  # 다시 시작할 때 앞 프로그램이 포트를 놓을 때까지 기다린다
+        try:
+            srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+            break
+        except OSError:
+            time.sleep(2)
+    srv.serve_forever()
 
 
 if __name__ == "__main__":
