@@ -3200,7 +3200,8 @@ function ptRender(){
   }
 }
 function drawPaper(pw){
-  if (!PT.pos.length) return;
+  // 모의 거래 선·글씨는 [모의 거래] 창을 열었을 때만 차트에 그린다
+  if (!PT.pos.length || $('#term').hidden) return;
   for (const p of PT.pos){
     if (p.sym !== S.sym.id) continue;
     const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
