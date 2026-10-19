@@ -3204,7 +3204,7 @@ function drawPaper(pw){
   for (const p of PT.pos){
     if (p.sym !== S.sym.id) continue;
     const pl = ptPnl(p), y = candle.priceToCoordinate(p.open);
-    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
+    const L = [[p.open, p.dir > 0 ? '#2962ff' : '#f23645', `모의 ${p.strat === 'grid' ? '물타기 자동 ' : p.strat === 'trail' ? '끌고가기 자동 ' : '직접 '}${p.dir > 0 ? '매수 BUY' : '매도 SELL'} ${p.lots}랏 · ${money(pl)}`, [6, 4]]];
     if (p.sl != null) L.push([p.sl, '#f23645', `모의 손절 S/L #${p.id}`, [2, 3]]);
     if (p.tp != null) L.push([p.tp, '#22ab94', `모의 익절 T/P #${p.id}`, [2, 3]]);
     for (const [pr, col, name, dash] of L){ const yy = candle.priceToCoordinate(pr); if (yy == null) continue;
