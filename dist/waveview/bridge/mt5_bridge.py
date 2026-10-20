@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 10
+VERSION = 12
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -449,7 +449,7 @@ def p_open(q, d, lots, strat, group, sl=None, quiet=False):
 def p_close(p, q, why, log=True):
     price = q["bid"] if p["dir"] > 0 else q["ask"]
     pnl = (price - p["open"]) * p["dir"] * p["lots"] * paper["cfg"]["cs"]
-    if log:
+    if log and not p.get("silent"):
         mins = int((time.time() * 1000 - p["time"]) / 60000)
         p_log(f"{'✅' if pnl >= 0 else '❌'} 청산 · {usd(pnl)} ({why})",
               f"종목: {p['sym']} · {'매수' if p['dir'] > 0 else '매도'} {p['lots']}랏\n"
@@ -458,7 +458,8 @@ def p_close(p, q, why, log=True):
               f"잔액: ${paper['bal'] + pnl:,.2f} · 시각: {k_now()} (한국)")
     paper["bal"] += pnl
     paper["pos"] = [x for x in paper["pos"] if x is not p]
-    paper["hist"].insert(0, {**p, "close": price, "ctime": int(time.time() * 1000), "pnl": pnl, "why": why})
+    paper["hist"].insert(0, {**p, "close": price, "ctime": int(time.time() * 1000), "pnl": pnl,
+                             "why": why + (" · 지표 시간 진입" if p.get("news") else "")})
     paper["hist"] = paper["hist"][:5000]
     return pnl
 
@@ -492,6 +493,9 @@ def p_step(q):
         cur = q["bid"] if p["dir"] > 0 else q["ask"]
         if p.get("sl") is not None and (cur <= p["sl"] if p["dir"] > 0 else cur >= p["sl"]):
             p_close(p, q, "손절" if (p["sl"] - p["open"]) * p["dir"] < 0 else "트레일링 스탑 · 수익 지키기")
+            continue
+        if p.get("strat") == "ai" and p.get("tmax_s") and time.time() * 1000 - p["time"] >= p["tmax_s"] * 1000 and p.get("peak", 0) < p.get("act", 0):
+            p_close(p, q, "시간 손절 · 정해진 시간 안에 수익 없음")
             continue
         if p.get("strat") in ("trail", "ai"):
             t = c["trail"]
@@ -624,7 +628,7 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False, reg="") for i in range(n)]
     zs = []
     tr_state, armed = 0, False
     sh = sl_ = None
@@ -666,6 +670,11 @@ def ai_features(bars):
         eu_dst = 3 < kt.month < 10
         a_s, e_s, u_s = (7 if us_dst else 8), (16 if eu_dst else 17), (22 if us_dst else 23)
         f[i]["sess"] = "asia" if a_s <= kt.hour < e_s else "eu" if e_s <= kt.hour < u_s else "us"
+        # 장세: 최근 36봉 동안 순수하게 간 거리 ÷ 오르내린 거리 (1에 가까우면 한 방향 추세, 0에 가까우면 박스)
+        if i >= 36:
+            path = sum(abs(c[j] - c[j - 1]) for j in range(i - 35, i + 1)) or 1e-9
+            er = abs(c[i] - c[i - 36]) / path
+            f[i]["reg"] = "trend" if er >= 0.35 else "range" if er <= 0.2 else ""
         # 최근 36봉 고점에서 얼마나 빠졌나 / 저점에서 얼마나 올랐나 (ATR 몇 배)
         if atr[i] and i >= 36:
             f[i]["mvd"] = (max(x["h"] for x in bars[i - 36:i + 1]) - b["l"]) / atr[i]
@@ -732,7 +741,8 @@ SESS_KO = {"asia": "아시아장", "eu": "유로장", "us": "미장"}
 LAB_FILE = os.path.join(HERE, "ai_lab.json")
 TF_KO_S = {"5m": "5분봉", "15m": "15분봉", "1h": "1시간봉"}
 GENES = {"tf": ["5m", "15m", "1h"], "slk": [1.0, 1.5, 2.0, 2.5, 3.0], "actk": [0.8, 1.0, 1.5, 2.0, 3.0], "flt": [False, True],
-         "sess": ["", "asia", "eu", "us"], "mv": [0, 2, 3, 4], "zf": [False, True]}
+         "sess": ["", "asia", "eu", "us"], "mv": [0, 2, 3, 4], "zf": [False, True],
+         "reg": ["", "trend", "range"], "tmax": [0, 12, 24, 48]}
 
 
 def ai_name(e):
@@ -746,15 +756,20 @@ def ai_name(e):
         tags.append(f"{e['mv']}ATR 이상 빠진(오른) 뒤만")
     if e.get("zf"):
         tags.append("매물대 위에서만")
+    if e.get("reg"):
+        tags.append("추세장에서만" if e["reg"] == "trend" else "박스장에서만")
+    if e.get("tmax"):
+        tags.append(f"{e['tmax']}봉 안에 수익 못 내면 정리")
     return base + " · " + " · ".join(tags)
 
 
 def ai_key(e):
-    return (e.get("tf", "5m"), e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")))
+    return (e.get("tf", "5m"), e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")),
+            e.get("reg", ""), e.get("tmax", 0))
 
 
 def ai_mk(**e):
-    e = {"tf": "5m", "flt": False, "sess": "", "mv": 0, "zf": False, **e}
+    e = {"tf": "5m", "flt": False, "sess": "", "mv": 0, "zf": False, "reg": "", "tmax": 0, **e}
     e["name"] = ai_name(e)
     return e
 
@@ -793,6 +808,8 @@ def ai_dir(e, f):
         return 0
     if e.get("zf") and not (f["sup"] if s > 0 else f["res"]):
         return 0
+    if e.get("reg") and f["reg"] != e["reg"]:
+        return 0
     return s
 
 
@@ -805,6 +822,9 @@ def ai_backtest(e, bars, f, start, spread=0.2, end=None):
             d = pos["d"]
             if (b["l"] <= pos["sl"]) if d > 0 else (b["h"] >= pos["sl"]):
                 trades.append((pos["sl"] - pos["px"]) * d - spread)
+                pos = None
+            elif e.get("tmax") and i - pos["i"] >= e["tmax"] and pos["peak"] < pos["act"]:
+                trades.append((b["c"] - pos["px"]) * d - spread)  # 시간 손절: 정해진 봉 수 안에 수익 지키기 단계에 못 가면 종가에 정리
                 pos = None
             else:
                 fav = (b["c"] - pos["px"]) * d  # 종가 기준으로 보수적으로
@@ -819,7 +839,7 @@ def ai_backtest(e, bars, f, start, spread=0.2, end=None):
         if d:
             a = f[i]["atr"]
             sl = f[i]["zsl"] if e["sig"] == "zdb" and f[i].get("zsl") else b["c"] - d * e["slk"] * a
-            pos = {"d": d, "px": b["c"], "sl": sl, "act": e["actk"] * a, "peak": 0}
+            pos = {"d": d, "px": b["c"], "sl": sl, "act": e["actk"] * a, "peak": 0, "i": i}
     return trades
 
 
@@ -878,10 +898,16 @@ def ai_learn(sym):
         if e.get("tf", "5m") not in data:
             continue
         bars, f, start, split, days = data[e.get("tf", "5m")]
-        tr = ai_score(ai_backtest(e, bars, f, start, spread=spread, end=split))
+        trl = ai_backtest(e, bars, f, start, spread=spread, end=split)
+        tr = ai_score(trl)
         va = ai_score(ai_backtest(e, bars, f, split, spread=spread))
+        mid = (start + split) // 2
+        h1 = ai_score(ai_backtest(e, bars, f, start, spread=spread, end=mid))
+        h2 = ai_score(ai_backtest(e, bars, f, mid, spread=spread, end=split))
         benched = str(ai_key(e)) in ai["bench"]
-        ok = not benched and tr["n"] >= 8 and tr["pf"] >= 1.15 and tr["mdd"] < max(1e-9, tr["net"]) * 1.5 and va["n"] >= 2 and va["net"] > 0
+        ok = (not benched and tr["n"] >= 8 and tr["pf"] >= 1.15 and tr["mdd"] < max(1e-9, tr["net"]) * 1.5
+              and h1["net"] > 0 and h2["net"] > 0  # 학습 기간 앞·뒤 절반 모두 이익 (한 구간에서만 번 로직은 탈락)
+              and va["n"] >= 2 and va["net"] > 0)
         board.append({**e, "full": tr, "rec": va, "ok": ok, "benched": benched,
                       "score": (tr["net"] - tr["mdd"] * 0.5) / days + va["net"] / 3,  # 하루 평균으로 비교
                       "new": ai_key(e) not in old_keys})
@@ -904,8 +930,21 @@ def ai_learn(sym):
             json.dump(lab, fh, ensure_ascii=False)
     except OSError:
         pass
+    # 데이터 수집 모드(기본): 연습 계좌이니 검증을 통과한 게 없어도 점수 1등으로 거래하고, 2·3등도 같이 거래해 실전 기록을 모은다
+    collect = paper["cfg"].get("collect", True)
+    if collect and not pick:
+        pick = next((x for x in board if not x["benched"]), None)
+        changed = (pick["name"] if pick else None) != prev
+    picks = [pick] if pick else []
+    if collect:
+        for x in board:
+            if len(picks) >= 3:
+                break
+            if not x["benched"] and all(ai_key(x) != ai_key(y) for y in picks):
+                picks.append(x)
+    ai["picks"] = picks
     ai.update(at=time.time(), pick=pick, board=board[:5], lab=lab,
-              note=(f"지금 쓰는 로직: {pick['name']} (학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
+              note=(f"지금 쓰는 로직{'' if pick['ok'] else ' (검증 미통과 · 데이터 수집용)'}: {pick['name']} (학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
                     if pick else "요즘 장에 잘 맞는 로직이 없어 쉬는 중"))
     # 1시간 보고 (장이 열려 있을 때만: 마지막 봉이 30분 안)
     if bars and time.time() - bars[-1]["t"] < 3600:
@@ -917,8 +956,9 @@ def ai_learn(sym):
         top3 = "\n".join(f"{k + 1}. {'🆕 ' if x['new'] else ''}{x['name']}\n   학습 기간 {x['full']['n']}번 · 승률 {x['full']['win']:.0f}% · 손익비 {x['full']['pf']:.2f} · 최근 3일 {usd(x['rec']['net'])}"
                           for k, x in enumerate([x for x in board if x["ok"]][:3]))
         p_log(f"AI 연구실 · 1시간 보고 ({k_now()})",
-              f"{'🔄 로직을 바꿨습니다' if changed else '✔ 지금 로직을 계속 씁니다'}\n{ai['note']}\n\n"
-              f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개, 5분·15분·1시간봉) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
+              f"{'🔄 로직을 바꿨습니다' if changed else '✔ 지금 로직을 계속 씁니다'}\n{ai['note']}\n"
+              + ("함께 거래하는 로직(데이터 수집): " + " / ".join(x["name"] for x in ai.get("picks", [])[1:]) + "\n" if len(ai.get("picks", [])) > 1 else "")
+              + "\n" f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개, 5분·15분·1시간봉) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
               f"시험 스프레드 {spread:.2f} (한텍 실제 호가 기준){' · 쉬는 로직 ' + str(len(ai['bench'])) + '개 (실전 4연패)' if ai['bench'] else ''}\n"
               f"{top3 or '통과한 로직 없음'}\n\n"
               f"지난 1시간 거래 {len(hour)}번 {usd(sum(h['pnl'] for h in hour))} · 웨이브뷰 계좌 평가금 ${eqv:,.2f}")
@@ -926,16 +966,15 @@ def ai_learn(sym):
         p_log("AI 판단 · 로직 바꿈", ai["note"])
 
 
-def ai_guard():
-    """실전 4연패한 로직은 24시간 쉬게 하고, 하루 손실 한도를 넘으면 그날은 진입하지 않는다. 진입해도 되면 True."""
-    e = ai["pick"]
-    if not e:
-        return False
+def ai_guard(e, main):
+    """실전 4연패한 로직은 24시간 쉬게 하고 다음 후보로 바꾼다. 하루 손실 한도는 데이터 수집 모드면 알리기만 하고 계속 들어간다."""
     live = [h for h in paper["hist"] if h.get("logic") == e["name"]][:4]
     if len(live) == 4 and all(h["pnl"] < 0 for h in live):
         ai["bench"][str(ai_key(e))] = time.time() + 86400
-        p_log("AI 판단 · 로직 쉬게 함", f"{e['name']}\n실전에서 4번 연속 손실이라 24시간 쉬고 다음 후보를 찾습니다 (합계 {usd(sum(h['pnl'] for h in live))}).")
-        ai["pick"], ai["at"] = None, 0  # 다음 순서에 바로 다시 연구
+        p_log("AI 판단 · 로직 쉬게 함", f"{e['name']}\n실전에서 4번 연속 손실이라 24시간 쉬고 다음 후보로 바꿉니다 (합계 {usd(sum(h['pnl'] for h in live))}).")
+        ai["picks"] = [x for x in ai.get("picks", []) if ai_key(x) != ai_key(e)]
+        if main:
+            ai["pick"], ai["at"] = None, 0  # 다음 순서에 바로 다시 연구
         return False
     k = datetime.now(KST)
     day0 = datetime(k.year, k.month, k.day, tzinfo=KST).timestamp() * 1000
@@ -943,53 +982,69 @@ def ai_guard():
     lim = float(paper["cfg"].get("dayLoss", 30))
     if today <= -lim:
         tag = k.strftime("%Y-%m-%d")
+        collect = paper["cfg"].get("collect", True)
         if ai.get("dayStop") != tag:
             ai["dayStop"] = tag
-            p_log("AI 판단 · 오늘은 그만", f"오늘 손실 {usd(today)} 가 한도 ${lim:.0f} 를 넘어 오늘은 새로 진입하지 않습니다. 내일 다시 시작합니다.")
-        return False
+            p_log("AI 판단 · 오늘 손실 한도 넘음", f"오늘 손실 {usd(today)} (한도 ${lim:.0f})."
+                  + (" 연습 계좌 데이터 수집 모드라 계속 들어갑니다." if collect else " 오늘은 새로 진입하지 않습니다."))
+        if not collect:
+            return False
     return True
 
 
 def ai_signal(q):
-    if not ai["pick"] or any(p.get("strat") == "ai" for p in paper["pos"]):
-        return
-    tf = ai["pick"].get("tf", "5m")
-    bars = rates(q["sym"], tf, 400)[:-1]
-    key = f"ai|{q['sym']}|{tf}"
-    bt = bars[-1]["t"]
-    if paper["lastSig"].get(key) == bt:
-        return
-    first = key not in paper["lastSig"]
-    paper["lastSig"][key] = bt
-    if first:
-        return
-    f = ai_features(bars)
-    e = ai["pick"]
-    d = ai_dir(e, f[-1])
-    if not d or f[-1]["atr"] is None or not ai_guard():
-        return
-    if news_block():
-        p_log("진입 건너뜀", "중요 경제지표 발표 전후라 대기합니다.")
-        return
-    a = f[-1]["atr"]
-    px = q["ask"] if d > 0 else q["bid"]
-    sl = f[-1]["zsl"] if e["sig"] == "zdb" and f[-1].get("zsl") else px - d * e["slk"] * a
-    if (px - sl) * d <= 0:  # 이미 손절가를 지나 있으면 들어가지 않는다
-        return
-    lots = paper["cfg"].get("aiLot", 0.01)
-    p = p_open(q, d, lots, "ai", f"A{int(time.time() * 1000)}", round(sl, 2), quiet=True)
-    if p:
+    """상위 로직(최대 3개)이 각자 따로 진입한다. 텔레그램은 1등 로직 거래만 보낸다."""
+    picks = ai.get("picks") or ([ai["pick"]] if ai["pick"] else [])
+    feats = {}
+    for r, e in enumerate(picks):
+        if any(p.get("logic") == e["name"] for p in paper["pos"]):
+            continue
+        tf = e.get("tf", "5m")
+        if tf not in feats:
+            bars = rates(q["sym"], tf, 400)[:-1]
+            feats[tf] = (bars, ai_features(bars))
+        bars, f = feats[tf]
+        key = f"ai|{q['sym']}|{ai_key(e)}"
+        bt = bars[-1]["t"]
+        if paper["lastSig"].get(key) == bt:
+            continue
+        first = key not in paper["lastSig"]
+        paper["lastSig"][key] = bt
+        if first:
+            continue
+        d = ai_dir(e, f[-1])
+        if not d or f[-1]["atr"] is None or not ai_guard(e, r == 0):
+            continue
+        nb = news_block()
+        if nb and not paper["cfg"].get("collect", True):
+            p_log("진입 건너뜀", "중요 경제지표 발표 전후라 대기합니다.")
+            continue
+        a = f[-1]["atr"]
+        px = q["ask"] if d > 0 else q["bid"]
+        sl = f[-1]["zsl"] if e["sig"] == "zdb" and f[-1].get("zsl") else px - d * e["slk"] * a
+        if (px - sl) * d <= 0:  # 이미 손절가를 지나 있으면 들어가지 않는다
+            continue
+        lots = paper["cfg"].get("aiLot", 0.01)
+        p = p_open(q, d, lots, "ai", f"A{int(time.time() * 1000)}{r}", round(sl, 2), quiet=True)
+        if not p:
+            continue
         p["act"] = round(e["actk"] * a / paper["cfg"].get("ptv", 1), 2)
         p["logic"] = e["name"]
-        cs = paper["cfg"]["cs"]
-        start = p["open"] + d * e["actk"] * a
-        p_log(f"{side_ko(d)} 진입 · {lots}랏 · AI 판단",
-              f"종목: {p['sym']}\n"
-              f"진입가: {p['open']:,.2f}\n"
-              f"손절가: {p['sl']:,.2f} ({(p['sl'] - p['open']):+.2f} · 손절되면 {usd((p['sl'] - p['open']) * d * lots * cs)})\n"
-              f"수익 지키기 시작: {start:,.2f} 넘으면 (그 뒤로 번 것의 절반을 지키며 손절선을 따라 올림)\n"
-              f"시각: {k_now()} (한국)\n\n"
-              f"이유: {e['name']}\n최근 10일 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f} · ATR {a:.2f}")
+        p["rank"] = r + 1
+        p["news"] = bool(nb)
+        p["silent"] = r > 0
+        p["tmax_s"] = e.get("tmax", 0) * TF_SEC.get(tf, 300)
+        if r == 0:
+            cs = paper["cfg"]["cs"]
+            start = p["open"] + d * e["actk"] * a
+            p_log(f"{side_ko(d)} 진입 · {lots}랏 · AI 판단",
+                  f"종목: {p['sym']}\n"
+                  f"진입가: {p['open']:,.2f}\n"
+                  f"손절가: {p['sl']:,.2f} ({(p['sl'] - p['open']):+.2f} · 손절되면 {usd((p['sl'] - p['open']) * d * lots * cs)})\n"
+                  f"수익 지키기 시작: {start:,.2f} 넘으면 (그 뒤로 번 것의 절반을 지키며 손절선을 따라 올림)\n"
+                  f"시각: {k_now()} (한국){' · ⚠ 경제지표 발표 시간 (데이터 수집용으로 진입)' if nb else ''}\n\n"
+                  f"이유: {e['name']}\n학습 기간 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f} · ATR {a:.2f}"
+                  + ("" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
 
 
 def p_signals(q):
@@ -1034,6 +1089,29 @@ def p_signals(q):
             p_open(q, d, c["trail"]["lot"], "trail", f"T{int(time.time() * 1000)}", round(px - d * c["trail"]["sl"] * c.get("ptv", 1), 2))
 
 
+def weekly_report():
+    """토요일 아침 7시(한국) 한 주 성적 보고 — 한 번만."""
+    k = datetime.now(KST)
+    tag = k.strftime("%G-W%V")
+    if k.isoweekday() != 6 or k.hour < 7 or paper.get("weekly") == tag:
+        return
+    paper["weekly"] = tag
+    since = (time.time() - 7 * 86400) * 1000
+    wk = [h for h in paper["hist"] if h.get("strat") and h.get("ctime", 0) >= since]
+    by = {}
+    for h in wk:
+        by.setdefault(h.get("logic") or STRAT_KO.get(h.get("strat"), "?"), []).append(h["pnl"])
+    rank = sorted(by.items(), key=lambda kv: sum(kv[1]), reverse=True)
+    wins = sum(1 for h in wk if h["pnl"] > 0)
+    lab = lab_load()
+    p_log(f"📅 주간 보고 ({k.strftime('%m/%d')})",
+          f"이번 주 거래 {len(wk)}번 · 손익 {usd(sum(h['pnl'] for h in wk))} · 승률 {wins / len(wk) * 100 if wk else 0:.0f}%\n"
+          f"계좌 잔액 ${paper['bal']:,.2f} (대결 시작 $1,000)\n"
+          + (f"가장 잘한 로직: {rank[0][0]} ({usd(sum(rank[0][1]))}, {len(rank[0][1])}번)\n" if rank else "")
+          + (f"가장 못한 로직: {rank[-1][0]} ({usd(sum(rank[-1][1]))}, {len(rank[-1][1])}번)\n" if len(rank) > 1 else "")
+          + f"AI 연구 누적 {lab.get('gen', 0)}번 · 지금 로직: {ai['pick']['name'] if ai['pick'] else '쉬는 중'}")
+
+
 def paper_loop():
     last_sig = 0
     while True:
@@ -1046,6 +1124,7 @@ def paper_loop():
                         if time.time() - last_sig >= 10:
                             last_sig = time.time()
                             p_signals(q)
+                            weekly_report()
                         paper_save()
         except Exception as e:  # noqa: BLE001
             print("모의 거래 오류:", e)

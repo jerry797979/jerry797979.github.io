@@ -3683,7 +3683,7 @@ setInterval(renderInfo, 1000);
 $('#stOpen').addEventListener('click', () => openStats());
 
 /* 모의 거래 기록 · 통계 */
-const STRN = p => p.mt5 ? 'MT5 실거래' : p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? 'AI 판단' : '직접';
+const STRN = p => p.mt5 ? 'MT5 실거래' : p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? (p.logic ? 'AI · ' + p.logic : 'AI 판단') : '직접';
 const kst = ms => { const d = new Date(ms + KST * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
 function statOf(list){
   const w = list.filter(t => t.pnl > 0), l = list.filter(t => t.pnl <= 0), gw = w.reduce((a, t) => a + t.pnl, 0), gl = -l.reduce((a, t) => a + t.pnl, 0);
