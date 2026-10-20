@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 5
+VERSION = 6
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -559,6 +559,36 @@ def _bands(v, n, k):
     return m, up, lo
 
 
+def zones_from(bars, touch=3):
+    """웹 차트의 '매물대 지지·저항 자동'과 같은 계산: 고점·저점이 여러 번 모인 가격대."""
+    n, L = len(bars), 5
+    if n < 50:
+        return []
+    rng = sorted(b["h"] - b["l"] for b in bars[-300:])
+    tol = (rng[len(rng) // 2] * 0.8) or 1
+    piv = []
+    for i in range(L, n - L):
+        h, l = bars[i]["h"], bars[i]["l"]
+        if all(bars[i - k]["h"] <= h and bars[i + k]["h"] <= h for k in range(1, L + 1)):
+            piv.append(h)
+        if all(bars[i - k]["l"] >= l and bars[i + k]["l"] >= l for k in range(1, L + 1)):
+            piv.append(l)
+    piv.sort()
+    cl = []
+    for v in piv:
+        if cl and v - cl[-1][0] <= tol:
+            cl[-1][1] = v
+            cl[-1][2] += 1
+        else:
+            cl.append([v, v, 1])
+    zs = [(lo - tol * .25, hi + tol * .25, k) for lo, hi, k in cl if k >= touch]
+    out = []
+    for z in sorted(zs, key=lambda z: -z[2]):
+        if not any(z[0] <= o[1] + tol * .5 and z[1] >= o[0] - tol * .5 for o in out):
+            out.append(z)
+    return out
+
+
 def ai_features(bars):
     """봉마다 신호: 돌파 더블비(db), 골든·데드크로스 후 1B 터치(gcb), 지난 미장 고저 돌파(usl), 그리고 ATR."""
     n = len(bars)
@@ -569,7 +599,8 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, atr=atr[i], trend=0) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, atr=atr[i], trend=0) for i in range(n)]
+    zs = []
     tr_state, armed = 0, False
     sh = sl_ = None
     prev_in = False
@@ -600,6 +631,24 @@ def ai_features(bars):
                     f[i]["gcb"], armed = -1, False
                 elif not armed and c[i] < m1[i]:
                     armed = True
+        # 매물대: 그 봉 이전 봉들로만 계산한다 (앞날을 미리 보지 않게). 48봉마다 다시 계산
+        if i >= 200 and (i % 48 == 0 or not zs):
+            zs = zones_from(bars[max(0, i - 1500):i])
+        if zs and i:
+            # 위에서 내려와(앞 봉 종가가 매물대 아래로 안 빠짐) 매물대를 찍고 다시 위에서 마감한 봉 = 지지 / 반대 = 저항
+            sup = any(b["l"] <= hi and c[i] >= lo and c[i - 1] >= lo for lo, hi, _k in zs)
+            res = any(b["h"] >= lo and c[i] <= hi and c[i - 1] <= hi for lo, hi, _k in zs)
+            pb = bars[i - 1]
+            fresh_sup = any(pb["l"] > hi and b["l"] <= hi and c[i] > hi for lo, hi, _k in zs)  # 위에 떠 있다가 처음 찍고 다시 위로
+            fresh_res = any(pb["h"] < lo and b["h"] >= lo and c[i] < lo for lo, hi, _k in zs)
+            if fresh_sup and c[i] > b["o"]:
+                f[i]["zone"] = 1    # 지지 매물대 찍고 양봉
+            elif fresh_res and c[i] < b["o"]:
+                f[i]["zone"] = -1   # 저항 매물대 찍고 음봉
+            if f[i]["db"] == -1 and sup:
+                f[i]["zdb"] = 1     # 지지 매물대에서 ↓DB → 매수
+            elif f[i]["db"] == 1 and res:
+                f[i]["zdb"] = -1    # 저항 매물대에서 ↑DB → 매도
         # 미장(한국 22:00~06:00) 고저
         k = datetime.fromtimestamp(b["t"], KST)
         mm = k.hour * 60 + k.minute
@@ -627,6 +676,8 @@ AI_SIGNALS = [
     ("gcb", 1, "골든·데드크로스 후 1B 눌림·반등"),
     ("usl", 1, "지난 미장 고점·저점 돌파 따라가기"),
     ("usl", -1, "지난 미장 고점·저점 돌파 실패 노리기"),
+    ("zdb", 1, "매물대에서 돌파 더블비 반전 (지지에서 ↓DB 매수 · 저항에서 ↑DB 매도)"),
+    ("zone", 1, "매물대 찍고 반등 (지지 양봉 매수 · 저항 음봉 매도)"),
 ]
 AI_EXITS = [(1.5, 1.0, "손절 ATR×1.5"), (2.5, 2.0, "손절 ATR×2.5")]
 

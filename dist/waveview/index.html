@@ -864,7 +864,14 @@ function compute(bars){
       else if (!armed && b.close < m[i]) armed = true;
     }
   }
-  return { gcbUp, gcbDn, gcbN, m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
+  // 매물대에서 돌파 더블비 반전: 지지 매물대를 찍은 ↓DB = 매수 자리, 저항 매물대를 찍은 ↑DB = 매도 자리
+  const zs = typeof computeZones === 'function' ? computeZones(bars) : [], zBuy = [], zSell = [];
+  for (let i = 0; i < N; i++){
+    const b = bars[i];
+    zBuy.push(!!dbDn[i] && zs.some(z => b.low <= z.hi && b.close >= z.lo));
+    zSell.push(!!dbUp[i] && zs.some(z => b.high >= z.lo && b.close <= z.hi));
+  }
+  return { zBuy, zSell, gcbUp, gcbDn, gcbN, m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
 }
 const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
 const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
@@ -1057,6 +1064,10 @@ function renderMarkers(){
   if (S.show.gcb) for (let i = 1; i < S.bars.length; i++){
     if (I.gcbUp[i]) mk.push({ time:S.bars[i].time, position:'belowBar', color:'#00bcd4', shape:'arrowUp', size:1, text:`GC 눌림 ${I.gcbN[i]}` });
     if (I.gcbDn[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#e040fb', shape:'arrowDown', size:1, text:`DC 반등 ${I.gcbN[i]}` });
+  }
+  if (S.show.sr) for (let i = 1; i < S.bars.length; i++){
+    if (I.zBuy[i]) mk.push({ time:S.bars[i].time, position:'belowBar', color:'#00e5ff', shape:'arrowUp', size:1, text:'매물대 매수' });
+    if (I.zSell[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#ff4081', shape:'arrowDown', size:1, text:'매물대 매도' });
   }
   if (S.show.news) mk.push(...spikeMarks());
   if (S.btMarks && S.btMarks.sym === S.sym.id && S.btMarks.tf === S.tf[0]) mk.push(...S.btMarks.list);
@@ -2554,6 +2565,7 @@ const COND = {
   db:{ name:'더블 볼린저 1B (한쪽 밴드만)', ops:[['obUp','↑ 1B (한쪽 상단 터치)'],['obDn','↓ 1B (한쪽 하단 터치)']] },
   price:{ name:'가격', ops:[['xup','위로 교차'],['xdn','아래로 교차']], val:true },
   usl:{ name:'어제 미장 구간 고저 라인', ops:[['hiUp','고점 위로 돌파'],['loDn','저점 아래로 돌파']] },
+  zdb:{ name:'매물대에서 돌파 더블비 반전', ops:[['buy','지지 매물대에서 ↓DB (매수 자리)'],['sell','저항 매물대에서 ↑DB (매도 자리)']] },
   gcb:{ name:'골든·데드크로스 후 1B 터치', ops:[['up','골든크로스 후 BB1 하단 터치·근처 (눌림)'],['dn','데드크로스 후 BB1 상단 터치·근처 (반등)']] },
   ma:{ name:'이평선 (20MA·120MA)', ops:[['gold','정배열 전환 (20MA > 120MA)'],['dead','역배열 전환 (20MA < 120MA)']] },
   di:{ name:'DI 이격도', ops:[['xup','값 위로 올라감'],['xdn','값 아래로 내려감']], val:true },
@@ -2573,6 +2585,11 @@ if (!store.get('autoGcbV1')){
     ALERTS.push({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'gcb', op }], trig:'close', exp:null, name:`5분 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:Date.now() });
   store.set('autoGcbV1', 1); store.set('ralerts', ALERTS);
 }
+if (!store.get('autoZdbV1')){
+  for (const [op, n] of [['buy', '지지 매물대에서 ↓DB · 매수 자리'], ['sell', '저항 매물대에서 ↑DB · 매도 자리']])
+    ALERTS.push({ id:uid(), sym:'XAUUSD', tf:'5m', conds:[{ src:'zdb', op }], trig:'close', exp:null, name:`5분 ${n}`, msg:'', toast:true, sound:true, tg:true, active:true, created:Date.now() });
+  store.set('autoZdbV1', 1); store.set('ralerts', ALERTS);
+}
 let ALOG = store.get('alog', []);
 const saveAlerts = () => { store.set('ralerts', ALERTS); syncBridge(); }, saveLog = () => store.set('alog', ALOG.slice(0, 300));
 function condText(c){ const d = COND[c.src]; if (!d) return '?'; const o = d.ops.find(x => x[0] === c.op); return `${d.name}: ${o ? o[1] : c.op}${d.val ? ' ' + c.val : ''}`; }
@@ -2582,6 +2599,7 @@ function evalCond(c, bars, I, i, tf){
     case 'db': return !!I[c.op][i];
     case 'hhj': return c.op === 'up' ? !!I.dbUp[i] : !!I.dbDn[i];
     case 'gcb': return c.op === 'up' ? !!I.gcbUp[i] : !!I.gcbDn[i];
+    case 'zdb': return c.op === 'buy' ? !!I.zBuy[i] : !!I.zSell[i];
     case 'price': { const v = +c.val; return c.op === 'xup' ? p.close < v && b.close >= v : p.close > v && b.close <= v; }
     case 'usl': { const u = computeUsLine(bars, tf, i); if (!u) return false; return c.op === 'hiUp' ? p.close <= u.hi && b.close > u.hi : p.close >= u.lo && b.close < u.lo; }
     case 'ma': { const a = I.bma20, z = I.bma120; if (a[i] == null || z[i] == null || a[i - 1] == null || z[i - 1] == null) return false;
