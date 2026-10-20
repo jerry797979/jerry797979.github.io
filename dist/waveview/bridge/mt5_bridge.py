@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 6
+VERSION = 7
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -599,7 +599,7 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, atr=atr[i], trend=0) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0) for i in range(n)]
     zs = []
     tr_state, armed = 0, False
     sh = sl_ = None
@@ -645,10 +645,19 @@ def ai_features(bars):
                 f[i]["zone"] = 1    # 지지 매물대 찍고 양봉
             elif fresh_res and c[i] < b["o"]:
                 f[i]["zone"] = -1   # 저항 매물대 찍고 음봉
-            if f[i]["db"] == -1 and sup:
-                f[i]["zdb"] = 1     # 지지 매물대에서 ↓DB → 매수
-            elif f[i]["db"] == 1 and res:
-                f[i]["zdb"] = -1    # 저항 매물대에서 ↑DB → 매도
+            # 매물대에서 DB 반전: 최근 36봉 고점에서 ATR×3 이상 빠진 뒤(매도는 오른 뒤)일 때만, 손절은 매물대 바깥 끝 + ATR×0.3
+            a = atr[i]
+            if a and i >= 36:
+                hh = max(x["h"] for x in bars[i - 36:i + 1])
+                ll = min(x["l"] for x in bars[i - 36:i + 1])
+                if f[i]["db"] == -1 and hh - b["l"] >= 3 * a:
+                    z = next((z for z in zs if b["l"] <= z[1] and c[i] >= z[0]), None)
+                    if z:
+                        f[i]["zdb"], f[i]["zsl"] = 1, min(z[0], b["l"]) - 0.3 * a
+                elif f[i]["db"] == 1 and b["h"] - ll >= 3 * a:
+                    z = next((z for z in zs if b["h"] >= z[0] and c[i] <= z[1]), None)
+                    if z:
+                        f[i]["zdb"], f[i]["zsl"] = -1, max(z[1], b["h"]) + 0.3 * a
         # 미장(한국 22:00~06:00) 고저
         k = datetime.fromtimestamp(b["t"], KST)
         mm = k.hour * 60 + k.minute
@@ -723,7 +732,8 @@ def ai_backtest(e, bars, f, start, spread=0.2):
         d = ai_dir(e, f[i])
         if d:
             a = f[i]["atr"]
-            pos = {"d": d, "px": b["c"], "sl": b["c"] - d * e["slk"] * a, "act": e["actk"] * a, "peak": 0}
+            sl = f[i]["zsl"] if e["sig"] == "zdb" and f[i].get("zsl") else b["c"] - d * e["slk"] * a
+            pos = {"d": d, "px": b["c"], "sl": sl, "act": e["actk"] * a, "peak": 0}
     return trades
 
 
@@ -783,7 +793,10 @@ def ai_signal(q, tf):
         return
     a = f[-1]["atr"]
     px = q["ask"] if d > 0 else q["bid"]
-    p = p_open(q, d, paper["cfg"].get("aiLot", 0.01), "ai", f"A{int(time.time() * 1000)}", round(px - d * e["slk"] * a, 2))
+    sl = f[-1]["zsl"] if e["sig"] == "zdb" and f[-1].get("zsl") else px - d * e["slk"] * a
+    if (px - sl) * d <= 0:  # 이미 손절가를 지나 있으면 들어가지 않는다
+        return
+    p = p_open(q, d, paper["cfg"].get("aiLot", 0.01), "ai", f"A{int(time.time() * 1000)}", round(sl, 2))
     if p:
         p["act"] = round(e["actk"] * a / paper["cfg"].get("ptv", 1), 2)
         p["why"] = e["name"]

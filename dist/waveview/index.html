@@ -865,13 +865,20 @@ function compute(bars){
     }
   }
   // 매물대에서 돌파 더블비 반전: 지지 매물대를 찍은 ↓DB = 매수 자리, 저항 매물대를 찍은 ↑DB = 매도 자리
-  const zs = typeof computeZones === 'function' ? computeZones(bars) : [], zBuy = [], zSell = [];
+  // 단, 최근 36봉 고점에서 ATR×3 이상 빠진 뒤(매도는 오른 뒤)일 때만. 손절은 매물대 바깥쪽 끝에서 ATR×0.3 더
+  const zs = typeof computeZones === 'function' ? computeZones(bars) : [], zBuy = [], zSell = [], zSL = [];
+  const trz = bars.map((b, i) => i ? Math.max(b.high, bars[i - 1].close) - Math.min(b.low, bars[i - 1].close) : b.high - b.low), atrz = sma(trz, 14);
   for (let i = 0; i < N; i++){
-    const b = bars[i];
-    zBuy.push(!!dbDn[i] && zs.some(z => b.low <= z.hi && b.close >= z.lo));
-    zSell.push(!!dbUp[i] && zs.some(z => b.high >= z.lo && b.close <= z.hi));
+    const b = bars[i], a = atrz[i]; let buy = false, sell = false, sl = null;
+    if (a != null && i >= 36){
+      let hh = -Infinity, ll = Infinity; for (let k = i - 36; k <= i; k++){ hh = Math.max(hh, bars[k].high); ll = Math.min(ll, bars[k].low); }
+      const zb = dbDn[i] && hh - b.low >= 3 * a ? zs.find(z => b.low <= z.hi && b.close >= z.lo) : null;
+      const zr = dbUp[i] && b.high - ll >= 3 * a ? zs.find(z => b.high >= z.lo && b.close <= z.hi) : null;
+      if (zb){ buy = true; sl = Math.min(zb.lo, b.low) - .3 * a; } else if (zr){ sell = true; sl = Math.max(zr.hi, b.high) + .3 * a; }
+    }
+    zBuy.push(buy); zSell.push(sell); zSL.push(sl);
   }
-  return { zBuy, zSell, gcbUp, gcbDn, gcbN, m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
+  return { zBuy, zSell, zSL, gcbUp, gcbDn, gcbN, m, ui, li, m2, uo, lo, bma20: sma(c, 20), bma120: sma(c, 120), ma1: sma(c, P.ma.l1), ma2: sma(c, P.ma.l2), ma3: sma(c, P.ma.l3), di, dn, up, dbUp, dbDn, obUp, obDn };
 }
 const isDn = i => S.ind.dn[i] && !S.ind.dn[i-1];
 const isUp = i => S.ind.up[i] && !S.ind.up[i-1];
@@ -1066,8 +1073,8 @@ function renderMarkers(){
     if (I.gcbDn[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#e040fb', shape:'arrowDown', size:1, text:`DC 반등 ${I.gcbN[i]}` });
   }
   if (S.show.sr) for (let i = 1; i < S.bars.length; i++){
-    if (I.zBuy[i]) mk.push({ time:S.bars[i].time, position:'belowBar', color:'#00e5ff', shape:'arrowUp', size:1, text:'매물대 매수' });
-    if (I.zSell[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#ff4081', shape:'arrowDown', size:1, text:'매물대 매도' });
+    if (I.zBuy[i]) mk.push({ time:S.bars[i].time, position:'belowBar', color:'#00e5ff', shape:'arrowUp', size:1, text:`매물대 매수 · 손절 ${fmt(I.zSL[i])}` });
+    if (I.zSell[i]) mk.push({ time:S.bars[i].time, position:'aboveBar', color:'#ff4081', shape:'arrowDown', size:1, text:`매물대 매도 · 손절 ${fmt(I.zSL[i])}` });
   }
   if (S.show.news) mk.push(...spikeMarks());
   if (S.btMarks && S.btMarks.sym === S.sym.id && S.btMarks.tf === S.tf[0]) mk.push(...S.btMarks.list);
