@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 7
+VERSION = 8
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -407,7 +407,22 @@ def p_log(title, msg):
             print("텔레그램 실패:", e)
 
 
-def p_open(q, d, lots, strat, group, sl=None):
+STRAT_KO = {"grid": "물타기 회복", "trail": "끌고 가기", "ai": "AI 판단"}
+
+
+def k_now(ms=None):
+    return datetime.fromtimestamp((ms or time.time() * 1000) / 1000, KST).strftime("%m/%d %H:%M")
+
+
+def side_ko(d):
+    return "🟢 매수 (BUY)" if d > 0 else "🔴 매도 (SELL)"
+
+
+def usd(v):
+    return f"{'+' if v >= 0 else '−'}${abs(v):,.2f}"
+
+
+def p_open(q, d, lots, strat, group, sl=None, quiet=False):
     c = paper["cfg"]
     price = q["ask"] if d > 0 else q["bid"]
     need = lots * c["cs"] * price / c["lev"]
@@ -420,14 +435,25 @@ def p_open(q, d, lots, strat, group, sl=None):
     p = {"id": paper["seq"], "sym": q["sym"], "dir": d, "lots": lots, "open": price, "time": int(time.time() * 1000),
          "sl": sl, "tp": None, "strat": strat, "group": group, "peak": 0}
     paper["pos"].append(p)
-    p_log(f"{'BUY' if d > 0 else 'SELL'} {lots}랏 체결", f"{q['sym']} @ {price:,.2f} · {'물타기 회복' if strat == 'grid' else 'AI 판단' if strat == 'ai' else '끌고 가기'}"
-          + (f" · S/L {sl:,.2f}" if sl else ""))
+    if not quiet:
+        loss = (sl - price) * d * lots * c["cs"] if sl else None
+        p_log(f"{side_ko(d)} 진입 · {lots}랏",
+              f"종목: {q['sym']}\n진입가: {price:,.2f}\n"
+              + (f"손절가: {sl:,.2f} (손절되면 {usd(loss)})\n" if sl else "")
+              + f"전략: {STRAT_KO.get(strat, strat)}\n시각: {k_now()} (한국)")
     return p
 
 
-def p_close(p, q, why):
+def p_close(p, q, why, log=True):
     price = q["bid"] if p["dir"] > 0 else q["ask"]
     pnl = (price - p["open"]) * p["dir"] * p["lots"] * paper["cfg"]["cs"]
+    if log:
+        mins = int((time.time() * 1000 - p["time"]) / 60000)
+        p_log(f"{'✅' if pnl >= 0 else '❌'} 청산 · {usd(pnl)} ({why})",
+              f"종목: {p['sym']} · {'매수' if p['dir'] > 0 else '매도'} {p['lots']}랏\n"
+              f"진입가 {p['open']:,.2f} → 청산가 {price:,.2f} ({(price - p['open']) * p['dir']:+.2f})\n"
+              f"보유 {mins // 60}시간 {mins % 60}분 · 전략: {STRAT_KO.get(p.get('strat'), '직접')}\n"
+              f"잔액: ${paper['bal'] + pnl:,.2f} · 시각: {k_now()} (한국)")
     paper["bal"] += pnl
     paper["pos"] = [x for x in paper["pos"] if x is not p]
     paper["hist"].insert(0, {**p, "close": price, "ctime": int(time.time() * 1000), "pnl": pnl, "why": why})
@@ -442,7 +468,6 @@ def paper_close_id(pid, why):
         if not q or not p:
             return {"ok": False}
         r = p_close(p, q, why)
-        p_log(f"청산 #{pid}", f"{r:+.2f}$ · 잔액 ${paper['bal']:.2f}")
         paper_save()
         return {"ok": True, "pnl": r}
 
@@ -464,8 +489,7 @@ def p_step(q):
     for p in list(paper["pos"]):
         cur = q["bid"] if p["dir"] > 0 else q["ask"]
         if p.get("sl") is not None and (cur <= p["sl"] if p["dir"] > 0 else cur >= p["sl"]):
-            r = p_close(p, q, "손절" if (p["sl"] - p["open"]) * p["dir"] < 0 else "트레일링 스탑")
-            p_log(f"청산 · {p['lots']}랏", f"{r:+.2f}$ · 잔액 ${paper['bal']:.2f}")
+            p_close(p, q, "손절" if (p["sl"] - p["open"]) * p["dir"] < 0 else "트레일링 스탑 · 수익 지키기")
             continue
         if p.get("strat") in ("trail", "ai"):
             t = c["trail"]
@@ -501,7 +525,7 @@ def p_step(q):
         elif total >= (gc["be"] if has_add else gc["tp"]):
             why = "물타기 탈출" if has_add else "물타기 익절"
         if why:
-            s = sum(p_close(p, q, why) for p in ps)
+            s = sum(p_close(p, q, why, log=False) for p in ps)
             p_log(f"{why} · {len(ps)}건 청산", f"합계 {s:+.2f}$ · 잔액 ${paper['bal']:.2f}")
     margin = lambda: sum(p["lots"] * c["cs"] * p["open"] / c["lev"] for p in paper["pos"])
     while paper["pos"] and margin() > 0:
@@ -509,8 +533,7 @@ def p_step(q):
         if eq / margin() * 100 >= 50:
             break
         worst = min(paper["pos"], key=lambda p: p_pnl(p, q))
-        r = p_close(worst, q, "스톱아웃")
-        p_log("스톱아웃 (마진 레벨 50% 미만)", f"{worst['lots']}랏 강제 청산 {r:+.2f}$")
+        p_close(worst, q, "스톱아웃 · 마진 레벨 50% 미만")
 
 
 def news_block():
@@ -796,12 +819,20 @@ def ai_signal(q, tf):
     sl = f[-1]["zsl"] if e["sig"] == "zdb" and f[-1].get("zsl") else px - d * e["slk"] * a
     if (px - sl) * d <= 0:  # 이미 손절가를 지나 있으면 들어가지 않는다
         return
-    p = p_open(q, d, paper["cfg"].get("aiLot", 0.01), "ai", f"A{int(time.time() * 1000)}", round(sl, 2))
+    lots = paper["cfg"].get("aiLot", 0.01)
+    p = p_open(q, d, lots, "ai", f"A{int(time.time() * 1000)}", round(sl, 2), quiet=True)
     if p:
         p["act"] = round(e["actk"] * a / paper["cfg"].get("ptv", 1), 2)
         p["why"] = e["name"]
-        p_log("AI 판단 · 진입 이유", f"{e['name']}\n최근 10일 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f}\n"
-              f"손절 {p['sl']:,.2f} (ATR {a:.2f}) · 수익 {e['actk']}ATR 넘으면 절반 지키며 따라감")
+        cs = paper["cfg"]["cs"]
+        start = p["open"] + d * e["actk"] * a
+        p_log(f"{side_ko(d)} 진입 · {lots}랏 · AI 판단",
+              f"종목: {p['sym']}\n"
+              f"진입가: {p['open']:,.2f}\n"
+              f"손절가: {p['sl']:,.2f} ({(p['sl'] - p['open']):+.2f} · 손절되면 {usd((p['sl'] - p['open']) * d * lots * cs)})\n"
+              f"수익 지키기 시작: {start:,.2f} 넘으면 (그 뒤로 번 것의 절반을 지키며 손절선을 따라 올림)\n"
+              f"시각: {k_now()} (한국)\n\n"
+              f"이유: {e['name']}\n최근 10일 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f} · ATR {a:.2f}")
 
 
 def p_signals(q):
