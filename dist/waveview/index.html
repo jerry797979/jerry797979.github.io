@@ -3694,7 +3694,7 @@ function stTrades(){ const d = +$('#stRange').value, from = d === 1 ? (() => { c
   const who = $('#stWho').value; return PT.hist.filter(t => t.ctime >= from && (!who || ptOwn(t) === who)); }
 // 통계는 새 창(stats.html)에서 본다. 같은 사이트라 저장된 기록을 그대로 읽는다
 function openStats(){ pushLive(); const w = window.open('stats.html', 'wvstats'); if (!w){ $('#stModal').hidden = false; renderStats(); } }
-function pushLive(){ try { store.set('paperLive', { ts:Date.now(), me:ptEq('me'), bot:ptEq('bot'), mt5Me:!!S.mt5Me, ai:S.botAi ? S.botAi.note : '' }); } catch {} }
+function pushLive(){ try { store.set('paperLive', { ts:Date.now(), me:ptEq('me'), bot:ptEq('bot'), mt5Me:!!S.mt5Me, ai:S.botAi ? S.botAi.note : '', aiTop:S.botAi ? S.botAi.top || [] : [], aiGen:S.botAi ? S.botAi.gen || 0 : 0, aiAt:S.botAi ? S.botAi.at || 0 : 0 }); } catch {} }
 setInterval(pushLive, 3000);
 function renderStats(){
   const T = stTrades(), A = statOf(T), pf = x => x === Infinity ? '∞' : x.toFixed(2);

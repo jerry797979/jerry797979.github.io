@@ -69,7 +69,7 @@ tr:hover td{background:var(--hover)}
   </div>
   <section class="kpis" id="kpis"></section>
   <section class="chart"><canvas id="cv"></canvas><div class="legend"><span><i style="background:var(--me)"></i>사장님</span><span><i style="background:var(--bot)"></i>웨이브뷰</span></div></section>
-  <nav class="tabs" id="tabs"><button data-t="list" aria-selected="true">거래 기록</button><button data-t="day" aria-selected="false">날짜별</button><button data-t="strat" aria-selected="false">전략별</button><button data-t="hour" aria-selected="false">시간대별</button></nav>
+  <nav class="tabs" id="tabs"><button data-t="list" aria-selected="true">거래 기록</button><button data-t="day" aria-selected="false">날짜별</button><button data-t="strat" aria-selected="false">전략별</button><button data-t="hour" aria-selected="false">시간대별</button><button data-t="lab" aria-selected="false">🧪 AI 연구실</button></nav>
   <section id="tab"></section>
 </main>
 <script>
@@ -120,6 +120,16 @@ function render(){
   drawChart(T);
   // 탭
   const tab = $('#tab');
+  if (F.tab === 'lab'){
+    const top = (live && live.aiTop) || [];
+    tab.innerHTML = `<div class="tw" style="padding:14px 16px;display:grid;gap:10px">
+      <div class="sub">PC의 웨이브뷰 AI가 매시간 새 로직을 만들어 앞 7일로 만들고 최근 3일로 검증합니다. 통과한 것 중 1등을 쓰되, 지금 로직보다 10% 넘게 좋을 때만 바꿉니다.
+      ${live && live.aiGen ? `<br>지금까지 ${live.aiGen}번 연구 · 마지막 연구 ${kst(live.aiAt * 1000)}` : '<br>아직 연구 결과가 없습니다 (연결 프로그램이 새 버전으로 바뀌면 1시간 안에 시작합니다)'}</div>
+      ${live && live.ai ? `<div>🤖 ${live.ai}</div>` : ''}</div>
+      <div class="tw" style="margin-top:10px"><table><tr><th>순위</th><th class="l">로직</th><th>앞 7일 거래</th><th>승률</th><th>손익비</th><th>앞 7일 손익</th><th>최근 3일 검증</th><th class="l">판정</th></tr>${top.map((x, k) =>
+        `<tr><td>${k + 1}</td><td class="l" style="white-space:normal;min-width:320px">${x.new ? '<span class="tag bot">새 로직</span> ' : ''}${x.name}</td><td>${x.n}</td><td>${x.win.toFixed(0)}%</td><td>${pfs(x.pf)}</td><td class="${x.net >= 0 ? 'up' : 'dn'}">${money(x.net)}</td><td class="${x.vnet >= 0 ? 'up' : 'dn'}">${money(x.vnet)} (${x.vn}번)</td><td class="l">${x.ok ? '✅ 통과' : '❌ 탈락'}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">아직 순위가 없습니다</td></tr>'}</table></div>`;
+    window._rows = T; return;
+  }
   if (!T.length){ tab.innerHTML = `<div class="tw"><div class="empty">이 기간·계좌에 끝난 거래가 없습니다.</div></div>`; window._rows = T; return; }
   window._rows = T;
   if (F.tab === 'list'){

@@ -14,6 +14,7 @@ PC에 켜 둔 MT5 터미널에서 시세를 읽어 웨이브뷰 차트에 그대
 한 시간마다 웹사이트의 최신 버전을 확인해 바뀌었으면 스스로 바꾸고 다시 시작한다.
 """
 import json
+import random
 import math
 import os
 import threading
@@ -36,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 8
+VERSION = 9
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -192,7 +193,8 @@ class Handler(BaseHTTPRequestHandler):
                     st = dict(paper)
                     st["hist"] = [h for h in paper.get("hist", []) if h.get("ctime", 0) > int(q.get("since", 0))][:1000]
                     st["ai"] = {"note": ai["note"], "at": ai["at"], "pick": ai["pick"]["name"] if ai["pick"] else None,
-                                "board": [{"name": x["name"], "ok": x["ok"], **{k: round(v, 2) for k, v in x["full"].items()}} for x in ai["board"]]}
+                                "board": [{"name": x["name"], "ok": x["ok"], **{k: round(v, 2) for k, v in x["full"].items()}} for x in ai["board"]],
+                                "top": (ai.get("lab") or {}).get("top", []), "gen": (ai.get("lab") or {}).get("gen", 0)}
                 return self._send(200, {"ok": True, **st})
             return self._send(200, {"ok": True, "service": "waveview-mt5-bridge", "version": VERSION, "paper": True,
                                     "telegram": bool(cfg.get("telegram_token") and cfg.get("telegram_chat_id")),
@@ -622,7 +624,7 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False) for i in range(n)]
     zs = []
     tr_state, armed = 0, False
     sh = sl_ = None
@@ -657,10 +659,22 @@ def ai_features(bars):
         # 매물대: 그 봉 이전 봉들로만 계산한다 (앞날을 미리 보지 않게). 48봉마다 다시 계산
         if i >= 200 and (i % 48 == 0 or not zs):
             zs = zones_from(bars[max(0, i - 1500):i])
+        # 시간대 (한국 시각, 서머타임 반영 — 웹 차트 세션박스와 같은 기준)
+        kt = datetime.fromtimestamp(b["t"], KST)
+        wd = kt.isoweekday() % 7 + 1  # Pine dayofweek: 일=1 … 토=7
+        us_dst = 3 < kt.month < 11 or (kt.month == 3 and kt.day - wd >= 8) or (kt.month == 11 and kt.day - wd < 1)
+        eu_dst = 3 < kt.month < 10
+        a_s, e_s, u_s = (7 if us_dst else 8), (16 if eu_dst else 17), (22 if us_dst else 23)
+        f[i]["sess"] = "asia" if a_s <= kt.hour < e_s else "eu" if e_s <= kt.hour < u_s else "us"
+        # 최근 36봉 고점에서 얼마나 빠졌나 / 저점에서 얼마나 올랐나 (ATR 몇 배)
+        if atr[i] and i >= 36:
+            f[i]["mvd"] = (max(x["h"] for x in bars[i - 36:i + 1]) - b["l"]) / atr[i]
+            f[i]["mvu"] = (b["h"] - min(x["l"] for x in bars[i - 36:i + 1])) / atr[i]
         if zs and i:
             # 위에서 내려와(앞 봉 종가가 매물대 아래로 안 빠짐) 매물대를 찍고 다시 위에서 마감한 봉 = 지지 / 반대 = 저항
             sup = any(b["l"] <= hi and c[i] >= lo and c[i - 1] >= lo for lo, hi, _k in zs)
             res = any(b["h"] >= lo and c[i] <= hi and c[i - 1] <= hi for lo, hi, _k in zs)
+            f[i]["sup"], f[i]["res"] = sup, res
             pb = bars[i - 1]
             fresh_sup = any(pb["l"] > hi and b["l"] <= hi and c[i] > hi for lo, hi, _k in zs)  # 위에 떠 있다가 처음 찍고 다시 위로
             fresh_res = any(pb["h"] < lo and b["h"] >= lo and c[i] < lo for lo, hi, _k in zs)
@@ -714,13 +728,54 @@ AI_SIGNALS = [
 AI_EXITS = [(1.5, 1.0, "손절 ATR×1.5"), (2.5, 2.0, "손절 ATR×2.5")]
 
 
+SESS_KO = {"asia": "아시아장", "eu": "유로장", "us": "미장"}
+LAB_FILE = os.path.join(HERE, "ai_lab.json")
+GENES = {"slk": [1.0, 1.5, 2.0, 2.5, 3.0], "actk": [0.8, 1.0, 1.5, 2.0, 3.0], "flt": [False, True],
+         "sess": ["", "asia", "eu", "us"], "mv": [0, 2, 3, 4], "zf": [False, True]}
+
+
+def ai_name(e):
+    base = next(n for s_, w, n in AI_SIGNALS if s_ == e["sig"] and w == e["way"])
+    tags = [f"손절 ATR×{e['slk']}", f"수익 지키기 {e['actk']}ATR부터"]
+    if e.get("flt"):
+        tags.append("20·120이평 방향만")
+    if e.get("sess"):
+        tags.append(f"{SESS_KO[e['sess']]}만")
+    if e.get("mv"):
+        tags.append(f"{e['mv']}ATR 이상 빠진(오른) 뒤만")
+    if e.get("zf"):
+        tags.append("매물대 위에서만")
+    return base + " · " + " · ".join(tags)
+
+
+def ai_key(e):
+    return (e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")))
+
+
+def ai_mk(**e):
+    e = {"flt": False, "sess": "", "mv": 0, "zf": False, **e}
+    e["name"] = ai_name(e)
+    return e
+
+
 def ai_experts():
+    """기본 후보: 신호 7종 × 손절 2종 × 이평 방향 걸러내기 유무."""
+    return [ai_mk(sig=sg, way=w, slk=sl, actk=ac, flt=fl) for sg, w, _n in AI_SIGNALS for sl, ac in ((1.5, 1.0), (2.5, 2.0)) for fl in (False, True)]
+
+
+def ai_mutants(hall, n_mut=30, n_rand=10):
+    """성적 좋은 로직을 한두 군데 바꿔 보고(돌연변이), 아예 새로 섞은 로직도 만든다."""
     out = []
-    for sig, way, name in AI_SIGNALS:
-        for slk, actk, en in AI_EXITS:
-            for flt in (False, True):
-                out.append({"sig": sig, "way": way, "slk": slk, "actk": actk, "flt": flt,
-                            "name": f"{name} · {en}{' · 20·120이평 방향만' if flt else ''}"})
+    for _ in range(n_mut if hall else 0):
+        e = dict(random.choice(hall[:10]))
+        for g in random.sample(list(GENES), random.choice((1, 2))):
+            e[g] = random.choice(GENES[g])
+        if random.random() < 0.15:
+            e["sig"], e["way"], _n = random.choice(AI_SIGNALS)
+        out.append(ai_mk(**{k: e[k] for k in ("sig", "way", *GENES)}))
+    for _ in range(n_rand):
+        sg, w, _n = random.choice(AI_SIGNALS)
+        out.append(ai_mk(sig=sg, way=w, **{g: random.choice(v) for g, v in GENES.items()}))
     return out
 
 
@@ -728,15 +783,21 @@ def ai_dir(e, f):
     s = f[e["sig"]] * e["way"]
     if not s:
         return 0
-    if e["flt"] and f["trend"] != s:
+    if e.get("flt") and f["trend"] != s:
+        return 0
+    if e.get("sess") and f["sess"] != e["sess"]:
+        return 0
+    if e.get("mv") and (f["mvd"] if s > 0 else f["mvu"]) < e["mv"]:
+        return 0
+    if e.get("zf") and not (f["sup"] if s > 0 else f["res"]):
         return 0
     return s
 
 
-def ai_backtest(e, bars, f, start, spread=0.2):
-    """한 번에 한 포지션. 진입은 신호 봉 종가, 청산은 손절(추적 손절 포함). 손익은 가격 차이(1랏 0.01 기준 ×1달러)."""
+def ai_backtest(e, bars, f, start, spread=0.2, end=None):
+    """한 번에 한 포지션. 진입은 신호 봉 종가, 청산은 손절(추적 손절 포함). 손익은 가격 차이(0.01랏이면 1달러)."""
     trades, pos = [], None
-    for i in range(start, len(bars)):
+    for i in range(start, end or len(bars)):
         b = bars[i]
         if pos:
             d = pos["d"]
@@ -773,25 +834,75 @@ def ai_score(tr):
     return {"n": len(tr), "net": gw - gl, "pf": gw / gl if gl else (9.9 if gw else 0), "win": sum(1 for x in tr if x > 0) / len(tr) * 100, "mdd": mdd}
 
 
+def lab_load():
+    try:
+        with open(LAB_FILE, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return {"gen": 0, "hall": []}
+
+
 def ai_learn(sym, tf):
-    """최근 약 10일 봉으로 후보 전략을 모두 시험. 전체 기간 손익비 1.15 이상, 최근 3일도 이익, 거래 8번 이상인 것 중 1등을 고른다."""
+    """AI 연구실 (매시간): 기본 후보 + 지난 상위 로직 + 새로 만든 로직 40개를 앞 7일로 만들고 최근 3일로 검증한다.
+    둘 다 통과한 것 중 1등을 쓰되, 지금 쓰는 로직보다 점수가 10% 넘게 좋을 때만 바꾼다."""
     bars = rates(sym, tf, 3000)[:-1]
     f = ai_features(bars)
-    recent = max(130, len(bars) - 3 * 24 * 3600 // TF_SEC.get(tf, 300))
+    split = max(400, len(bars) - 3 * 24 * 3600 // TF_SEC.get(tf, 300))
+    lab = lab_load()
+    hall = [ai_mk(**{k: h[k] for k in ("sig", "way", *GENES) if k in h}) for h in lab.get("hall", []) if h.get("sig") in {x[0] for x in AI_SIGNALS}]
+    old = ai_experts() + hall + ([ai["pick"]] if ai["pick"] else [])
+    old_keys = {ai_key(x) for x in old}
+    new = [x for x in ai_mutants(hall) if ai_key(x) not in old_keys]  # 처음 시험하는 로직만 '새 로직'
+    seen, cands = set(), []
+    for e in old + new:
+        k = ai_key(e)
+        if k not in seen:
+            seen.add(k)
+            cands.append(e)
     board = []
-    for e in ai_experts():
-        full = ai_score(ai_backtest(e, bars, f, 130))
-        rec = ai_score(ai_backtest(e, bars, f, recent))
-        ok = full["n"] >= 8 and full["pf"] >= 1.15 and rec["net"] > 0 and full["mdd"] < max(1e-9, full["net"]) * 1.5
-        board.append({**e, "full": full, "rec": rec, "ok": ok, "score": full["net"] - full["mdd"] * 0.5 + rec["net"] * 0.5})
+    for e in cands:
+        tr = ai_score(ai_backtest(e, bars, f, 130, end=split))
+        va = ai_score(ai_backtest(e, bars, f, split))
+        ok = tr["n"] >= 8 and tr["pf"] >= 1.15 and tr["mdd"] < max(1e-9, tr["net"]) * 1.5 and va["n"] >= 2 and va["net"] > 0
+        board.append({**e, "full": tr, "rec": va, "ok": ok, "score": tr["net"] - tr["mdd"] * 0.5 + va["net"],
+                      "new": ai_key(e) not in old_keys})
     board.sort(key=lambda x: (x["ok"], x["score"]), reverse=True)
-    pick = board[0] if board and board[0]["ok"] else None
+    best = board[0] if board and board[0]["ok"] else None
+    cur = next((x for x in board if ai["pick"] and ai_key(x) == ai_key(ai["pick"])), None)
     prev = ai["pick"]["name"] if ai["pick"] else None
-    ai.update(at=time.time(), pick=pick, board=board[:5],
-              note=(f"지금 쓰는 전략: {pick['name']} (최근 10일 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f})"
-                    if pick else "요즘 장에 잘 맞는 전략이 없어 쉬는 중"))
-    if (pick["name"] if pick else None) != prev:
-        p_log("AI 판단 · 전략 바꿈", ai["note"])
+    if cur and cur["ok"] and best and best["score"] <= cur["score"] * 1.1 + 1e-9:
+        pick, changed = cur, False
+    else:
+        pick, changed = best, (best["name"] if best else None) != prev
+    lab["gen"] = lab.get("gen", 0) + 1
+    lab["hall"] = [{k: x[k] for k in ("sig", "way", *GENES)} for x in board if x["ok"]][:40]
+    lab["top"] = [{"name": x["name"], "ok": x["ok"], "new": x["new"], "n": x["full"]["n"], "win": round(x["full"]["win"], 1), "pf": round(x["full"]["pf"], 2),
+                   "net": round(x["full"]["net"], 2), "vnet": round(x["rec"]["net"], 2), "vn": x["rec"]["n"]} for x in board[:10]]
+    lab["at"] = time.time()
+    try:
+        with open(LAB_FILE, "w", encoding="utf-8") as fh:
+            json.dump(lab, fh, ensure_ascii=False)
+    except OSError:
+        pass
+    ai.update(at=time.time(), pick=pick, board=board[:5], lab=lab,
+              note=(f"지금 쓰는 로직: {pick['name']} (앞 7일 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
+                    if pick else "요즘 장에 잘 맞는 로직이 없어 쉬는 중"))
+    # 1시간 보고 (장이 열려 있을 때만: 마지막 봉이 30분 안)
+    if bars and time.time() - bars[-1]["t"] < 1800:
+        okn = sum(1 for x in board if x["ok"])
+        newok = sum(1 for x in board if x["ok"] and x["new"])
+        hour = [h for h in paper["hist"] if h.get("strat") and h.get("ctime", 0) > (time.time() - 3600) * 1000]
+        q = p_quote()
+        eqv = paper["bal"] + (sum(p_pnl(p, q) for p in paper["pos"]) if q else 0)
+        top3 = "\n".join(f"{k + 1}. {'🆕 ' if x['new'] else ''}{x['name']}\n   앞 7일 {x['full']['n']}번 · 승률 {x['full']['win']:.0f}% · 손익비 {x['full']['pf']:.2f} · 최근 3일 {usd(x['rec']['net'])}"
+                          for k, x in enumerate([x for x in board if x["ok"]][:3]))
+        p_log(f"AI 연구실 · 1시간 보고 ({k_now()})",
+              f"{'🔄 로직을 바꿨습니다' if changed else '✔ 지금 로직을 계속 씁니다'}\n{ai['note']}\n\n"
+              f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
+              f"{top3 or '통과한 로직 없음'}\n\n"
+              f"지난 1시간 거래 {len(hour)}번 {usd(sum(h['pnl'] for h in hour))} · 웨이브뷰 계좌 평가금 ${eqv:,.2f}")
+    elif changed:
+        p_log("AI 판단 · 로직 바꿈", ai["note"])
 
 
 def ai_signal(q, tf):
