@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 9
+VERSION = 10
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -349,7 +349,7 @@ PAPER_DEF = {"bal": 1000.0, "pos": [], "hist": [], "seq": 500000, "lastSig": {},
                      "grid": {"tf": "5m", "dir": "rev", "lot1": 0.01, "adds": "30:0.02, 60:0.03", "tp": 5, "be": 1, "stop": 100},
                      "trail": {"tf": "5m", "dir": "trend", "lot": 0.01, "sl": 10, "act": 10, "mode": "half", "dist": 10}}}
 news = {"at": 0, "ev": []}
-ai = {"at": 0, "pick": None, "board": [], "note": "아직 판단 전"}
+ai = {"at": 0, "pick": None, "board": [], "note": "아직 판단 전", "bench": {}, "spread": 0.2, "dayStop": ""}
 
 
 def paper_load():
@@ -730,12 +730,13 @@ AI_EXITS = [(1.5, 1.0, "손절 ATR×1.5"), (2.5, 2.0, "손절 ATR×2.5")]
 
 SESS_KO = {"asia": "아시아장", "eu": "유로장", "us": "미장"}
 LAB_FILE = os.path.join(HERE, "ai_lab.json")
-GENES = {"slk": [1.0, 1.5, 2.0, 2.5, 3.0], "actk": [0.8, 1.0, 1.5, 2.0, 3.0], "flt": [False, True],
+TF_KO_S = {"5m": "5분봉", "15m": "15분봉", "1h": "1시간봉"}
+GENES = {"tf": ["5m", "15m", "1h"], "slk": [1.0, 1.5, 2.0, 2.5, 3.0], "actk": [0.8, 1.0, 1.5, 2.0, 3.0], "flt": [False, True],
          "sess": ["", "asia", "eu", "us"], "mv": [0, 2, 3, 4], "zf": [False, True]}
 
 
 def ai_name(e):
-    base = next(n for s_, w, n in AI_SIGNALS if s_ == e["sig"] and w == e["way"])
+    base = f"[{TF_KO_S.get(e.get('tf', '5m'), e.get('tf'))}] " + next(n for s_, w, n in AI_SIGNALS if s_ == e["sig"] and w == e["way"])
     tags = [f"손절 ATR×{e['slk']}", f"수익 지키기 {e['actk']}ATR부터"]
     if e.get("flt"):
         tags.append("20·120이평 방향만")
@@ -749,18 +750,19 @@ def ai_name(e):
 
 
 def ai_key(e):
-    return (e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")))
+    return (e.get("tf", "5m"), e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")))
 
 
 def ai_mk(**e):
-    e = {"flt": False, "sess": "", "mv": 0, "zf": False, **e}
+    e = {"tf": "5m", "flt": False, "sess": "", "mv": 0, "zf": False, **e}
     e["name"] = ai_name(e)
     return e
 
 
 def ai_experts():
-    """기본 후보: 신호 7종 × 손절 2종 × 이평 방향 걸러내기 유무."""
-    return [ai_mk(sig=sg, way=w, slk=sl, actk=ac, flt=fl) for sg, w, _n in AI_SIGNALS for sl, ac in ((1.5, 1.0), (2.5, 2.0)) for fl in (False, True)]
+    """기본 후보: 5분·15분봉 × 신호 7종 × 손절 2종 × 이평 방향 걸러내기 유무."""
+    return [ai_mk(tf=tf, sig=sg, way=w, slk=sl, actk=ac, flt=fl) for tf in ("5m", "15m") for sg, w, _n in AI_SIGNALS
+            for sl, ac in ((1.5, 1.0), (2.5, 2.0)) for fl in (False, True)]
 
 
 def ai_mutants(hall, n_mut=30, n_rand=10):
@@ -842,12 +844,10 @@ def lab_load():
         return {"gen": 0, "hall": []}
 
 
-def ai_learn(sym, tf):
-    """AI 연구실 (매시간): 기본 후보 + 지난 상위 로직 + 새로 만든 로직 40개를 앞 7일로 만들고 최근 3일로 검증한다.
-    둘 다 통과한 것 중 1등을 쓰되, 지금 쓰는 로직보다 점수가 10% 넘게 좋을 때만 바꾼다."""
-    bars = rates(sym, tf, 3000)[:-1]
-    f = ai_features(bars)
-    split = max(400, len(bars) - 3 * 24 * 3600 // TF_SEC.get(tf, 300))
+def ai_learn(sym):
+    """AI 연구실 (매시간): 기본 후보 + 지난 상위 로직 + 새로 만든 로직을 분봉별로 시험한다.
+    최근 3일 전까지 20일(5분봉은 받을 수 있는 만큼)로 만들고 최근 3일로 검증. 하루 평균 성적으로 비교해서 분봉끼리도 공정하게 겨룬다.
+    둘 다 통과한 것 중 1등을 쓰되, 지금 쓰는 로직보다 점수가 10% 넘게 좋을 때만 바꾼다. 실전에서 4연패한 로직은 24시간 쉰다."""
     lab = lab_load()
     hall = [ai_mk(**{k: h[k] for k in ("sig", "way", *GENES) if k in h}) for h in lab.get("hall", []) if h.get("sig") in {x[0] for x in AI_SIGNALS}]
     old = ai_experts() + hall + ([ai["pick"]] if ai["pick"] else [])
@@ -859,13 +859,33 @@ def ai_learn(sym, tf):
         if k not in seen:
             seen.add(k)
             cands.append(e)
+    data = {}
+    split_t = time.time() - 3 * 86400
+    for tf in {e.get("tf", "5m") for e in cands}:
+        bars = rates(sym, tf, 3000)[:-1]
+        if len(bars) < 300:
+            continue
+        f = ai_features(bars)
+        split = next((i for i, x in enumerate(bars) if x["t"] >= split_t), len(bars))
+        start = max(130, next((i for i, x in enumerate(bars) if x["t"] >= split_t - 20 * 86400), 130))
+        days = max(1.0, (bars[split - 1]["t"] - bars[start]["t"]) / 86400) if split > start else 1.0
+        data[tf] = (bars, f, start, split, days)
+    spread = max(0.2, ai.get("spread", 0.2))
+    now = time.time()
+    ai["bench"] = {k: v for k, v in ai.get("bench", {}).items() if v > now}
     board = []
     for e in cands:
-        tr = ai_score(ai_backtest(e, bars, f, 130, end=split))
-        va = ai_score(ai_backtest(e, bars, f, split))
-        ok = tr["n"] >= 8 and tr["pf"] >= 1.15 and tr["mdd"] < max(1e-9, tr["net"]) * 1.5 and va["n"] >= 2 and va["net"] > 0
-        board.append({**e, "full": tr, "rec": va, "ok": ok, "score": tr["net"] - tr["mdd"] * 0.5 + va["net"],
+        if e.get("tf", "5m") not in data:
+            continue
+        bars, f, start, split, days = data[e.get("tf", "5m")]
+        tr = ai_score(ai_backtest(e, bars, f, start, spread=spread, end=split))
+        va = ai_score(ai_backtest(e, bars, f, split, spread=spread))
+        benched = str(ai_key(e)) in ai["bench"]
+        ok = not benched and tr["n"] >= 8 and tr["pf"] >= 1.15 and tr["mdd"] < max(1e-9, tr["net"]) * 1.5 and va["n"] >= 2 and va["net"] > 0
+        board.append({**e, "full": tr, "rec": va, "ok": ok, "benched": benched,
+                      "score": (tr["net"] - tr["mdd"] * 0.5) / days + va["net"] / 3,  # 하루 평균으로 비교
                       "new": ai_key(e) not in old_keys})
+    bars = data.get("5m", next(iter(data.values()), ([],)))[0]
     board.sort(key=lambda x: (x["ok"], x["score"]), reverse=True)
     best = board[0] if board and board[0]["ok"] else None
     cur = next((x for x in board if ai["pick"] and ai_key(x) == ai_key(ai["pick"])), None)
@@ -885,29 +905,55 @@ def ai_learn(sym, tf):
     except OSError:
         pass
     ai.update(at=time.time(), pick=pick, board=board[:5], lab=lab,
-              note=(f"지금 쓰는 로직: {pick['name']} (앞 7일 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
+              note=(f"지금 쓰는 로직: {pick['name']} (학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
                     if pick else "요즘 장에 잘 맞는 로직이 없어 쉬는 중"))
     # 1시간 보고 (장이 열려 있을 때만: 마지막 봉이 30분 안)
-    if bars and time.time() - bars[-1]["t"] < 1800:
+    if bars and time.time() - bars[-1]["t"] < 3600:
         okn = sum(1 for x in board if x["ok"])
         newok = sum(1 for x in board if x["ok"] and x["new"])
         hour = [h for h in paper["hist"] if h.get("strat") and h.get("ctime", 0) > (time.time() - 3600) * 1000]
         q = p_quote()
         eqv = paper["bal"] + (sum(p_pnl(p, q) for p in paper["pos"]) if q else 0)
-        top3 = "\n".join(f"{k + 1}. {'🆕 ' if x['new'] else ''}{x['name']}\n   앞 7일 {x['full']['n']}번 · 승률 {x['full']['win']:.0f}% · 손익비 {x['full']['pf']:.2f} · 최근 3일 {usd(x['rec']['net'])}"
+        top3 = "\n".join(f"{k + 1}. {'🆕 ' if x['new'] else ''}{x['name']}\n   학습 기간 {x['full']['n']}번 · 승률 {x['full']['win']:.0f}% · 손익비 {x['full']['pf']:.2f} · 최근 3일 {usd(x['rec']['net'])}"
                           for k, x in enumerate([x for x in board if x["ok"]][:3]))
         p_log(f"AI 연구실 · 1시간 보고 ({k_now()})",
               f"{'🔄 로직을 바꿨습니다' if changed else '✔ 지금 로직을 계속 씁니다'}\n{ai['note']}\n\n"
-              f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
+              f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개, 5분·15분·1시간봉) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
+              f"시험 스프레드 {spread:.2f} (한텍 실제 호가 기준){' · 쉬는 로직 ' + str(len(ai['bench'])) + '개 (실전 4연패)' if ai['bench'] else ''}\n"
               f"{top3 or '통과한 로직 없음'}\n\n"
               f"지난 1시간 거래 {len(hour)}번 {usd(sum(h['pnl'] for h in hour))} · 웨이브뷰 계좌 평가금 ${eqv:,.2f}")
     elif changed:
         p_log("AI 판단 · 로직 바꿈", ai["note"])
 
 
-def ai_signal(q, tf):
+def ai_guard():
+    """실전 4연패한 로직은 24시간 쉬게 하고, 하루 손실 한도를 넘으면 그날은 진입하지 않는다. 진입해도 되면 True."""
+    e = ai["pick"]
+    if not e:
+        return False
+    live = [h for h in paper["hist"] if h.get("logic") == e["name"]][:4]
+    if len(live) == 4 and all(h["pnl"] < 0 for h in live):
+        ai["bench"][str(ai_key(e))] = time.time() + 86400
+        p_log("AI 판단 · 로직 쉬게 함", f"{e['name']}\n실전에서 4번 연속 손실이라 24시간 쉬고 다음 후보를 찾습니다 (합계 {usd(sum(h['pnl'] for h in live))}).")
+        ai["pick"], ai["at"] = None, 0  # 다음 순서에 바로 다시 연구
+        return False
+    k = datetime.now(KST)
+    day0 = datetime(k.year, k.month, k.day, tzinfo=KST).timestamp() * 1000
+    today = sum(h["pnl"] for h in paper["hist"] if h.get("strat") and h.get("ctime", 0) >= day0)
+    lim = float(paper["cfg"].get("dayLoss", 30))
+    if today <= -lim:
+        tag = k.strftime("%Y-%m-%d")
+        if ai.get("dayStop") != tag:
+            ai["dayStop"] = tag
+            p_log("AI 판단 · 오늘은 그만", f"오늘 손실 {usd(today)} 가 한도 ${lim:.0f} 를 넘어 오늘은 새로 진입하지 않습니다. 내일 다시 시작합니다.")
+        return False
+    return True
+
+
+def ai_signal(q):
     if not ai["pick"] or any(p.get("strat") == "ai" for p in paper["pos"]):
         return
+    tf = ai["pick"].get("tf", "5m")
     bars = rates(q["sym"], tf, 400)[:-1]
     key = f"ai|{q['sym']}|{tf}"
     bt = bars[-1]["t"]
@@ -920,7 +966,7 @@ def ai_signal(q, tf):
     f = ai_features(bars)
     e = ai["pick"]
     d = ai_dir(e, f[-1])
-    if not d or f[-1]["atr"] is None:
+    if not d or f[-1]["atr"] is None or not ai_guard():
         return
     if news_block():
         p_log("진입 건너뜀", "중요 경제지표 발표 전후라 대기합니다.")
@@ -934,7 +980,7 @@ def ai_signal(q, tf):
     p = p_open(q, d, lots, "ai", f"A{int(time.time() * 1000)}", round(sl, 2), quiet=True)
     if p:
         p["act"] = round(e["actk"] * a / paper["cfg"].get("ptv", 1), 2)
-        p["why"] = e["name"]
+        p["logic"] = e["name"]
         cs = paper["cfg"]["cs"]
         start = p["open"] + d * e["actk"] * a
         p_log(f"{side_ko(d)} 진입 · {lots}랏 · AI 판단",
@@ -949,10 +995,10 @@ def ai_signal(q, tf):
 def p_signals(q):
     c = paper["cfg"]
     if paper["auto"].get("ai", True):
-        tf = c.get("aiTf", "5m")
+        ai["spread"] = ai.get("spread", 0.2) * 0.98 + max(0.0, q["ask"] - q["bid"]) * 0.02  # 실제 호가 차이 평균
         if time.time() - ai["at"] > 3600:
-            ai_learn(q["sym"], tf)
-        ai_signal(q, tf)
+            ai_learn(q["sym"])
+        ai_signal(q)
         return
     for st in ("grid", "trail"):
         if not paper["auto"].get(st) or any(p.get("strat") == st for p in paper["pos"]):
