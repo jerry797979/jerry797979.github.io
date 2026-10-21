@@ -979,6 +979,9 @@ def ai_mk(**e):
     return e
 
 
+BLOG_RULE = None  # ai_mk 정의 뒤에 채운다
+
+
 def ai_experts():
     """기본 후보: 5분·15분봉 × 신호 7종 × 손절 2종 × 이평 방향 걸러내기 유무."""
     base = [ai_mk(tf=tf, sig=sg, way=w, slk=sl, actk=ac, flt=fl) for tf in ("5m", "15m") for sg, w, _n in AI_SIGNALS
@@ -986,6 +989,9 @@ def ai_experts():
     # 돌파 더블비 뒤 되돌림 진입: 손절 방식 × 청산 방식
     base += [ai_mk(tf=tf, sig="pbk", way=1, slm=sm, tpm=tp) for tf in ("5m", "15m") for sm in ("band", "p20", "atr") for tp in ("trail", "rr1", "rr2")]
     # 블로그 3분봉 장기이평 구간 매매: 10P마다 +0.01랏(50P까지) · 55P 손절 · 익절 10P/전고저 · 피할 때 피함
+    global BLOG_RULE
+    BLOG_RULE = ai_mk(tf="3m", sig="lmt", way=1, mode="zone", zstep=10, zmax=50, zstop=55, ztp=10, zbe=0, zlot="eq", zflip=True, zvol=False, zhtf=True, avd=True)
+    base += [BLOG_RULE]
     base += [ai_mk(tf=tf, sig="lmt", way=1, mode="zone", ztp=tp, avd=True) for tf in ("3m", "5m") for tp in (10, "hl")]
     base += [ai_mk(tf="3m", sig="lmt", way=1, mode="zone", ztp="hl", avd=True, zlot="up")]
     base += [ai_mk(tf="3m", sig="lmt", way=1, mode="zone", ztp=tp, avd=True, zvol=zv) for tp in (10, "hl") for zv in (True, "cal")]
@@ -1309,13 +1315,21 @@ def ai_learn(sym):
                 break
             if not x["benched"] and all(ai_key(x) != ai_key(y) for y in picks):
                 picks.append(x)
+        # 사장님 지시: 블로그 규칙 그대로(3분봉·1시간 같은 방향·10P마다 추가·50P까지·55P 손절·10P 익절·첫 진입가 복귀 일괄 청산·배열 뒤집히면 본절·피할 때 피함)를 1등(텔레그램 알림)으로 매매
+        if paper["cfg"].get("blog", True):
+            bk = ai_key(BLOG_RULE)
+            bx = next((x for x in board if ai_key(x) == bk), None)
+            if bx:
+                changed = changed or (pick["name"] if pick else None) != bx["name"]
+                pick = bx = {**bx, "boss": True}
+                picks = [bx] + [y for y in picks if ai_key(y) != bk][:2]
         # 블로그 3분봉 장기이평 구간 매매는 성적과 상관없이 한 자리를 늘 줘서 실제 시세 기록을 모은다 (한 달 뒤 판단)
         zb = next((x for x in board if x.get("mode") == "zone" and x["sig"] == "lmt" and not x["benched"]), None)
         if zb and all(not (y.get("mode") == "zone" and y["sig"] == "lmt") for y in picks):
             picks = (picks[:2] + [zb]) if len(picks) >= 3 else picks + [zb]
     ai["picks"] = picks
     ai.update(at=time.time(), pick=pick, board=board[:5], lab=lab,
-              note=(f"지금 쓰는 로직{'' if pick['ok'] else ' (검증 미통과 · 데이터 수집용)'}: {pick['name']} (한 달 환산 {usd(pick.get('mon', 0))} · 학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
+              note=(f"지금 쓰는 로직{' (사장님 지정 · 블로그 3분봉 장기이평 매매)' if pick.get('boss') else '' if pick['ok'] else ' (검증 미통과 · 데이터 수집용)'}: {pick['name']} (한 달 환산 {usd(pick.get('mon', 0))} · 학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
                     if pick else "요즘 장에 잘 맞는 로직이 없어 쉬는 중"))
     # 1시간 보고 (장이 열려 있을 때만: 마지막 봉이 30분 안)
     if bars and time.time() - bars[-1]["t"] < 3600:
@@ -1349,7 +1363,8 @@ def ai_guard(e, main):
                 order.append(g)
             by[g]["pnl"] += h["pnl"]
     live = [by[g] for g in order[:4]]
-    if len(live) == 4 and all(h["pnl"] < 0 for h in live):
+    blog = paper["cfg"].get("blog", True) and BLOG_RULE and ai_key(e) == ai_key(BLOG_RULE)  # 사장님이 정한 규칙 매매는 쉬지 않는다 (본절 정리도 스프레드만큼 −라 연패로 잘못 셀 수 있음)
+    if not blog and len(live) == 4 and all(h["pnl"] < 0 for h in live):
         ai["bench"][str(ai_key(e))] = time.time() + 86400
         p_log("AI 판단 · 로직 쉬게 함", f"{e['name']}\n실전에서 4번 연속 손실이라 24시간 쉬고 다음 후보로 바꿉니다 (합계 {usd(sum(h['pnl'] for h in live))}).")
         ai["picks"] = [x for x in ai.get("picks", []) if ai_key(x) != ai_key(e)]
@@ -1431,7 +1446,7 @@ def ai_signal(q):
                       f"손절: {p['open'] - d * zx * v:,.2f} ({zx}포인트 · 다 추가된 뒤 손절되면 약 −${worst:,.0f})\n"
                       f"시각: {k_now()} (한국){' · ⚠ 경제지표 발표 시간' if nb else ''}\n\n"
                       f"이유: {e['name']}\n학습 기간 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f}"
-                      + ("" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
+                      + ("\n(사장님 지정 규칙 · 블로그 3분봉 장기이평 매매)" if e.get("boss") else "" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
             continue
         if e.get("mode") == "basket":
             bk = {k: e[k] for k in ("a1", "a2", "l2", "btp", "bbe", "bstop")}
