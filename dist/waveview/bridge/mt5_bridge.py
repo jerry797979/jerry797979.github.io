@@ -400,9 +400,9 @@ def p_pnl(p, q):
     return (cur - p["open"]) * p["dir"] * p["lots"] * paper["cfg"]["cs"]
 
 
-def p_log(title, msg):
+def p_log(title, msg, tg=True):
     print("[모의·웨이브뷰]", title, msg)
-    if paper["cfg"].get("tg", True):
+    if tg and paper["cfg"].get("tg", True):
         try:
             send_telegram(f"[모의 · 웨이브뷰 계좌] {title}\n{msg}")
         except Exception as e:  # noqa: BLE001
@@ -1094,7 +1094,8 @@ def ai_learn(sym):
               + "\n" f"이번 시험: {len(board)}개 (새로 만든 것 {len(new)}개, 5분·15분·1시간봉) → 통과 {okn}개 (새 로직 {newok}개) · {lab['gen']}번째 연구\n"
               f"시험 스프레드 {spread:.2f} (한텍 실제 호가 기준){' · 쉬는 로직 ' + str(len(ai['bench'])) + '개 (실전 4연패)' if ai['bench'] else ''}\n"
               f"{top3 or '통과한 로직 없음'}\n\n"
-              f"지난 1시간 거래 {len(hour)}번 {usd(sum(h['pnl'] for h in hour))} · 웨이브뷰 계좌 평가금 ${eqv:,.2f}")
+              f"지난 1시간 거래 {len(hour)}번 {usd(sum(h['pnl'] for h in hour))} · 웨이브뷰 계좌 평가금 ${eqv:,.2f}",
+              tg=False)  # hourly report is log-only; too frequent for Telegram (2026-10-21)
     elif changed:
         p_log("AI 판단 · 로직 바꿈", ai["note"])
 
