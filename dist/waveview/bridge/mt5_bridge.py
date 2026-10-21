@@ -702,7 +702,7 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False, reg="", pbk=0, psl=None, lmt=0, avoid=False, ph=None, pl=None, dr=None) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False, reg="", pbk=0, psl=None, lmt=0, avoid=False, ph=None, pl=None, dr=None, cal=None) for i in range(n)]
     # 하루 변동폭(한국 날짜 기준 고가-저가): 지난 20일 평균. 구간 매매 '영점 조절'에 쓴다
     days, dk, dh, dl = [], None, None, None
     for i in range(n):
@@ -855,6 +855,41 @@ def ai_features(bars):
                 f[i]["usl"] = 1
             elif c[i - 1] >= fin[1] > c[i]:
                 f[i]["usl"] = -1
+    # 영점 조절용 복기: 장기이평 터치마다 (끝난 시점, 시각, 첫 반등 폭, 최대로 물린 폭 · 못 돌아왔으면 None)
+    rv = []
+    for j in range(n):
+        d = f[j]["lmt"]
+        if not d:
+            continue
+        c0, mae, fav, back, k = bars[j]["c"], 0.0, 0.0, False, j + 1
+        while k < n and k <= j + 400:
+            x = bars[k]
+            if k <= j + 20:
+                fav = max(fav, ((x["h"] - c0) if d > 0 else (c0 - x["l"])) / v_)
+            mae = max(mae, ((c0 - x["l"]) if d > 0 else (x["h"] - c0)) / v_)
+            if mae > 0 and ((x["h"] >= c0) if d > 0 else (x["l"] <= c0)) and k > j + 1:
+                back = True
+                break
+            k += 1
+        if back or k > j + 400:
+            rv.append((max(k, j + 20), bars[j]["t"], fav, mae if back else None))
+    rv.sort()
+    ptr, pool = 0, []
+    for i in range(n):
+        while ptr < len(rv) and rv[ptr][0] < i:
+            pool.append(rv[ptr])
+            ptr += 1
+        t0 = bars[i]["t"] - 7 * 86400
+        pool = [x for x in pool if x[1] >= t0] if pool and pool[0][1] < t0 else pool
+        if len(pool) >= 6:
+            favs = sorted(x[2] for x in pool)
+            st = min(20, max(5, round(favs[len(favs) // 2] / 5) * 5))  # 보통 반등 폭 (5P 단위, 5~20)
+            mx = 80
+            for w in range(30, 81, 10):  # 이 구간이었으면 85%는 살아나왔다
+                if sum(1 for x in pool if x[3] is None or x[3] > w) <= 0.15 * len(pool):
+                    mx = w
+                    break
+            f[i]["cal"] = (st, max(st, mx // st * st))
     return f
 
 
@@ -886,7 +921,9 @@ GENES = {"tf": ["3m", "5m", "15m", "1h"], "slk": [1.0, 1.5, 2.0, 2.5, 3.0], "act
          # zlot: eq=추가도 0.01랏씩 / up=1·2·3·4배로 늘려 타기(블로그 5·10·15·20랏). zflip: 들고 있는데 이평 배열이 뒤집히면 본절(평단)에 무조건 정리
          "zlot": ["eq", "up"], "zflip": [True, False],
          # zvol: 블로그 작성자처럼 '한 달에 한 번 영점 조절' — 지난 20일 하루 변동폭이 70포인트일 때를 기준으로 구간·손절·익절 폭을 늘리고 줄인다
-         "zvol": [False, True],
+         # zvol="cal": 작성자 방식 그대로 — 지난 7일 장기이평 터치들을 되돌아보고 '보통 반등 폭'을 추가 간격으로,
+         # '몇 포인트 구간이었으면 살아나왔나'(되돌아온 경우의 85%를 덮는 폭)를 구간 끝으로 다시 잡는다
+         "zvol": [False, True, "cal"],
          "mode": ["atr", "basket", "zone"], "a1": [20, 25, 30], "a2": [50, 60, 70], "l2": [0.02, 0.03], "btp": [3, 5, 8], "bbe": [0.5, 1, 2], "bstop": [100]}
 
 
@@ -896,7 +933,7 @@ def ai_name(e):
         tp_ = "전고·전저" if e["ztp"] == "hl" else f"+{e['ztp']}P"
         tags = [f"구간 매매: {e['zstep']}P마다 추가({'1·2·3배로 늘려서' if e.get('zlot') == 'up' else '0.01랏씩'}, {e['zmax']}P까지) · {e['zstop']}P 손절 · 추가 없으면 {tp_} 익절 · 추가되면 첫 진입가{'+' + str(e['zbe']) + 'P' if e['zbe'] else ''} 복귀 시 일괄 청산"
             + (" · 배열 뒤집히면 본절 정리" if e.get("zflip", True) else "")
-            + (" · 폭은 지난 20일 변동폭에 맞춰 조절" if e.get("zvol") else "")]
+            + (" · 폭은 지난 7일 이평 터치 복기로 영점 조절" if e.get("zvol") == "cal" else " · 폭은 지난 20일 변동폭에 맞춰 조절" if e.get("zvol") else "")]
     elif e.get("mode") == "basket":
         tags = [f"사장님식 분할: {e['a1']}P 밀리면 +0.01랏 · {e['a2']}P 밀리면 +{e['l2']}랏 · {e['bstop']}P 반대면 전부 손절 · 목표 +${e['btp']} (추가 후 본전+${e['bbe']})"]
     else:
@@ -925,7 +962,7 @@ def ai_key(e):
     return (e.get("tf", "5m"), e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")),
             e.get("reg", ""), e.get("tmax", 0), e.get("mode", "atr"), e.get("slm", "atr"), e.get("tpm", "trail"),
             *((e["a1"], e["a2"], e["l2"], e["btp"], e["bbe"], e["bstop"]) if e.get("mode") == "basket" else ()),
-            *((e["zstep"], e["zmax"], e["zstop"], str(e["ztp"]), e["zbe"], e.get("zlot", "eq"), e.get("zflip", True), bool(e.get("zvol"))) if e.get("mode") == "zone" else ()), bool(e.get("avd")))
+            *((e["zstep"], e["zmax"], e["zstop"], str(e["ztp"]), e["zbe"], e.get("zlot", "eq"), e.get("zflip", True), str(e.get("zvol") or "")) if e.get("mode") == "zone" else ()), bool(e.get("avd")))
 
 
 def ai_mk(**e):
@@ -945,7 +982,7 @@ def ai_experts():
     # 블로그 3분봉 장기이평 구간 매매: 10P마다 +0.01랏(50P까지) · 55P 손절 · 익절 10P/전고저 · 피할 때 피함
     base += [ai_mk(tf=tf, sig="lmt", way=1, mode="zone", ztp=tp, avd=True) for tf in ("3m", "5m") for tp in (10, "hl")]
     base += [ai_mk(tf="3m", sig="lmt", way=1, mode="zone", ztp="hl", avd=True, zlot="up")]
-    base += [ai_mk(tf="3m", sig="lmt", way=1, mode="zone", ztp=tp, avd=True, zvol=True) for tp in (10, "hl")]
+    base += [ai_mk(tf="3m", sig="lmt", way=1, mode="zone", ztp=tp, avd=True, zvol=zv) for tp in (10, "hl") for zv in (True, "cal")]
     # 사장님식 분할 진입 기본형: 25P +0.01 · 60P +0.02 · 100P 손절 · 목표 $5 (추가 후 본전+$1)
     base += [ai_mk(tf=tf, sig=sg, way=w, mode="basket", flt=fl) for tf in ("5m", "15m") for sg, w, _n in AI_SIGNALS for fl in (False, True)]
     return base
@@ -1039,7 +1076,12 @@ def ai_bt_basket(e, bars, f, start, spread=0.2, end=None):
 def zone_sz(e, fi):
     """구간 폭(포인트): (추가 간격, 최대 추가, 손절, 익절). zvol 이면 지난 20일 하루 변동폭/70 배로 조절 (0.5~2배)"""
     k = 1.0
-    if e.get("zvol") and fi.get("dr"):
+    if e.get("zvol") == "cal":
+        if fi.get("cal"):
+            st, mx = fi["cal"]
+            tp = st if e["ztp"] == "hl" else max(1, min(e["ztp"], st))
+            return st, mx, mx + 5, tp
+    elif e.get("zvol") and fi.get("dr"):
         v = paper["cfg"].get("ptv", 1) if paper else 1
         k = min(2.0, max(0.5, fi["dr"] / v / 70))
     tp = 10 if e["ztp"] == "hl" else e["ztp"]
@@ -1375,7 +1417,8 @@ def ai_signal(q):
                       f"익절: {z['tp']:,.2f} ({'전고·전저' if hl is not None else f'+{tpp}포인트'}, 추가가 없을 때)\n"
                       f"구간 추가: {zs}포인트마다 {'0.02·0.03·0.04랏으로 늘려서' if e.get('zlot') == 'up' else '0.01랏'} ({p['open'] - d * zs * v:,.2f}부터 {p['open'] - d * zm * v:,.2f}까지 최대 {legs}번)\n"
                       f"추가되면: 첫 진입가로 돌아올 때 일괄 청산{' · 배열 뒤집히면 본절 정리' if z['flip'] else ''}\n"
-                      + (f"폭 조절: 지난 20일 하루 평균 변동폭 {f[-1]['dr'] / v:.0f}포인트 기준\n" if e.get("zvol") and f[-1].get("dr") else "")
+                      + (f"영점 조절: 지난 7일 장기이평 터치 복기 → 반등 폭 {zs}P · 살아나온 구간 {zm}P\n" if e.get("zvol") == "cal" and f[-1].get("cal")
+                         else f"폭 조절: 지난 20일 하루 평균 변동폭 {f[-1]['dr'] / v:.0f}포인트 기준\n" if e.get("zvol") and f[-1].get("dr") else "")
                       + f""
                       f"손절: {p['open'] - d * zx * v:,.2f} ({zx}포인트 · 다 추가된 뒤 손절되면 약 −${worst:,.0f})\n"
                       f"시각: {k_now()} (한국){' · ⚠ 경제지표 발표 시간' if nb else ''}\n\n"
