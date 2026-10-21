@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 14
+VERSION = 15
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -1344,8 +1344,27 @@ def main():
         print("이미 켜져 있습니다")
         return
     paper_load()
-    while not mt5.initialize():
-        print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인하면 자동으로 연결합니다. (10초 뒤 다시 시도)", mt5.last_error())
+    # 웨이브뷰와의 연결 문을 먼저 연다 (MT5 가 아직 안 켜져도 웹이 '연결 대기'를 알 수 있고, 5분마다 도는 자동 실행이 중복으로 켜지지 않는다)
+    port = int(cfg["port"])
+    srv = None
+    for _ in range(30):  # 다시 시작할 때 앞 프로그램이 포트를 놓을 때까지 기다린다
+        try:
+            srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+            break
+        except OSError:
+            time.sleep(2)
+    if srv is None:
+        print("포트를 열지 못했습니다 (이미 켜져 있는 것 같습니다)")
+        return
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    print(f"웨이브뷰 연결 주소: http://127.0.0.1:{port}")
+    while True:
+        try:
+            if mt5.initialize(timeout=60000):
+                break
+            print("MT5 에 연결하지 못했습니다. MT5 를 켜고 로그인하면 자동으로 연결합니다. (10초 뒤 다시 시도)", mt5.last_error())
+        except Exception as e:  # noqa: BLE001
+            print("MT5 연결 오류:", e)
         time.sleep(10)
     acc = mt5.account_info()
     detect_offset()
@@ -1358,15 +1377,8 @@ def main():
     threading.Thread(target=paper_loop, daemon=True).start()
     threading.Thread(target=keep_mt5, daemon=True).start()
     threading.Thread(target=self_update, daemon=True).start()
-    port = int(cfg["port"])
-    print(f"웨이브뷰 연결 주소: http://127.0.0.1:{port}  (이 창을 닫으면 연결이 끊깁니다)")
-    for _ in range(30):  # 다시 시작할 때 앞 프로그램이 포트를 놓을 때까지 기다린다
-        try:
-            srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-            break
-        except OSError:
-            time.sleep(2)
-    srv.serve_forever()
+    while True:
+        time.sleep(3600)
 
 
 if __name__ == "__main__":

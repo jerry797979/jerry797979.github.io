@@ -1085,21 +1085,21 @@ let refLines = [], lowLine = null;
 // 어제 미장 구간 고저 라인 (원본 Pine 로직 그대로: 한국시간 22:00~06:00, 끝난 직후 봉부터 오른쪽으로)
 function computeUsLine(bars = S.bars, tf = S.tf[1], upto = bars.length){
   if (tf >= 86400) return null;
-  let sh = null, sl = null, fin = null, prevIn = false, s0 = 0;
+  let sh = null, sl = null, fin = null, prevIn = false, s0 = 0, hiI = 0, loI = 0;
   for (let i = 0; i < upto; i++){
     const b = bars[i], d = new Date(b.time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
     let inS = m >= 1320 || m < 360;
     // 봉 사이가 8시간 넘게 비면(주말·휴장) 앞 미장은 끝난 것으로 본다
-    if (inS && prevIn && i && b.time - bars[i - 1].time > 8 * 3600){ if (sh != null) fin = { hi:sh, lo:sl, i0:i, s0 }; prevIn = false; }
+    if (inS && prevIn && i && b.time - bars[i - 1].time > 8 * 3600){ if (sh != null) fin = { hi:sh, lo:sl, i0:i, s0, hiI, loI }; prevIn = false; }
     if (inS){
-      if (!prevIn){ sh = b.high; sl = b.low; s0 = i; } else { sh = Math.max(sh, b.high); sl = Math.min(sl, b.low); }
-    } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i, s0 }; }
+      if (!prevIn){ sh = b.high; sl = b.low; s0 = i; hiI = loI = i; } else { if (b.high > sh){ sh = b.high; hiI = i; } if (b.low < sl){ sl = b.low; loI = i; } }
+    } else if (prevIn && sh != null){ fin = { hi:sh, lo:sl, i0:i, s0, hiI, loI }; }
     prevIn = inS;
   }
   // 미장 마지막 봉(06:00에 끝나는 봉)까지 왔으면 다음 봉을 기다리지 않고 확정한다 (금요일 미장은 토요일 휴장이라 다음 봉이 없다)
   if (prevIn && sh != null && upto > 0){
     const d = new Date(bars[upto - 1].time * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes();
-    if (m < 360 && m + tf / 60 >= 360) fin = { hi:sh, lo:sl, i0:upto, s0 };
+    if (m < 360 && m + tf / 60 >= 360) fin = { hi:sh, lo:sl, i0:upto, s0, hiI, loI };
   }
   return fin;
 }
@@ -3662,7 +3662,8 @@ function renderInfo(){
   const nb = S.show.news && typeof newsBlock === 'function' ? newsBlock() : null;
   if (nb) out.push(`<div class="warn">⛔ 거래 대기 · ${nb.ko} ${hm(nb.t)} 발표 전후</div>`);
   if (S.usLine){ const w = S.usWho || '어제';
-    out.push(`<section><h4>${w} 미장 고점 · 저점</h4>${row('#00FF00', '고점', fmt(S.usLine.hi))}${row('#FF0000', '저점', fmt(S.usLine.lo))}</section>`); }
+    const U = S.usLine, B = S.bars, tt = i => B[i] ? (() => { const d = new Date(B[i].time * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; })() : '';
+    out.push(`<section><h4>${w} 미장 고점 · 저점 <span style="font-weight:400">(${tt(U.s0)} ~ 06:00 · ${S.tf[2]} 기준)</span></h4>${row('#00FF00', `고점 <small style="color:var(--sub)">${tt(U.hiI)} 봉</small>`, fmt(U.hi))}${row('#FF0000', `저점 <small style="color:var(--sub)">${tt(U.loI)} 봉</small>`, fmt(U.lo))}</section>`); }
   if (S.ktrNow){ const { name, col, v } = S.ktrNow, f = x => String(Number(x.toFixed(2)));
     out.push(`<section><h4>KTR · <span style="color:${col}">세션: ${name}</span></h4><div class="ktrg"><div>0.5 KTR<b>${f(v * .5)}</b></div><div style="color:#f5c518">1.0 KTR<b>${f(v)}</b></div><div>2.0 KTR<b>${f(v * 2)}</b></div></div></section>`); }
   if (S.show.sr && S.zones && S.zones.length){

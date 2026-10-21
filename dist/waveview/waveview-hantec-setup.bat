@@ -43,11 +43,15 @@ rem 4) 화면 없이 실행 + 컴퓨터 켤 때 자동 실행
 echo  [4/4] 자동 실행을 등록하는 중입니다...
 > "%WV%\run-bridge.vbs" echo CreateObject("WScript.Shell").Run """%PYW%"" ""%WV%\mt5_bridge.py""", 0, False
 copy /y "%WV%\run-bridge.vbs" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\WaveView-Bridge.vbs" >nul
+rem    PC 를 다시 켜거나 프로그램이 꺼져도 5분 안에 다시 켜지도록 작업 스케줄러에 등록 (사장님 계정에만, 관리자 권한 필요 없음)
+rem    이미 켜져 있으면 프로그램이 스스로 바로 끝나므로 두 개가 뜨지 않는다
+schtasks /create /tn "WaveView Bridge" /tr "wscript.exe \"%WV%\run-bridge.vbs\"" /sc minute /mo 5 /f >nul 2>nul
 powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='pythonw.exe' OR Name='python.exe'\" | Where-Object { $_.CommandLine -like '*mt5_bridge.py*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" >nul 2>nul
 wscript "%WV%\run-bridge.vbs"
 
 echo.
 echo  설치가 끝났습니다. 한텍 MT5 를 켜고 로그인해 두면 웨이브뷰가 자동으로 연결됩니다.
+echo  PC 를 다시 켜도 5분 안에 저절로 다시 연결됩니다. 이 설치는 다시 하실 필요가 없습니다.
 echo  (크롬이 '로컬 네트워크 접근'을 물으면 [허용]을 누르세요)
 echo.
 start "" "%SITE%/"
