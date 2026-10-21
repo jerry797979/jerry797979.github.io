@@ -98,8 +98,12 @@ function data(){
   hist.sort((a, b) => b.ctime - a.ctime);
   return { P, live, hist, race:P.race || 0 };
 }
-function render(){
+let lastSig = '';
+function render(force){
   const { P, live, hist, race } = data();
+  // 표·그래프는 거래 기록이나 필터가 바뀔 때만 다시 그린다 (자주 다시 그리면 스크롤이 맨 위로 튄다)
+  const sig = [hist.length, hist[0] ? hist[0].id + ':' + hist[0].ctime : '', (P.pos || []).length, F.who, F.days, F.tab, F.tab === 'lab' && live ? live.aiAt : ''].join('|');
+  const heavy = force || sig !== lastSig; lastSig = sig;
   $('#sub').textContent = `대결 시작 ${race ? kst(race) : '—'} · 둘 다 $1,000 · ${live ? '차트 창 기준 ' + kst(live.ts) + ' 갱신' : '차트 창을 열어 두면 실시간으로 갱신됩니다'}`;
   // 대결 점수: 차트 창이 계산한 평가금(보유 포지션 손익 포함)을 그대로 쓴다
   const R = hist.filter(t => t.ctime >= race);
@@ -120,9 +124,11 @@ function render(){
   const kp = (k, v, c) => `<div class="kpi"><small>${k}</small><b class="${c || ''}">${v}</b></div>`;
   $('#kpis').innerHTML = kp('순손익', money(A.net), A.net >= 0 ? 'up' : 'dn') + kp('거래 수', A.n.toLocaleString() + '건') + kp('승률', A.win.toFixed(1) + '%') + kp('손익비 (PF)', pfs(A.pf))
     + kp('평균 이익', money(A.aw), 'up') + kp('평균 손실', money(-A.al), 'dn') + kp('최대 낙폭', '−$' + A.mdd.toFixed(2), 'dn') + kp('보유 중', ((P.pos || []).length) + '건');
+  if (!heavy) return;
   drawChart(T);
-  // 탭
-  const tab = $('#tab');
+  // 탭 (보던 스크롤 위치는 지킨다)
+  const tab = $('#tab'), tw0 = tab.querySelector('.tw:last-child'), keepY = tw0 ? tw0.scrollTop : 0, keepX = tw0 ? tw0.scrollLeft : 0;
+  requestAnimationFrame(() => { const tw = tab.querySelector('.tw:last-child'); if (tw && !force){ tw.scrollTop = keepY; tw.scrollLeft = keepX; } });
   if (F.tab === 'lab'){
     const top = (live && live.aiTop) || [];
     tab.innerHTML = `<div class="tw" style="padding:14px 16px;display:grid;gap:10px">
@@ -165,16 +171,16 @@ function drawChart(T){
     g.strokeStyle = col; g.lineWidth = 2; g.lineJoin = 'round'; g.beginPath(); ps.forEach(([t, v], i) => i ? g.lineTo(X(t), Y(v)) : g.moveTo(X(t), Y(v))); g.stroke();
     const [lt, lv] = ps[ps.length - 1]; g.fillStyle = col; g.beginPath(); g.arc(X(lt), Y(lv), 3.5, 0, 7); g.fill(); }
 }
-const seg = (id, k) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F[k] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); render(); });
+const seg = (id, k) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F[k] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); render(true); });
 seg('#fWho', 'who'); seg('#fDays', 'days');
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F.tab = b.dataset.t; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); });
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F.tab = b.dataset.t; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(true); });
 $('#csv').onclick = () => {
   const rows = [['청산시각(KST)', '진입시각(KST)', '계좌', '전략', '종목', '방향', '랏', '진입가', '청산가', '손익($)', '청산이유']]
     .concat((window._rows || []).map(t => [kst(t.ctime), t.time ? kst(t.time) : '', own(t) === 'me' ? '사장님' : '웨이브뷰', STRN(t), t.sym || '', t.dir > 0 ? '매수' : '매도', t.lots, t.open ?? '', t.close ?? '', t.pnl.toFixed(2), t.why || '']));
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')], { type:'text/csv' }));
   a.download = `웨이브뷰_거래기록_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
-render(); addEventListener('storage', e => { if (e.key === 'wv:paper' || e.key === 'wv:paperLive') render(); }); setInterval(render, 5000); addEventListener('resize', render);
+render(true); addEventListener('storage', e => { if (e.key === 'wv:paper' || e.key === 'wv:paperLive') render(); }); setInterval(() => render(), 5000); addEventListener('resize', () => render(true));
 })();
 </script>
 </body>
