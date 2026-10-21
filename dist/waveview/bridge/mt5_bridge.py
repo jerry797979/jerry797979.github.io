@@ -702,7 +702,7 @@ def ai_features(bars):
     a20, a120 = _sma(c, 20), _sma(c, 120)
     tr = [bars[0]["h"] - bars[0]["l"]] + [max(bars[i]["h"], c[i - 1]) - min(bars[i]["l"], c[i - 1]) for i in range(1, n)]
     atr = _sma(tr, 14)
-    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False, reg="", pbk=0, psl=None, lmt=0, avoid=False, ph=None, pl=None, dr=None, cal=None) for i in range(n)]
+    f = [dict(db=0, gcb=0, usl=0, zone=0, zdb=0, zsl=None, atr=atr[i], trend=0, sess="", mvd=0, mvu=0, sup=False, res=False, reg="", pbk=0, psl=None, lmt=0, avoid=False, ph=None, pl=None, dr=None, cal=None, htr=0) for i in range(n)]
     # 하루 변동폭(한국 날짜 기준 고가-저가): 지난 20일 평균. 구간 매매 '영점 조절'에 쓴다
     days, dk, dh, dl = [], None, None, None
     for i in range(n):
@@ -738,7 +738,10 @@ def ai_features(bars):
             sd = math.sqrt(sum((x - mm) ** 2 for x in cs_) / 20)
             lv += [mm, mm + 2 * sd, mm - 2 * sd]
         if len(H) >= 120:
-            lv.append(sum(x[2] for x in H[-120:]) / 120)
+            h120 = sum(x[2] for x in H[-120:]) / 120
+            lv.append(h120)
+            # 1시간봉 우위: 20이평 vs 120이평 (지난 시간까지)
+            f[i]["htr"] = 1 if sum(x[2] for x in H[-20:]) / 20 > h120 else -1
         kt_ = datetime.fromtimestamp(b["t"], KST)
         # 블로그 매매법의 피할 때: 새벽 2~7시, 1시간봉 기본 BB·장기이평·전고저 5포인트 안
         f[i]["avoid"] = 2 <= kt_.hour < 7 or any(abs(c[i] - x) <= 5 * v_ for x in lv)
@@ -920,6 +923,8 @@ GENES = {"tf": ["3m", "5m", "15m", "1h"], "slk": [1.0, 1.5, 2.0, 2.5, 3.0], "act
          "zstep": [5, 10], "zmax": [30, 50], "zstop": [55], "ztp": [5, 10, 15, 20, "hl"], "zbe": [0, 2], "avd": [False, True],
          # zlot: eq=추가도 0.01랏씩 / up=1·2·3·4배로 늘려 타기(블로그 5·10·15·20랏). zflip: 들고 있는데 이평 배열이 뒤집히면 본절(평단)에 무조건 정리
          "zlot": ["eq", "up"], "zflip": [True, False],
+         # zhtf: 1시간봉 배열(20/120)과 같은 방향만. 1시간이 역배열인데 3분 정배열 장기이평 터치로 매수하면 1시간 장기이평 맞고 떨어지기 쉽다
+         "zhtf": [True, False],
          # zvol: 블로그 작성자처럼 '한 달에 한 번 영점 조절' — 지난 20일 하루 변동폭이 70포인트일 때를 기준으로 구간·손절·익절 폭을 늘리고 줄인다
          # zvol="cal": 작성자 방식 그대로 — 지난 7일 장기이평 터치들을 되돌아보고 '보통 반등 폭'을 추가 간격으로,
          # '몇 포인트 구간이었으면 살아나왔나'(되돌아온 경우의 85%를 덮는 폭)를 구간 끝으로 다시 잡는다
@@ -933,6 +938,7 @@ def ai_name(e):
         tp_ = "전고·전저" if e["ztp"] == "hl" else f"+{e['ztp']}P"
         tags = [f"구간 매매: {e['zstep']}P마다 추가({'1·2·3배로 늘려서' if e.get('zlot') == 'up' else '0.01랏씩'}, {e['zmax']}P까지) · {e['zstop']}P 손절 · 추가 없으면 {tp_} 익절 · 추가되면 첫 진입가{'+' + str(e['zbe']) + 'P' if e['zbe'] else ''} 복귀 시 일괄 청산"
             + (" · 배열 뒤집히면 본절 정리" if e.get("zflip", True) else "")
+            + (" · 1시간봉 배열과 같은 방향만" if e.get("zhtf", True) else "")
             + (" · 폭은 지난 7일 이평 터치 복기로 영점 조절" if e.get("zvol") == "cal" else " · 폭은 지난 20일 변동폭에 맞춰 조절" if e.get("zvol") else "")]
     elif e.get("mode") == "basket":
         tags = [f"사장님식 분할: {e['a1']}P 밀리면 +0.01랏 · {e['a2']}P 밀리면 +{e['l2']}랏 · {e['bstop']}P 반대면 전부 손절 · 목표 +${e['btp']} (추가 후 본전+${e['bbe']})"]
@@ -962,12 +968,12 @@ def ai_key(e):
     return (e.get("tf", "5m"), e["sig"], e["way"], e["slk"], e["actk"], bool(e.get("flt")), e.get("sess", ""), e.get("mv", 0), bool(e.get("zf")),
             e.get("reg", ""), e.get("tmax", 0), e.get("mode", "atr"), e.get("slm", "atr"), e.get("tpm", "trail"),
             *((e["a1"], e["a2"], e["l2"], e["btp"], e["bbe"], e["bstop"]) if e.get("mode") == "basket" else ()),
-            *((e["zstep"], e["zmax"], e["zstop"], str(e["ztp"]), e["zbe"], e.get("zlot", "eq"), e.get("zflip", True), str(e.get("zvol") or "")) if e.get("mode") == "zone" else ()), bool(e.get("avd")))
+            *((e["zstep"], e["zmax"], e["zstop"], str(e["ztp"]), e["zbe"], e.get("zlot", "eq"), e.get("zflip", True), str(e.get("zvol") or ""), e.get("zhtf", True)) if e.get("mode") == "zone" else ()), bool(e.get("avd")))
 
 
 def ai_mk(**e):
     e = {"tf": "5m", "slk": 2.5, "actk": 2.0, "slm": "atr", "tpm": "trail", "flt": False, "sess": "", "mv": 0, "zf": False, "reg": "", "tmax": 0,
-         "zstep": 10, "zmax": 50, "zstop": 55, "ztp": 10, "zbe": 0, "avd": False, "zlot": "eq", "zflip": True, "zvol": False,
+         "zstep": 10, "zmax": 50, "zstop": 55, "ztp": 10, "zbe": 0, "avd": False, "zlot": "eq", "zflip": True, "zvol": False, "zhtf": True,
          "mode": "atr", "a1": 25, "a2": 60, "l2": 0.02, "btp": 5, "bbe": 1, "bstop": 100, **e}
     e["name"] = ai_name(e)
     return e
@@ -1019,6 +1025,8 @@ def ai_dir(e, f):
     if e.get("reg") and f["reg"] != e["reg"]:
         return 0
     if e.get("avd") and f.get("avoid"):
+        return 0
+    if e.get("mode") == "zone" and e.get("zhtf", True) and f.get("htr") != s:
         return 0
     return s
 
