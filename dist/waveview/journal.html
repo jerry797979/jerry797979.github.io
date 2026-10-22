@@ -503,6 +503,31 @@ $('#csv').onclick = () => {
 addEventListener('resize', () => { if (F.open) render(); });
 setInterval(() => { if (!document.hidden && !F.open) load(); }, 60000);
 load();
+// 차트 창이 지표 발표 알림을 띄우면 이 창에도 같은 알림을 가운데 띄운다 (닫기·Esc·바깥 누르면 닫힘)
+function newsPop(n){
+  document.getElementById('newsPopM')?.remove();
+  const hm = t => { const d = new Date((t + 9 * 3600) * 1000); return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+  const m = document.createElement('div'); m.id = 'newsPopM';
+  m.style.cssText = 'position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:16px';
+  m.innerHTML = `<div role="alertdialog" aria-modal="true" aria-labelledby="npT" style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-top:4px solid #f23645;border-radius:10px;max-width:420px;width:100%;padding:22px 24px;display:grid;gap:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)">
+    <div id="npT" style="font-size:15px;font-weight:700;color:#f23645">⚠ 중요 경제지표 발표 임박</div>
+    <div style="font-size:20px;font-weight:700;line-height:1.4"></div>
+    <div style="font-size:14px;color:var(--sub)">발표 ${hm(n.t)} (한국 시간)</div>
+    <div id="npC" style="font-size:34px;font-weight:800;font-variant-numeric:tabular-nums"></div>
+    ${n.fc || n.pv ? `<div style="font-size:13.5px">${n.fc ? '예상 <b></b>' : ''}${n.fc && n.pv ? ' · ' : ''}${n.pv ? '이전 <b></b>' : ''}</div>` : ''}
+    <div style="font-size:13px;color:var(--sub);line-height:1.55">발표 ${n.before}분 전부터 ${n.after}분 후까지는 큰 무빙이 나올 수 있습니다.<br>새 진입은 쉬고, 들고 있는 포지션의 손절을 확인하세요.</div>
+    <button id="npX" style="height:40px;font:inherit;font-size:15px;font-weight:600;background:#2962ff;color:#fff;border:0;border-radius:6px;cursor:pointer">닫기</button></div>`;
+  m.querySelector('#npT').nextElementSibling.textContent = n.ko;
+  const bs = m.querySelectorAll('b'); let bi = 0; if (n.fc) bs[bi++].textContent = n.fc; if (n.pv) bs[bi].textContent = n.pv;
+  document.body.appendChild(m);
+  const tick = () => { const s = n.t - Math.floor(Date.now() / 1000), c = document.getElementById('npC'); if (!c) return clearInterval(iv);
+    c.textContent = s > 0 ? `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초 남음` : '발표됨'; c.style.color = s <= 60 ? '#f23645' : ''; };
+  const iv = setInterval(tick, 1000); tick();
+  const close = () => { clearInterval(iv); m.remove(); removeEventListener('keydown', esc); }, esc = e => { if (e.key === 'Escape') close(); };
+  addEventListener('keydown', esc); m.addEventListener('click', e => { if (e.target === m) close(); });
+  m.querySelector('#npX').onclick = close; m.querySelector('#npX').focus();
+}
+addEventListener('storage', e => { if (e.key !== 'wv:newsPop' || !e.newValue) return; try { const n = JSON.parse(e.newValue); if (Date.now() - n.at < 60000) newsPop(n); } catch {} });
 })();
 </script>
 </body>

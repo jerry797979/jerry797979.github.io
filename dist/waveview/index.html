@@ -1274,10 +1274,38 @@ function newsTick(){
     const m = Math.round((nx.t - now) / 60), left = m >= 1440 ? `${md(nx.t)} ${hm(nx.t)}` : m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분 후` : `${m}분 후`;
     if (m <= 120) el.classList.add('soon');
     el.textContent = `📅 ${nx.ko} · ${m >= 1440 ? left : hm(nx.t) + ' (' + left + ')'}`;
-    // 텔레그램: 발표 30분 전 1번
-    const k = 'newsTg:' + nx.t;
-    if (m <= P.news.before && m > 0 && !store.get(k)){ store.set(k, 1); notify({ sym:'경제지표', name:`⚠ ${m}분 후 ${nx.ko} 발표 (${hm(nx.t)})`, msg:`발표 ${P.news.before}분 전부터 ${P.news.after}분 후까지는 큰 무빙이 나올 수 있어 거래 대기를 권합니다.${nx.fc ? `\n예상 ${nx.fc} · 이전 ${nx.pv}` : ''}`, tg:true, sound:true }); }
   } else el.textContent = '📅 지표 일정 없음';
+  // 발표 전 알림 1번 (텔레그램 + 차트 가운데 창). '거래 대기' 구간에 들어가도 울리도록 알약 표시와 따로 확인한다
+  if (nx){
+    const m = Math.ceil((nx.t - now) / 60), k = 'newsTg:' + nx.t;
+    if (m <= P.news.before && m > 0 && !store.get(k)){ store.set(k, 1); newsPop(nx); notify({ sym:'경제지표', name:`⚠ ${m}분 후 ${nx.ko} 발표 (${hm(nx.t)})`, msg:`발표 ${P.news.before}분 전부터 ${P.news.after}분 후까지는 큰 무빙이 나올 수 있어 거래 대기를 권합니다.${nx.fc ? `\n예상 ${nx.fc} · 이전 ${nx.pv}` : ''}`, tg:true, sound:true }); }
+  }
+}
+// 지표 발표 전 알림: 텔레그램과 같은 때 차트 한가운데 창으로 띄운다 (닫기·Esc·바깥 누르면 닫힘). 열린 거래 기록·트레이더 노트 창에도 같이 뜬다
+function newsPop(ev){
+  store.set('newsPop', { t:ev.t, ko:ev.ko, fc:ev.fc || '', pv:ev.pv || '', before:P.news.before, after:P.news.after, at:Date.now() });
+  showNewsPop(ev.t, ev.ko, ev.fc, ev.pv, P.news.before, P.news.after);
+}
+function showNewsPop(t, ko, fc, pv, before, after){
+  document.getElementById('newsPopM')?.remove();
+  const m = document.createElement('div'); m.id = 'newsPopM'; m.className = 'modal'; m.style.zIndex = 60;
+  m.innerHTML = `<div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="npT" style="max-width:420px;width:100%;padding:22px 24px;display:grid;gap:12px;border-top:4px solid #f23645;text-align:center">
+    <div id="npT" style="font-size:15px;font-weight:700;color:#f23645">⚠ 중요 경제지표 발표 임박</div>
+    <div style="font-size:20px;font-weight:700;line-height:1.4">${ko}</div>
+    <div style="font-size:14px;color:var(--sub)">발표 ${hm(t)} (한국 시간)</div>
+    <div id="npC" style="font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px"></div>
+    ${fc || pv ? `<div style="font-size:13.5px">${fc ? `예상 <b>${fc}</b>` : ''}${fc && pv ? ' · ' : ''}${pv ? `이전 <b>${pv}</b>` : ''}</div>` : ''}
+    <div style="font-size:13px;color:var(--sub);line-height:1.55">발표 ${before}분 전부터 ${after}분 후까지는 큰 무빙이 나올 수 있습니다.<br>새 진입은 쉬고, 들고 있는 포지션의 손절을 확인하세요.</div>
+    <button class="btn primary" id="npX" style="height:40px;font-size:15px;justify-content:center">닫기</button></div>`;
+  document.body.appendChild(m);
+  const tick = () => { const s = t - nowSec(), c = document.getElementById('npC'); if (!c){ clearInterval(iv); return; }
+    c.textContent = s > 0 ? `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초 남음` : '발표됨'; c.style.color = s <= 60 ? '#f23645' : ''; };
+  const iv = setInterval(tick, 1000); tick();
+  const close = () => { clearInterval(iv); m.remove(); removeEventListener('keydown', esc); };
+  const esc = e => { if (e.key === 'Escape') close(); };
+  addEventListener('keydown', esc);
+  m.addEventListener('click', e => { if (e.target === m) close(); });
+  m.querySelector('#npX').onclick = close; m.querySelector('#npX').focus();
 }
 $('#newsPill').onclick = () => {
   const now = nowSec(), list = newsEvents(now - 86400, now + 7 * 86400).filter(e => e.imp >= 2);
