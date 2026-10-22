@@ -507,7 +507,7 @@ svg{display:block}
       <div id="wl"></div>
       <div class="detail" id="detail"></div>
       <div class="cinfo" id="cinfo"></div>
-      <div style="padding:0 12px 14px"><button class="tb" id="stOpen" style="width:100%;justify-content:center;border:1px solid var(--border);height:34px">📊 거래 기록 · 통계 (새 창)</button></div>
+      <div style="padding:0 12px 14px"><button class="tb" id="stOpen" style="width:100%;justify-content:center;border:1px solid var(--border);height:34px">📊 거래 기록 · 통계 (새 창)</button><button class="tb" id="jOpen" style="width:100%;justify-content:center;border:1px solid var(--border);height:34px;margin-top:6px">📒 EdgeLog · 내 매매 일지 분석 ↗</button></div>
     </div>
     <div class="pb" id="tab-al" hidden>
       <div class="seg" role="tablist"><button data-sub="list" aria-pressed="true">얼러트</button><button data-sub="log" aria-pressed="false">기록 <span class="badge" id="logBadge" hidden></span></button></div>
@@ -3692,6 +3692,7 @@ function renderInfo(){
 }
 setInterval(renderInfo, 1000);
 $('#stOpen').addEventListener('click', () => openStats());
+$('#jOpen').addEventListener('click', () => { if (!window.open('journal.html', 'wvjournal')) location.href = 'journal.html'; });
 
 /* 모의 거래 기록 · 통계 */
 const STRN = p => p.mt5 ? 'MT5 실거래' : p.strat === 'grid' ? '물타기 자동' : p.strat === 'trail' ? '끌고가기 자동' : p.strat === 'ai' ? (p.logic ? 'AI · ' + p.logic : 'AI 판단') : '직접';

@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>엣지로그 매매 일지</title>
+<style>
+/* 엣지로그: MT5 실거래를 '묶음(분할 진입 포함)' 단위로 모아 진입 자리·보유 시간·손절·분할 방식을 진단하고, 다른 분할 방식이었으면 어땠을지 같은 시세로 다시 돌려 본다 */
+:root{--bg:#131313;--panel:#1b1c20;--line:#2a2b31;--fg:#e0e3eb;--sub:#8b8e98;--acc:#2962ff;--up:#22ab94;--dn:#f23645;--warn:#f5a623;--hover:#24262c;
+  --sans:-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--sans);padding:20px 16px 48px}
+main{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+main > *{min-width:0}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:baseline;gap:8px}
+h1{font-size:21px;margin:0;letter-spacing:-.3px}
+h1 em{font-style:normal;color:var(--acc)}
+.sub{color:var(--sub);font-size:12.5px}
+.sp{flex:1}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;height:32px;padding:0 12px;font:inherit;font-size:13px;cursor:pointer}
+.btn:hover{background:var(--hover)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:2px;flex-wrap:wrap}
+.seg button{background:none;border:0;color:var(--sub);font:inherit;font-size:13px;padding:5px 12px;border-radius:5px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#2a2e39;color:var(--fg);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(41,98,255,.15);color:#9db6ff;border-radius:14px;padding:3px 10px;font-size:12.5px}
+.chip button{background:none;border:0;color:inherit;cursor:pointer;font-size:14px;padding:0}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.kpi small{display:block;color:var(--sub);font-size:11.5px}
+.kpi b{font-size:18px;font-variant-numeric:tabular-nums}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.box h2{font-size:15px;margin:0 0 8px}
+.ins{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.ins li{display:grid;grid-template-columns:22px 1fr;gap:6px;line-height:1.55}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--sub);font:inherit;font-size:14px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--acc);font-weight:600}
+.tw{overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+td.wrap{white-space:normal;min-width:220px}
+th{color:var(--sub);font-weight:500;position:sticky;top:0;background:var(--panel);z-index:1}
+tbody tr.row{cursor:pointer}
+tbody tr.row:hover td{background:var(--hover)}
+tr.det > td{background:#17181c;padding:14px 16px;white-space:normal;text-align:left}
+.up{color:var(--up)}.dn{color:var(--dn)}.wa{color:var(--warn)}
+.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:9px;background:#2a2e39;margin:1px 2px 1px 0;white-space:nowrap}
+.tag.bad{background:rgba(242,54,69,.14);color:#ff8a94}.tag.good{background:rgba(34,171,148,.15);color:#5fd4bd}
+.empty{color:var(--sub);padding:28px;text-align:center}
+.hbar{display:inline-block;height:10px;border-radius:2px;vertical-align:middle}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal .h{color:var(--sub);font-size:12px;text-align:center}
+.cal .d{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:68px;padding:6px 8px;cursor:pointer;display:grid;align-content:space-between}
+.cal .d:hover{border-color:#4a4f5c}
+.cal .d.sel{outline:2px solid var(--acc)}
+.cal .d.off{opacity:.35;cursor:default}
+.cal .d small{color:var(--sub);font-size:11.5px}
+.cal .d b{font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.calnav{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.det-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+.det-grid > *{min-width:0}
+canvas.mini{width:100%;height:280px;display:block;background:#131313;border:1px solid var(--line);border-radius:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}
+.kv span:nth-child(odd){color:var(--sub)}
+.dx{margin:8px 0 0;padding-left:18px;display:grid;gap:4px}
+textarea{width:100%;min-height:54px;background:#131313;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;font-size:13px;resize:vertical}
+.alt td:first-child{white-space:normal}
+.best{background:rgba(34,171,148,.08)}
+.note{font-size:12px;color:var(--sub)}
+@media (max-width:860px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2,.det-grid{grid-template-columns:1fr}.cal .d{min-height:54px;padding:4px}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo"><h1><em>Edge</em>Log</h1><span class="sub">엣지로그 · 통계로 찾는 내 매매의 강점과 약점</span></div>
+    <span class="sp"></span><span class="sub" id="st">불러오는 중…</span>
+    <button class="btn" id="reload">다시 불러오기</button><button class="btn" id="csv">엑셀로 받기</button>
+  </header>
+  <div class="filters">
+    <div class="seg" id="fPer"><button data-v="today" aria-pressed="false">오늘</button><button data-v="week" aria-pressed="false">이번 주</button><button data-v="month" aria-pressed="true">이번 달</button><button data-v="last" aria-pressed="false">지난달</button><button data-v="30" aria-pressed="false">30일</button><button data-v="all" aria-pressed="false">전체</button></div>
+    <div class="seg" id="fSym"></div>
+    <span id="dayChip"></span>
+  </div>
+  <section class="kpis" id="kpis"></section>
+  <section class="box"><h2>🧭 이 기간 진단</h2><ul class="ins" id="ins"></ul></section>
+  <nav class="tabs" id="tabs">
+    <button data-t="trades" aria-selected="true">🔍 거래별 진단</button>
+    <button data-t="cal" aria-selected="false">📅 날짜별 · 달력</button>
+    <button data-t="scale" aria-selected="false">🧩 분할 매수 분석</button>
+    <button data-t="pat" aria-selected="false">⏱ 패턴 · 조건별</button>
+    <button data-t="mon" aria-selected="false">📆 월별</button>
+  </nav>
+  <section id="tab"></section>
+  <p class="note">MT5 계좌의 실제 체결(최근 120일)을 연결 프로그램에서 읽습니다. 같은 방향으로 겹쳐 들어간 주문은 한 번의 <b>묶음 거래</b>로 봅니다. 진입 자리 진단은 한텍 3분봉 단순이평 20/120·볼린저(20,2)와 1시간봉 20/120 배열을 기준으로 하며, '다른 방식이었으면'은 같은 3분봉 시세로 다시 돌린 추정입니다 (한 봉 안에서 손절과 익절이 겹치면 손절로 봅니다).</p>
+</main>
+<script>
+(() => {
+const $ = s => document.querySelector(s), KST = 9 * 3600;
+const get = (k, d) => { try { const v = localStorage.getItem('wv:' + k); return v ? JSON.parse(v) : d; } catch { return d; } };
+const put = (k, v) => { try { localStorage.setItem('wv:' + k, JSON.stringify(v)); } catch {} };
+const money = v => (v >= 0 ? '+' : '−') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+const px = v => v == null ? '—' : v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+const p1 = v => v == null ? '—' : (Math.round(v * 10) / 10).toLocaleString('en-US');
+const kd = s => new Date((s + KST) * 1000);  // 초 → 한국 시각 Date (UTC 필드로 읽음)
+const two = n => String(n).padStart(2, '0');
+const kdt = s => { const d = kd(s); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${two(d.getUTCHours())}:${two(d.getUTCMinutes())}`; };
+const kday = s => { const d = kd(s); return `${d.getUTCFullYear()}-${two(d.getUTCMonth() + 1)}-${two(d.getUTCDate())}`; };
+const dur = m => m < 60 ? `${Math.round(m)}분` : m < 1440 ? `${Math.floor(m / 60)}시간 ${Math.round(m % 60)}분` : `${Math.floor(m / 1440)}일 ${Math.floor(m % 1440 / 60)}시간`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const CFG = get('cfg', {}), BASE = (CFG.mt5url || 'http://127.0.0.1:8765').replace(/\/+$/, '');
+const api = async p => { const r = await fetch(BASE + p); const j = await r.json(); if (j.error) throw new Error(j.error); return j; };
+
+// ---------- 지표 ----------
+function sma(v, n){ const o = new Array(v.length).fill(null); let s = 0; for (let i = 0; i < v.length; i++){ s += v[i]; if (i >= n) s -= v[i - n]; if (i >= n - 1) o[i] = s / n; } return o; }
+function bb(v, n, k){ const m = sma(v, n), up = [], lo = []; for (let i = 0; i < v.length; i++){ if (m[i] == null){ up.push(null); lo.push(null); continue; } let q = 0; for (let j = i - n + 1; j <= i; j++) q += (v[j] - m[i]) ** 2; const sd = Math.sqrt(q / n); up.push(m[i] + k * sd); lo.push(m[i] - k * sd); } return { up, lo }; }
+function atr(B, n){ const tr = B.map((b, i) => i ? Math.max(b.h - b.l, Math.abs(b.h - B[i - 1].c), Math.abs(b.l - B[i - 1].c)) : b.h - b.l); return sma(tr, n); }
+function prep(B){ const c = B.map(b => b.c), { up, lo } = bb(c, 20, 2); return { B, t:B.map(b => b.t), a20:sma(c, 20), a120:sma(c, 120), up, lo, atr:atr(B, 14) }; }
+const idx = (T, ts) => { let lo = 0, hi = T.length - 1, r = -1; while (lo <= hi){ const m = (lo + hi) >> 1; if (T[m] <= ts){ r = m; lo = m + 1; } else hi = m - 1; } return r; };
+
+// ---------- 상태 ----------
+let RAW = null, M = {}, NEWS = [], BK = [], OPEN = [], KPT = 100;
+const F = { per:'month', sym:'', day:'', tab:'trades', open:null };
+const NOTES = get('jnote', {});
+
+async function load(){
+  $('#st').textContent = '연결 프로그램에서 MT5 거래를 읽는 중…';
+  try {
+    RAW = await api('/mt5/trades?since=0'); put('jcache', { at:Date.now(), raw:RAW });
+  } catch (e){
+    const c = get('jcache', null);
+    if (!c){ $('#st').innerHTML = '<span class="dn">연결 프로그램에 연결되지 않습니다.</span> PC에서 웨이브뷰 연결 프로그램이 켜져 있는지 확인하세요.'; render(); return; }
+    RAW = c.raw; $('#st').innerHTML = `<span class="wa">연결 안 됨 · ${kdt(c.at / 1000)} 저장본으로 보는 중 (차트 진단 없음)</span>`;
+  }
+  try { NEWS = (await (await fetch('calendar.json?' + Math.floor(Date.now() / 3600e3), { cache:'no-store' })).json()).filter(e => e.impact === 'High').map(e => Date.parse(e.date) / 1000); } catch { NEWS = []; }
+  const cnt = {}; for (const t of [...RAW.closed, ...RAW.pos]) cnt[t.sym] = (cnt[t.sym] || 0) + 1;
+  const syms = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
+  for (const s of syms.slice(0, 3)){
+    if (M[s]) continue;
+    try {
+      $('#st').textContent = `${s} 3분봉·1시간봉 받는 중…`;
+      const b3 = (await api(`/bars?symbol=${encodeURIComponent(s)}&tf=3m&count=30000`)).bars;
+      const b1 = (await api(`/bars?symbol=${encodeURIComponent(s)}&tf=1h&count=3000`)).bars;
+      M[s] = { m3:prep(b3), h1:prep(b1) };
+    } catch {}
+  }
+  $('#fSym').innerHTML = `<button data-v="" aria-pressed="${!F.sym}">모든 종목</button>` + syms.map(s => `<button data-v="${esc(s)}" aria-pressed="${F.sym === s}">${esc(s)}</button>`).join('');
+  build();
+  const a = RAW.account;
+  if (!$('#st').innerHTML.includes('저장본')) $('#st').textContent = `MT5 ${a ? `잔액 $${a.balance.toLocaleString('en-US', { maximumFractionDigits:2 })} · 평가 $${a.equity.toLocaleString('en-US', { maximumFractionDigits:2 })} · ` : ''}${BK.length}개 묶음 · ${kdt(Date.now() / 1000)} 갱신`;
+  render();
+}
+
+// ---------- 거래 → 묶음 ----------
+function build(){
+  // 1포인트(가격 1) × 1랏 = 몇 달러인지 실제 체결에서 추정 (금 = 100)
+  const ks = RAW.closed.filter(t => t.open != null && Math.abs(t.close - t.open) >= 1).map(t => t.pnl / ((t.close - t.open) * t.dir * t.lots)).filter(x => x > 0).sort((a, b) => a - b);
+  KPT = ks.length ? ks[ks.length >> 1] : 100;
+  const legs = new Map();
+  for (const t of RAW.closed){
+    const k = t.pid || t.id;
+    if (!legs.has(k)) legs.set(k, { pid:k, sym:t.sym, dir:t.dir, open:t.open ?? t.close, time:t.time / 1000, sl:t.sl || null, tp:t.tp || null, lots:0, olots:t.olots, closes:[], pnl:0 });
+    const g = legs.get(k); g.closes.push({ t:t.ctime / 1000, px:t.close, lots:t.lots, pnl:t.pnl }); g.lots += t.lots; g.pnl += t.pnl;
+  }
+  const L = [...legs.values()].map(g => ({ ...g, lots:+(g.olots || g.lots).toFixed(2), end:Math.max(...g.closes.map(c => c.t)) })).sort((a, b) => a.time - b.time);
+  const out = [];
+  for (const g of L){
+    const b = out.find(x => x.sym === g.sym && x.dir === g.dir && g.time < x.end && g.time >= x.t0);
+    if (b){ b.legs.push(g); b.end = Math.max(b.end, g.end); } else out.push({ sym:g.sym, dir:g.dir, t0:g.time, end:g.end, legs:[g] });
+  }
+  BK = out.map(analyze).sort((a, b) => b.end - a.end);
+  OPEN = RAW.pos || [];
+}
+
+function analyze(b){
+  const legs = b.legs.sort((x, y) => x.time - y.time), f = legs[0], d = b.dir, p0 = f.open;
+  const lots = legs.reduce((a, g) => a + g.lots, 0), avg = legs.reduce((a, g) => a + g.open * g.lots, 0) / lots;
+  const pnl = legs.reduce((a, g) => a + g.pnl, 0), holdM = (b.end - b.t0) / 60;
+  const adds = legs.slice(1).map(g => ({ at:(p0 - g.open) * d, lots:g.lots, t:g.time }));
+  const gaps = []; for (let i = 1; i < legs.length; i++) gaps.push((legs[i - 1].open - legs[i].open) * d);
+  const r = { ...b, legs, p0, lots:+lots.toFixed(2), avg, pnl, holdM, adds, gaps, f, tags:[], ctx:null, mae:null, mfe:null, alts:null, id:String(f.pid) };
+  const sl = legs.find(g => g.sl)?.sl;
+  r.sl = sl || null; r.slP = sl ? (p0 - sl) * d : null;
+  const lastC = f.closes.slice().sort((x, y) => y.t - x.t)[0];
+  r.exitWhy = legs.every(g => g.sl && g.closes.some(c => Math.abs(c.px - g.sl) < 0.6)) ? '손절 주문 체결' : legs.every(g => g.tp && g.closes.some(c => Math.abs(c.px - g.tp) < 0.6)) ? '익절 주문 체결' : '직접 청산';
+  const T = (id, good) => r.tags.push({ id, good });
+  if (!sl) T('nosl');
+  if (gaps.some(g => g > 0 && g < 10)) T('narrow');
+  if (legs.length > 1 && legs.slice(1).reduce((a, g) => a + g.lots, 0) >= f.lots * 3) T('bigadd');
+  if (holdM >= 180 && pnl < 0) T('longloss');
+  const kh = kd(b.t0).getUTCHours();
+  if (kh >= 2 && kh < 7) T('late');
+  if (NEWS.some(n => Math.abs(n - b.t0) <= 1800)) T('news');
+  const m = M[b.sym];
+  if (m){
+    const D = m.m3, i = idx(D.t, b.t0), j = i - 1;  // 진입 직전 '끝난' 봉 기준 (앞날을 보지 않음)
+    if (j >= 120 && D.a120[j] != null && b.t0 - D.t[i] < 600){
+      const H = m.h1, h = idx(H.t, b.t0) - 1;
+      const al3 = D.a20[j] > D.a120[j] ? 1 : -1, al1 = h >= 120 && H.a120[h] != null ? (H.a20[h] > H.a120[h] ? 1 : -1) : 0;
+      const a = D.atr[j] || 1, ext = (p0 - D.a20[j]) * d / a, d120 = p0 - D.a120[j];
+      let hi = -Infinity, lo = Infinity; for (let k = i - 1; k >= 0 && D.t[k] >= b.t0 - 86400; k--){ hi = Math.max(hi, D.B[k].h); lo = Math.min(lo, D.B[k].l); }
+      r.ctx = { al3, al1, ext, d120, a20:D.a20[j], a120:D.a120[j], hi, lo, up:D.up[j], lo2:D.lo[j], atr:a };
+      if (al1) T(al1 === d ? 'h1o' : 'h1x', al1 === d);
+      T(al3 === d ? 'm3o' : 'm3x', al3 === d);
+      if (Math.abs(d120) <= 3) T('lmt', true);
+      if (ext >= 2) T('chase');
+      if ((d > 0 && p0 > D.up[j]) || (d < 0 && p0 < D.lo[j])) T('band');
+      if ((d > 0 && hi - p0 >= -1 && hi - p0 <= 5) || (d < 0 && p0 - lo >= -1 && p0 - lo <= 5)) T('hl');
+      // 보유 중 최대로 물린 폭·최대 수익 폭 (첫 진입가 기준), 배열 뒤집힘 뒤 본절 기회
+      const e = idx(D.t, b.end); let mae = 0, mfe = 0, flip = -1, beAfterFlip = false;
+      for (let k = i; k <= e && k < D.B.length; k++){
+        const x = D.B[k]; mae = Math.max(mae, d > 0 ? p0 - x.l : x.h - p0); mfe = Math.max(mfe, d > 0 ? x.h - p0 : p0 - x.l);
+        if (flip < 0 && k > i && al3 !== -d && D.a120[k] != null && (D.a20[k] > D.a120[k] ? 1 : -1) === -d) flip = k;
+        if (flip >= 0 && k > flip && (d > 0 ? x.h >= avg + .5 : x.l <= avg - .5)) beAfterFlip = true;
+      }
+      r.mae = Math.max(0, mae); r.mfe = Math.max(0, mfe);
+      if (r.mae >= 50) T('deep');
+      if (r.mfe >= 10 && pnl < 0) T('gave');
+      if (pnl < 0 && beAfterFlip) T('flipbe');
+      r.alts = alts(r, D);
+    }
+  }
+  if (holdM < 30) T('quick', null);
+  return r;
+}
+
+// 같은 시세로 다른 분할 방식을 돌려 본다 (첫 진입 시각·가격·첫 랏 그대로)
+function zone(D, d, p0, i0, L, step, max, stop, tp, flip){
+  const legs = [[p0, L]]; let n = 0, fl = false;
+  const al0 = D.a120[i0] != null ? (D.a20[i0] > D.a120[i0] ? 1 : -1) : 0;  // 처음부터 역배열에 들어간 거래는 '뒤집힘'으로 보지 않는다
+  if (al0 === -d) flip = false;
+  const val = px => legs.reduce((a, [o, l]) => a + (px - o) * d * l, 0) * KPT;
+  for (let k = i0 + 1; k < D.B.length && k <= i0 + 1440; k++){
+    const x = D.B[k], worst = d > 0 ? p0 - x.l : x.h - p0;
+    while ((n + 1) * step <= max && worst >= (n + 1) * step){ n++; legs.push([p0 - d * n * step, L]); }
+    if (worst >= stop) return { pnl:val(p0 - d * stop), n:legs.length, why:`${stop}P 손절`, t:D.t[k] };
+    if (flip && D.a120[k] != null && (D.a20[k] > D.a120[k] ? 1 : -1) === -d) fl = true;
+    const av = legs.reduce((a, [o, l]) => a + o * l, 0) / legs.reduce((a, [, l]) => a + l, 0);
+    const tg = fl && n ? av : n ? p0 : p0 + d * tp;
+    if (d > 0 ? x.h >= tg : x.l <= tg) return { pnl:val(tg), n:legs.length, why:fl && n ? '배열 뒤집힘 · 평단 정리' : n ? '첫 진입가 복귀 일괄 청산' : `+${tp}P 익절`, t:D.t[k] };
+  }
+  const k = Math.min(D.B.length - 1, i0 + 1440); return { pnl:val(D.B[k].c), n:legs.length, why:'3일 안에 안 끝나 정리', t:D.t[k] };
+}
+function alts(r, D){
+  const d = r.dir, i0 = idx(D.t, r.t0), L = r.f.lots, out = [];
+  out.push({ k:'act', name:'실제 매매', pnl:r.pnl, n:r.legs.length, why:r.exitWhy });
+  if (r.legs.length > 1) out.push({ k:'one', name:'추가 진입 안 했으면 (첫 주문만)', pnl:r.f.pnl, n:1, why:'첫 주문 실제 청산' });
+  // 실제로 넣은 분할 그대로 두고, 마지막 추가 뒤 첫 진입가로 돌아올 때 전부 정리했다면
+  if (r.legs.length > 1){
+    const last = r.legs[r.legs.length - 1].time, e = idx(D.t, r.end); let hit = null;
+    for (let k = idx(D.t, last) + 1; k <= e && k < D.B.length; k++){ const x = D.B[k]; if (d > 0 ? x.h >= r.p0 : x.l <= r.p0){ hit = k; break; } }
+    if (hit != null) out.push({ k:'back', name:'내 분할 그대로 + 첫 진입가 복귀 시 일괄 청산', pnl:r.legs.reduce((a, g) => a + (r.p0 - g.open) * d * g.lots, 0) * KPT, n:r.legs.length, why:`${kdt(D.t[hit])} 첫 진입가 도달` });
+  }
+  out.push({ k:'z10', name:'블로그 구간: 10P마다 같은 랏 · 50P까지 · 55P 손절', ...zone(D, d, r.p0, i0, L, 10, 50, 55, 10, true) });
+  out.push({ k:'z20', name:'넓은 구간: 20P마다 같은 랏 · 60P까지 · 70P 손절', ...zone(D, d, r.p0, i0, L, 20, 60, 70, 10, true) });
+  out.push({ k:'s10', name:'추가 없이 10P 손절 · 10P 익절', ...zone(D, d, r.p0, i0, L, 999, 0, 10, 10, false) });
+  return out;
+}
+
+// ---------- 태그 설명 ----------
+const TAG = {
+  h1x:['1시간봉 반대 방향', '1시간봉 배열(20/120)과 반대로 들어갔습니다. 1시간 장기이평을 맞고 되돌아올 확률이 높은 자리입니다.'],
+  h1o:['1시간봉 같은 방향', ''], m3o:['3분 배열 순방향', ''],
+  m3x:['3분 배열 역방향', '3분봉 20/120 배열과 반대 방향 진입입니다. 추세를 거스른 역매매였습니다.'],
+  lmt:['3분 장기이평 자리', ''],
+  chase:['추격 진입', '20이평에서 ATR 2배 넘게 이미 달린 뒤에 따라 들어갔습니다. 되돌림 한 번에 바로 물리는 자리입니다.'],
+  band:['볼린저 밖 진입', '볼린저밴드(20,2) 바깥에서 같은 방향으로 들어갔습니다. 밴드 안으로 돌아오는 힘에 밀리기 쉽습니다.'],
+  hl:['전고·전저 앞', '최근 24시간 전고점(매수)·전저점(매도) 5포인트 안에서 들어갔습니다. 매물에 막히는 자리입니다.'],
+  late:['새벽 2~7시', '새벽 2시 이후 진입입니다. 유럽장이 끝나 호가가 얇고 미국 지표·마감 물량에 크게 튀는 시간입니다.'],
+  news:['지표 발표 ±30분', '중요 경제지표 발표 30분 안에 들어갔습니다.'],
+  nosl:['손절 미설정', '진입할 때 MT5에 손절가를 걸지 않았습니다.'],
+  narrow:['물타기 간격 좁음', '추가 진입 간격이 10포인트도 안 됐습니다. 한 번 크게 밀리면 짧은 거리에서 랏만 빠르게 쌓입니다.'],
+  bigadd:['물리고 랏 크게 늘림', '추가 진입 랏 합계가 첫 진입의 3배 이상입니다. 틀린 방향에 비중을 키웠습니다.'],
+  deep:['50P 넘게 물림', '첫 진입가에서 50포인트 넘게 반대로 갔습니다. 구간 매매 기준(50P 구간·55P 손절)을 넘은 자리입니다.'],
+  gave:['수익 반납', '10포인트 이상 수익이 났었는데 손실로 끝났습니다. 익절이나 본절 보호가 없었습니다.'],
+  flipbe:['본절 기회 놓침', '보유 중 3분 배열이 반대로 뒤집혔고 그 뒤 평단까지 돌아왔는데 정리하지 않아 손실로 끝났습니다.'],
+  longloss:['손실 장기 보유', '손실 포지션을 3시간 넘게 들고 있었습니다. 희망회로 구간입니다.'],
+  quick:['30분 안에 끝남', ''],
+};
+const tagHtml = t => `<span class="tag ${t.good === true ? 'good' : t.good === false || !('good' in t) || t.good === undefined ? 'bad' : ''}">${TAG[t.id][0]}</span>`;
+const isBad = t => t.good === undefined || t.good === false;
+
+// ---------- 기간 ----------
+function range(){
+  const now = Date.now() / 1000, d = kd(now), y = d.getUTCFullYear(), mo = d.getUTCMonth();
+  const day0 = Date.UTC(y, mo, d.getUTCDate()) / 1000 - KST;
+  if (F.day){ const [Y, Mo, D] = F.day.split('-').map(Number); const s = Date.UTC(Y, Mo - 1, D) / 1000 - KST; return [s, s + 86400, F.day + ' 하루']; }
+  if (F.per === 'today') return [day0, Infinity, '오늘'];
+  if (F.per === 'week') return [day0 - ((d.getUTCDay() + 6) % 7) * 86400, Infinity, '이번 주 (월요일부터)'];
+  if (F.per === 'month') return [Date.UTC(y, mo, 1) / 1000 - KST, Infinity, `${mo + 1}월`];
+  if (F.per === 'last') return [Date.UTC(y, mo - 1, 1) / 1000 - KST, Date.UTC(y, mo, 1) / 1000 - KST, `${mo === 0 ? 12 : mo}월`];
+  if (F.per === '30') return [now - 30 * 86400, Infinity, '최근 30일'];
+  return [0, Infinity, '전체 (최근 120일)'];
+}
+const sel = () => { const [a, b] = range(); return BK.filter(x => x.end >= a && x.end < b && (!F.sym || x.sym === F.sym)); };
+function stat(L){
+  const w = L.filter(x => x.pnl > 0), l = L.filter(x => x.pnl <= 0), gw = w.reduce((a, x) => a + x.pnl, 0), gl = -l.reduce((a, x) => a + x.pnl, 0);
+  let eq = 0, pk = 0, mdd = 0, cl = 0, mcl = 0;
+  for (const x of L.slice().sort((a, b) => a.end - b.end)){ eq += x.pnl; pk = Math.max(pk, eq); mdd = Math.max(mdd, pk - eq); cl = x.pnl <= 0 ? cl + 1 : 0; mcl = Math.max(mcl, cl); }
+  return { n:L.length, net:gw - gl, win:L.length ? w.length / L.length * 100 : 0, pf:gl ? gw / gl : (gw ? Infinity : 0), aw:w.length ? gw / w.length : 0, al:l.length ? gl / l.length : 0, mdd, mcl,
+    hold:L.length ? L.reduce((a, x) => a + x.holdM, 0) / L.length : 0, holdW:w.length ? w.reduce((a, x) => a + x.holdM, 0) / w.length : 0, holdL:l.length ? l.reduce((a, x) => a + x.holdM, 0) / l.length : 0,
+    sl:L.length ? L.filter(x => x.sl).length / L.length * 100 : 0, legs:L.reduce((a, x) => a + x.legs.length, 0) };
+}
+const pfs = x => x === Infinity ? '∞' : x.toFixed(2);
+
+// ---------- 그리기 ----------
+function render(){
+  const L = sel(), S = stat(L), [, , lab] = range();
+  $('#dayChip').innerHTML = F.day ? `<span class="chip">📅 ${F.day} 만 보는 중 <button id="dayX" aria-label="날짜 선택 풀기">×</button></span>` : '';
+  if (F.day) $('#dayX').onclick = () => { F.day = ''; render(); };
+  const kp = (k, v, c, t) => `<div class="kpi" ${t ? `title="${t}"` : ''}><small>${k}</small><b class="${c || ''}">${v}</b></div>`;
+  $('#kpis').innerHTML = kp(`순손익 · ${lab}`, money(S.net), S.net >= 0 ? 'up' : 'dn') + kp('거래 (묶음 · 주문 수)', `${S.n}번 · ${S.legs}건`) + kp('승률', S.win.toFixed(1) + '%') + kp('손익비 (PF)', pfs(S.pf))
+    + kp('평균 이익 / 손실', `<span class="up">${money(S.aw)}</span> / <span class="dn">${money(-S.al)}</span>`)
+    + kp('평균 보유 시간', dur(S.hold), '', `이긴 거래 ${dur(S.holdW)} · 진 거래 ${dur(S.holdL)}`) + kp('이긴 / 진 거래 보유', `${dur(S.holdW)} / ${dur(S.holdL)}`, S.holdL > S.holdW * 1.5 ? 'wa' : '')
+    + kp('손절 걸고 들어간 비율', S.sl.toFixed(0) + '%', S.sl < 50 ? 'wa' : '') + kp('최대 연속 손실', S.mcl + '번', S.mcl >= 4 ? 'dn' : '') + kp('최대 낙폭', '−$' + S.mdd.toFixed(2), 'dn');
+  insights(L, S);
+  const tab = $('#tab');
+  if (!RAW){ tab.innerHTML = '<div class="tw"><div class="empty">연결 프로그램에 연결되면 MT5 거래를 불러옵니다.</div></div>'; return; }
+  ({ trades, cal, scale, pat, mon })[F.tab](tab, L);
+}
+
+function insights(L, S){
+  const li = [];
+  if (!L.length){ $('#ins').innerHTML = '<li><span>ℹ️</span><span>이 기간에 끝난 거래가 없습니다.</span></li>'; return; }
+  const loss = L.filter(x => x.pnl < 0), totLoss = -loss.reduce((a, x) => a + x.pnl, 0) || 1;
+  const by = {}; for (const x of L) for (const t of x.tags) if (isBad(t)) (by[t.id] ||= []).push(x);
+  const rank = Object.entries(by).map(([k, xs]) => ({ k, xs, net:xs.reduce((a, x) => a + x.pnl, 0), ln:xs.filter(x => x.pnl < 0).length })).filter(r => r.net < 0 && r.xs.length >= 2).sort((a, b) => a.net - b.net);
+  for (const r of rank.slice(0, 3)){
+    const w = r.xs.filter(x => x.pnl > 0).length / r.xs.length * 100, share = Math.min(100, -r.net / totLoss * 100);
+    li.push(['⚠️', `<b>${TAG[r.k][0]}</b> 거래 ${r.xs.length}번 (승률 ${w.toFixed(0)}%) 합계 <b class="dn">${money(r.net)}</b> — 손실의 ${share.toFixed(0)}%. 이 조건을 피했다면 순손익 ${money(S.net - r.net)}. <span class="sub">${TAG[r.k][1]}</span>`]);
+  }
+  const goods = Object.entries((() => { const g = {}; for (const x of L) for (const t of x.tags) if (t.good === true) (g[t.id] ||= []).push(x); return g; })())
+    .map(([k, xs]) => ({ k, xs, net:xs.reduce((a, x) => a + x.pnl, 0), w:xs.filter(x => x.pnl > 0).length / xs.length * 100 })).filter(r => r.xs.length >= 3 && r.net > 0).sort((a, b) => b.net - a.net);
+  if (goods[0]) li.push(['✅', `잘 되는 자리: <b>${TAG[goods[0].k][0]}</b> ${goods[0].xs.length}번 · 승률 ${goods[0].w.toFixed(0)}% · <b class="up">${money(goods[0].net)}</b>. 이 자리 비중을 늘리세요.`]);
+  if (S.holdL > S.holdW * 1.5 && S.holdL > 30) li.push(['⏱', `진 거래를 이긴 거래보다 ${(S.holdL / Math.max(1, S.holdW)).toFixed(1)}배 오래 들고 있습니다 (${dur(S.holdL)} vs ${dur(S.holdW)}). 손실은 짧게, 수익은 길게가 반대로 되고 있습니다.`]);
+  if (S.al > S.aw * 1.5 && S.win < 75) li.push(['⚖️', `평균 손실(${money(-S.al)})이 평균 이익(${money(S.aw)})의 ${(S.al / Math.max(.01, S.aw)).toFixed(1)}배입니다. 승률 ${S.win.toFixed(0)}%로는 메우기 어렵습니다.`]);
+  const sc = L.filter(x => x.alts); if (sc.length >= 3){
+    const sum = k => sc.reduce((a, x) => a + ((x.alts.find(y => y.k === k) || x.alts[0]).pnl), 0), act = sum('act');
+    const best = ['one', 'back', 'z10', 'z20', 's10'].map(k => [k, sum(k)]).sort((a, b) => b[1] - a[1])[0];
+    if (best[1] > act + 1) li.push(['🧩', `같은 진입에서 <b>${{ one:'추가 진입 없이', back:'내 분할 + 첫 진입가 복귀 일괄 청산', z10:'블로그 10P 구간 매매', z20:'20P 간격 구간 매매', s10:'10P 손절·10P 익절' }[best[0]]}</b>로 했으면 ${money(best[1])} (실제 ${money(act)}). 자세한 비교는 '분할 매수 분석' 탭.`]);
+  }
+  if (!li.length) li.push(['👍', '이 기간엔 눈에 띄게 반복된 손실 패턴이 없습니다.']);
+  $('#ins').innerHTML = li.map(([i, t]) => `<li><span>${i}</span><span>${t}</span></li>`).join('');
+}
+
+function trades(tab, L){
+  const y0 = tab.querySelector('.tw')?.scrollTop || 0;
+  const op = OPEN.filter(p => !F.sym || p.sym === F.sym);
+  tab.innerHTML = (op.length ? `<div class="tw" style="margin-bottom:12px"><table><thead><tr><th>보유 중 (진입 시각)</th><th class="l">종목</th><th>방향</th><th>랏</th><th>진입가</th><th>손절</th><th>평가 손익</th><th>보유</th></tr></thead><tbody>${op.map(p =>
+    `<tr><td>${kdt(p.time / 1000)}</td><td class="l">${esc(p.sym)}</td><td class="${p.dir > 0 ? 'up' : 'dn'}">${p.dir > 0 ? '매수' : '매도'}</td><td>${p.lots}</td><td>${px(p.open)}</td><td class="${p.sl ? '' : 'wa'}">${p.sl ? px(p.sl) : '없음'}</td><td class="${p.profit >= 0 ? 'up' : 'dn'}">${money(p.profit)}</td><td>${dur((Date.now() / 1000 - p.time / 1000) / 60)}</td></tr>`).join('')}</tbody></table></div>` : '')
+    + (L.length ? `<div class="tw" style="max-height:760px"><table><thead><tr><th>진입 (한국)</th><th class="l">종목</th><th>방향</th><th>주문</th><th>랏</th><th>첫 진입가</th><th>보유</th><th>최대 물림</th><th>최대 수익</th><th>손익</th><th class="l">진단</th></tr></thead><tbody>${L.map(x =>
+      `<tr class="row" data-id="${x.id}"><td>${kdt(x.t0)}</td><td class="l">${esc(x.sym)}</td><td class="${x.dir > 0 ? 'up' : 'dn'}">${x.dir > 0 ? '매수' : '매도'}</td><td>${x.legs.length}</td><td>${x.lots.toFixed(2)}</td><td>${px(x.p0)}</td><td>${dur(x.holdM)}</td><td class="${x.mae >= 50 ? 'dn' : ''}">${x.mae == null ? '—' : p1(x.mae) + 'P'}</td><td>${x.mfe == null ? '—' : p1(x.mfe) + 'P'}</td><td class="${x.pnl >= 0 ? 'up' : 'dn'}"><b>${money(x.pnl)}</b></td><td class="l wrap">${x.tags.filter(t => t.good !== null).map(tagHtml).join('')}</td></tr>`
+      + (F.open === x.id ? `<tr class="det"><td colspan="11">${detail(x)}</td></tr>` : '')).join('')}</tbody></table></div>` : '<div class="tw"><div class="empty">이 기간에 끝난 거래가 없습니다.</div></div>');
+  const tw = tab.querySelector('.tw:last-child'); if (tw) tw.scrollTop = y0;
+  tab.querySelectorAll('tr.row').forEach(r => r.onclick = () => { F.open = F.open === r.dataset.id ? null : r.dataset.id; render(); });
+  const x = L.find(x => x.id === F.open); if (x){ drawMini(x); const ta = tab.querySelector('textarea'); if (ta) ta.oninput = () => { NOTES[x.id] = ta.value; put('jnote', NOTES); }; }
+}
+
+function detail(x){
+  const c = x.ctx, bad = x.tags.filter(isBad), why = [];
+  for (const t of bad) if (TAG[t.id][1]) why.push(TAG[t.id][1]);
+  if (x.pnl < 0 && !why.length) why.push('진입 조건에서 뚜렷한 문제는 없습니다. 정상적인 손절로 볼 수 있습니다.');
+  const best = x.alts ? x.alts.slice().sort((a, b) => b.pnl - a.pnl)[0] : null;
+  return `<div class="det-grid"><div><canvas class="mini" id="mini"></canvas>
+      <div class="note">3분봉 · <span style="color:#f23645">20이평</span> · <span style="color:#f5a623">120이평</span> · ▲▼ 진입 · ✕ 청산 · 점선: 첫 진입가${x.sl ? ' · 빨간 점선: 손절가' : ''}</div></div>
+    <div style="display:grid;gap:12px;align-content:start">
+      <div class="kv"><span>방향 · 종목</span><span class="${x.dir > 0 ? 'up' : 'dn'}">${x.dir > 0 ? '매수' : '매도'} · ${esc(x.sym)}</span>
+        <span>진입 → 끝</span><span>${kdt(x.t0)} → ${kdt(x.end)} (${dur(x.holdM)})</span>
+        <span>주문</span><span>${x.legs.map((g, i) => `${i ? `${p1((x.p0 - g.open) * x.dir)}P 물린 곳 ` : '첫 '}${px(g.open)} · ${g.lots}랏`).join('<br>')}</span>
+        <span>평단 · 합계</span><span>${px(x.avg)} · ${x.lots.toFixed(2)}랏</span>
+        <span>손절</span><span>${x.sl ? `${px(x.sl)} (${p1(x.slP)}P)` : '<span class="wa">안 걸었음</span>'} · ${x.exitWhy}</span>
+        ${x.mae != null ? `<span>최대 물림 · 최대 수익</span><span>${p1(x.mae)}P · ${p1(x.mfe)}P</span>` : ''}
+        ${c ? `<span>진입 자리</span><span>3분 ${c.al3 > 0 ? '정배열' : '역배열'} · 1시간 ${c.al1 > 0 ? '정배열' : c.al1 < 0 ? '역배열' : '—'} · 120이평에서 ${p1(c.d120)}P · 20이평에서 ATR ${c.ext.toFixed(1)}배</span>` : ''}
+        <span>손익</span><span class="${x.pnl >= 0 ? 'up' : 'dn'}"><b>${money(x.pnl)}</b></span></div>
+      <div><b>${x.pnl < 0 ? '왜 졌나' : '진단'}</b><ul class="dx">${(why.length ? why : ['조건에 맞는 좋은 진입이었습니다.']).map(w => `<li>${w}</li>`).join('')}</ul></div>
+      ${x.alts ? `<div><b>다른 방식이었으면</b><div class="tw" style="margin-top:6px"><table class="alt"><tbody>${x.alts.map(a => `<tr class="${a === best && a.k !== 'act' ? 'best' : ''}"><td class="l">${a.name}<br><span class="note">${a.why}</span></td><td class="${a.pnl >= 0 ? 'up' : 'dn'}">${money(a.pnl)}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+      <div><b>메모</b><textarea placeholder="이 거래에서 느낀 점·다음엔 이렇게 (이 PC에만 저장)">${esc(NOTES[x.id] || '')}</textarea></div>
+    </div></div>`;
+}
+
+function drawMini(x){
+  const cv = $('#mini'), m = M[x.sym]; if (!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr;
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.font = '11px ' + getComputedStyle(document.body).fontFamily;
+  if (!m){ g.fillStyle = '#8b8e98'; g.fillText('차트 데이터 없음 (연결 프로그램 연결 필요)', 14, 24); return; }
+  const D = m.m3, a = Math.max(0, idx(D.t, x.t0) - 50); let b = Math.min(D.B.length - 1, idx(D.t, x.end) + 25);
+  const step = Math.max(1, Math.ceil((b - a + 1) / 260));
+  const C = []; for (let k = a; k <= b; k += step){ const s = D.B.slice(k, Math.min(b + 1, k + step)); C.push({ k, t:s[0].t, o:s[0].o, h:Math.max(...s.map(z => z.h)), l:Math.min(...s.map(z => z.l)), c:s[s.length - 1].c, a20:D.a20[Math.min(b, k + step - 1)], a120:D.a120[Math.min(b, k + step - 1)] }); }
+  const ys = C.flatMap(z => [z.h, z.l]).concat(x.legs.map(l => l.open)).concat(x.sl ? [x.sl] : []);
+  let mn = Math.min(...ys), mx = Math.max(...ys); const pad = (mx - mn) * .06 || 1; mn -= pad; mx += pad;
+  const W = r.width, H = r.height, R = 58, cw = (W - R - 8) / C.length, X = i => 6 + i * cw + cw / 2, Y = v => 8 + (mx - v) / (mx - mn) * (H - 26);
+  const XI = t => { const i = C.findIndex((z, n) => (C[n + 1] ? C[n + 1].t : Infinity) > t); return X(Math.max(0, i)); };
+  g.fillStyle = '#8b8e98'; for (let q = 0; q <= 4; q++){ const v = mn + (mx - mn) * q / 4; g.fillText(v.toFixed(1), W - R + 4, Y(v) + 4); g.strokeStyle = 'rgba(139,142,152,.08)'; g.beginPath(); g.moveTo(0, Y(v)); g.lineTo(W - R, Y(v)); g.stroke(); }
+  C.forEach((z, i) => { const up = z.c >= z.o; g.strokeStyle = g.fillStyle = up ? '#22ab94' : '#f23645'; g.beginPath(); g.moveTo(X(i), Y(z.h)); g.lineTo(X(i), Y(z.l)); g.stroke(); const bw = Math.max(1, cw * .7); g.fillRect(X(i) - bw / 2, Math.min(Y(z.o), Y(z.c)), bw, Math.max(1, Math.abs(Y(z.o) - Y(z.c)))); });
+  for (const [k, col] of [['a20', '#f23645'], ['a120', '#f5a623']]){ g.strokeStyle = col; g.lineWidth = 1.6; g.beginPath(); let s = false; C.forEach((z, i) => { if (z[k] == null) return; s ? g.lineTo(X(i), Y(z[k])) : g.moveTo(X(i), Y(z[k])); s = true; }); g.stroke(); }
+  g.lineWidth = 1; g.setLineDash([4, 4]); g.strokeStyle = 'rgba(224,227,235,.5)'; g.beginPath(); g.moveTo(0, Y(x.p0)); g.lineTo(W - R, Y(x.p0)); g.stroke();
+  if (x.sl){ g.strokeStyle = 'rgba(242,54,69,.8)'; g.beginPath(); g.moveTo(0, Y(x.sl)); g.lineTo(W - R, Y(x.sl)); g.stroke(); }
+  g.setLineDash([]);
+  for (const l of x.legs){ const cx = XI(l.time), cy = Y(l.open); g.fillStyle = x.dir > 0 ? '#2962ff' : '#e040fb'; g.beginPath(); if (x.dir > 0){ g.moveTo(cx, cy); g.lineTo(cx - 6, cy + 10); g.lineTo(cx + 6, cy + 10); } else { g.moveTo(cx, cy); g.lineTo(cx - 6, cy - 10); g.lineTo(cx + 6, cy - 10); } g.fill();
+    for (const c of l.closes){ const ex = XI(c.t), ey = Y(c.px); g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.moveTo(ex - 5, ey - 5); g.lineTo(ex + 5, ey + 5); g.moveTo(ex + 5, ey - 5); g.lineTo(ex - 5, ey + 5); g.stroke(); g.lineWidth = 1; } }
+  g.fillStyle = '#8b8e98'; g.fillText(kdt(C[0].t), 6, H - 4); const e = kdt(C[C.length - 1].t); g.fillText(e, W - R - g.measureText(e).width, H - 4);
+}
+
+function cal(tab, L0){
+  const now = kd(Date.now() / 1000); F.cm ||= `${now.getUTCFullYear()}-${two(now.getUTCMonth() + 1)}`;
+  const [Y, Mo] = F.cm.split('-').map(Number), first = new Date(Date.UTC(Y, Mo - 1, 1)), days = new Date(Date.UTC(Y, Mo, 0)).getUTCDate();
+  const all = BK.filter(x => !F.sym || x.sym === F.sym), byDay = {}; for (const x of all) (byDay[kday(x.end)] ||= []).push(x);
+  const mList = all.filter(x => kday(x.end).startsWith(F.cm)), MS = stat(mList);
+  const mxAbs = Math.max(1, ...Object.entries(byDay).filter(([k]) => k.startsWith(F.cm)).map(([, v]) => Math.abs(v.reduce((a, x) => a + x.pnl, 0))));
+  let cells = WD.map(w => `<div class="h">${w}</div>`).join('') + '<div></div>'.repeat(first.getUTCDay());
+  for (let dd = 1; dd <= days; dd++){
+    const k = `${F.cm}-${two(dd)}`, xs = byDay[k];
+    if (!xs){ cells += `<div class="d off"><small>${dd}</small></div>`; continue; }
+    const n = xs.reduce((a, x) => a + x.pnl, 0), al = Math.min(.55, .12 + Math.abs(n) / mxAbs * .45);
+    cells += `<div class="d ${F.day === k ? 'sel' : ''}" data-d="${k}" style="background:${n >= 0 ? `rgba(34,171,148,${al})` : `rgba(242,54,69,${al})`}"><small>${dd}</small><b>${money(n)}</b><small>${xs.length}번 · ${(xs.filter(x => x.pnl > 0).length / xs.length * 100).toFixed(0)}%</small></div>`;
+  }
+  const rows = Object.entries(byDay).filter(([k]) => k.startsWith(F.cm)).sort((a, b) => b[0].localeCompare(a[0])).map(([k, xs]) => {
+    const s = stat(xs), worst = xs.slice().sort((a, b) => a.pnl - b.pnl)[0], tc = {}; for (const x of xs) if (x.pnl < 0) for (const t of x.tags) if (isBad(t)) tc[t.id] = (tc[t.id] || 0) + 1;
+    const top = Object.entries(tc).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id, n]) => `<span class="tag bad">${TAG[id][0]} ${n}</span>`).join('');
+    return `<tr class="row" data-d="${k}"><td>${k} (${WD[new Date(k).getUTCDay()]})</td><td>${s.n}</td><td>${s.win.toFixed(0)}%</td><td>${pfs(s.pf)}</td><td class="${s.net >= 0 ? 'up' : 'dn'}"><b>${money(s.net)}</b></td><td class="dn">${worst.pnl < 0 ? money(worst.pnl) : '—'}</td><td>${dur(s.hold)}</td><td class="l wrap">${top || '<span class="sub">—</span>'}</td></tr>`;
+  }).join('');
+  tab.innerHTML = `<div style="display:grid;gap:16px"><div class="box"><div class="calnav"><button class="btn" id="cp">‹</button><b>${Y}년 ${Mo}월</b><button class="btn" id="cn">›</button><span class="sp"></span><span class="${MS.net >= 0 ? 'up' : 'dn'}"><b>${money(MS.net)}</b></span><span class="sub">${MS.n}번 · 승률 ${MS.win.toFixed(0)}%</span></div><div class="cal">${cells}</div><div class="note" style="margin-top:8px">날짜를 누르면 위 숫자·진단이 그날 기준으로 바뀝니다.</div></div>
+    <div class="tw"><table><thead><tr><th>날짜</th><th>거래</th><th>승률</th><th>손익비</th><th>순손익</th><th>최대 손실</th><th>평균 보유</th><th class="l">진 거래의 주요 문제</th></tr></thead><tbody>${rows || '<tr><td colspan="8" class="empty">이 달엔 거래가 없습니다</td></tr>'}</tbody></table></div></div>`;
+  const mv = n => { const d = new Date(Date.UTC(Y, Mo - 1 + n, 1)); F.cm = `${d.getUTCFullYear()}-${two(d.getUTCMonth() + 1)}`; render(); };
+  $('#cp').onclick = () => mv(-1); $('#cn').onclick = () => mv(1);
+  tab.querySelectorAll('[data-d]').forEach(el => el.onclick = () => { F.day = F.day === el.dataset.d ? '' : el.dataset.d; render(); });
+}
+
+function scale(tab, L){
+  const sc = L.filter(x => x.alts), multi = L.filter(x => x.legs.length > 1);
+  const names = { act:'실제 매매', one:'추가 진입 안 했으면', back:'내 분할 + 첫 진입가 복귀 일괄 청산', z10:'블로그 10P 구간 (50P까지 · 55P 손절)', z20:'20P 간격 구간 (60P까지 · 70P 손절)', s10:'추가 없이 10P 손절 · 10P 익절' };
+  const rows = Object.keys(names).map(k => { const v = sc.map(x => (x.alts.find(a => a.k === k) || x.alts[0]).pnl); const w = v.filter(p => p > 0).length; return [k, v.reduce((a, p) => a + p, 0), v.length ? w / v.length * 100 : 0, Math.min(0, ...v)]; });
+  const best = rows.slice().sort((a, b) => b[1] - a[1])[0];
+  // 이 기간에 가장 잘 맞았을 구간 폭 찾기 (같은 랏 · 첫 진입가 복귀 일괄 청산 · 구간+5P 손절)
+  const grid = [];
+  for (const st of [5, 10, 15, 20, 25]) for (const mx of [30, 50, 70]){ if (mx < st) continue; let s = 0, w = 0, worst = 0;
+    for (const x of sc){ const D = M[x.sym].m3, z = zone(D, x.dir, x.p0, idx(D.t, x.t0), x.f.lots, st, mx, mx + 5, 10, true); s += z.pnl; w += z.pnl > 0; worst = Math.min(worst, z.pnl); }
+    grid.push({ st, mx, s, w:sc.length ? w / sc.length * 100 : 0, worst }); }
+  grid.sort((a, b) => b.s - a.s);
+  const gp = multi.flatMap(x => x.gaps).filter(g => g > 0), gu = multi.flatMap(x => x.gaps).filter(g => g <= 0), ml = multi.map(x => x.lots / x.f.lots);
+  const ms = stat(multi), ss = stat(L.filter(x => x.legs.length === 1));
+  tab.innerHTML = `<div class="grid2">
+    <div class="box"><h2>내 분할 습관</h2><div class="kv">
+      <span>분할로 들어간 거래</span><span>${multi.length}번 / ${L.length}번 (${L.length ? (multi.length / L.length * 100).toFixed(0) : 0}%)</span>
+      <span>분할 거래 성적</span><span>승률 ${ms.win.toFixed(0)}% · <b class="${ms.net >= 0 ? 'up' : 'dn'}">${money(ms.net)}</b> · 평균 손실 ${money(-ms.al)}</span>
+      <span>한 번에 들어간 거래</span><span>승률 ${ss.win.toFixed(0)}% · <b class="${ss.net >= 0 ? 'up' : 'dn'}">${money(ss.net)}</b> · 평균 손실 ${money(-ss.al)}</span>
+      <span>물타기 간격 (밀린 뒤 추가)</span><span>${gp.length ? `평균 ${p1(gp.reduce((a, b) => a + b, 0) / gp.length)}P · 가장 좁게 ${p1(Math.min(...gp))}P · 가장 넓게 ${p1(Math.max(...gp))}P` : '—'}</span>
+      <span>불타기 (이익 중 추가)</span><span>${gu.length}번</span>
+      <span>첫 랏 대비 최종 랏</span><span>${ml.length ? `평균 ${(ml.reduce((a, b) => a + b, 0) / ml.length).toFixed(1)}배 · 최대 ${Math.max(...ml).toFixed(1)}배` : '—'}</span>
+      <span>50P 넘게 물린 거래</span><span>${L.filter(x => x.mae >= 50).length}번 · 합계 ${money(L.filter(x => x.mae >= 50).reduce((a, x) => a + x.pnl, 0))}</span></div></div>
+    <div class="box"><h2>같은 진입, 다른 방식이었으면</h2><div class="note" style="margin-bottom:6px">진입 시각·첫 진입가·첫 랏은 그대로 두고 청산·추가 규칙만 바꿔 같은 3분봉으로 다시 돌렸습니다 (${sc.length}번).</div>
+      <div class="tw"><table><thead><tr><th class="l">방식</th><th>합계</th><th>승률</th><th>가장 큰 손실</th></tr></thead><tbody>${rows.map(([k, s, w, wl]) => `<tr class="${k === best[0] && k !== 'act' ? 'best' : ''}"><td class="l">${names[k]}${k === best[0] ? ' 🏆' : ''}</td><td class="${s >= 0 ? 'up' : 'dn'}"><b>${money(s)}</b></td><td>${w.toFixed(0)}%</td><td class="dn">${money(wl)}</td></tr>`).join('')}</tbody></table></div></div></div>
+    <div class="box" style="margin-top:16px"><h2>이 기간에 가장 잘 맞았을 구간 폭</h2><div class="note" style="margin-bottom:8px">추가 간격 × 구간 끝을 바꿔 가며 내 진입 ${sc.length}번에 똑같이 적용 (같은 랏 추가 · 추가 없으면 +10P 익절 · 추가되면 첫 진입가 복귀 시 일괄 청산 · 배열 뒤집히면 평단 정리 · 구간 끝+5P 손절). 지난 기간에 맞춘 값이라 앞으로도 같다는 보장은 없습니다.</div>
+      <div class="tw"><table><thead><tr><th>순위</th><th>추가 간격</th><th>구간 끝</th><th>손절</th><th>합계</th><th>승률</th><th>가장 큰 손실</th></tr></thead><tbody>${grid.slice(0, 8).map((z, i) => `<tr class="${i ? '' : 'best'}"><td>${i + 1}</td><td>${z.st}P</td><td>${z.mx}P</td><td>${z.mx + 5}P</td><td class="${z.s >= 0 ? 'up' : 'dn'}"><b>${money(z.s)}</b></td><td>${z.w.toFixed(0)}%</td><td class="dn">${money(z.worst)}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">차트 데이터가 있는 거래가 없습니다</td></tr>'}</tbody></table></div></div>`;
+}
+
+function pat(tab, L){
+  const grp = (key, order) => { const g = new Map(); for (const x of L){ const k = key(x); if (k == null) continue; if (!g.has(k)) g.set(k, []); g.get(k).push(x); } let r = [...g].map(([k, xs]) => [k, stat(xs)]); if (order) r.sort(order); return r; };
+  const tbl = (title, rows, head) => { const mx = Math.max(1, ...rows.map(r => Math.abs(r[1].net)));
+    return `<div class="tw"><table><thead><tr><th>${head}</th><th>거래</th><th>승률</th><th>손익비</th><th>순손익</th><th class="l" style="width:28%"></th></tr></thead><tbody>${rows.map(([k, s]) =>
+      `<tr><td class="l">${k}</td><td>${s.n}</td><td>${s.win.toFixed(0)}%</td><td>${pfs(s.pf)}</td><td class="${s.net >= 0 ? 'up' : 'dn'}">${money(s.net)}</td><td class="l"><span class="hbar" style="width:${Math.abs(s.net) / mx * 100}%;background:${s.net >= 0 ? 'var(--up)' : 'var(--dn)'}"></span></td></tr>`).join('') || '<tr><td colspan="6" class="empty">—</td></tr>'}</tbody></table></div>`; };
+  const hour = grp(x => two(kd(x.t0).getUTCHours()) + '시', (a, b) => a[0].localeCompare(b[0]));
+  const wd = grp(x => kd(x.t0).getUTCDay(), (a, b) => ((a[0] + 6) % 7) - ((b[0] + 6) % 7)).map(([k, s]) => [WD[k] + '요일', s]);
+  const hb = [[15, '15분 안'], [60, '15분~1시간'], [180, '1~3시간'], [720, '3~12시간'], [Infinity, '12시간 넘게']];
+  const hold = grp(x => hb.findIndex(([m]) => x.holdM < m), (a, b) => a[0] - b[0]).map(([k, s]) => [hb[k][1], s]);
+  const dirs = grp(x => x.dir > 0 ? '매수' : '매도');
+  const legs = grp(x => Math.min(4, x.legs.length), (a, b) => a[0] - b[0]).map(([k, s]) => [k === 1 ? '한 번에' : k === 4 ? '4번 이상 나눠서' : `${k}번 나눠서`, s]);
+  const sl = grp(x => x.sl ? '손절 걸고 진입' : '손절 없이 진입');
+  const tags = Object.keys(TAG).map(id => { const xs = L.filter(x => x.tags.some(t => t.id === id)); return xs.length ? [`${TAG[id][0]}`, stat(xs), id] : null; }).filter(Boolean).sort((a, b) => a[1].net - b[1].net);
+  tab.innerHTML = `<div class="box" style="margin-bottom:16px"><h2>조건별 성적 — 어디서 계속 손절이 나오나</h2><div class="note" style="margin-bottom:8px">진입할 때의 자리·행동별로 묶었습니다. 위로 갈수록 돈을 많이 잃은 조건입니다. '피했다면'은 그 조건의 거래를 모두 안 했을 때의 기간 순손익입니다.</div>
+    <div class="tw"><table><thead><tr><th class="l">조건</th><th>거래</th><th>승률</th><th>순손익</th><th>평균</th><th>피했다면</th></tr></thead><tbody>${tags.map(([n, s, id]) => {
+      const tot = stat(L).net; return `<tr><td class="l">${tagHtml(L.find(x => x.tags.some(t => t.id === id)).tags.find(t => t.id === id))}</td><td>${s.n}</td><td>${s.win.toFixed(0)}%</td><td class="${s.net >= 0 ? 'up' : 'dn'}"><b>${money(s.net)}</b></td><td>${money(s.net / s.n)}</td><td class="${tot - s.net >= tot ? 'up' : ''}">${money(tot - s.net)}</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">—</td></tr>'}</tbody></table></div></div>
+    <div class="grid2"><div style="display:grid;gap:16px">${tbl('', hour, '진입 시간대 (한국)')}${tbl('', wd, '요일')}</div>
+    <div style="display:grid;gap:16px">${tbl('', hold, '보유 시간')}${tbl('', legs, '분할 횟수')}${tbl('', dirs, '방향')}${tbl('', sl, '손절 설정')}</div></div>`;
+}
+
+function mon(tab){
+  const all = BK.filter(x => !F.sym || x.sym === F.sym), g = {}; for (const x of all) (g[kday(x.end).slice(0, 7)] ||= []).push(x);
+  const rows = Object.entries(g).sort((a, b) => b[0].localeCompare(a[0])).map(([k, xs]) => {
+    const s = stat(xs), days = new Set(xs.map(x => kday(x.end))), dn = {}; for (const x of xs) dn[kday(x.end)] = (dn[kday(x.end)] || 0) + x.pnl;
+    const pd = Object.values(dn), wd = pd.filter(v => v > 0).length, tc = {}; for (const x of xs) if (x.pnl < 0) for (const t of x.tags) if (isBad(t)) tc[t.id] = (tc[t.id] || 0) + x.pnl;
+    const top = Object.entries(tc).sort((a, b) => a[1] - b[1]).slice(0, 2).map(([id, v]) => `<span class="tag bad">${TAG[id][0]} ${money(v)}</span>`).join('');
+    return `<tr><td>${k}</td><td>${s.n}</td><td>${days.size}일 (이긴 날 ${wd})</td><td>${s.win.toFixed(0)}%</td><td>${pfs(s.pf)}</td><td class="${s.net >= 0 ? 'up' : 'dn'}"><b>${money(s.net)}</b></td><td class="up">${money(Math.max(...pd))}</td><td class="dn">${money(Math.min(...pd))}</td><td class="dn">−$${s.mdd.toFixed(2)}</td><td class="l wrap">${top || '—'}</td></tr>`; }).join('');
+  tab.innerHTML = `<div class="tw"><table><thead><tr><th>월</th><th>거래</th><th>매매한 날</th><th>승률</th><th>손익비</th><th>순손익</th><th>최고의 날</th><th>최악의 날</th><th>최대 낙폭</th><th class="l">손실이 가장 컸던 조건</th></tr></thead><tbody>${rows || '<tr><td colspan="10" class="empty">거래가 없습니다</td></tr>'}</tbody></table></div>`;
+}
+
+const seg = (id, k, after) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F[k] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); after && after(); render(); });
+seg('#fPer', 'per', () => { F.day = ''; }); seg('#fSym', 'sym');
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; F.tab = b.dataset.t; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); });
+$('#reload').onclick = () => { M = {}; load(); };
+$('#csv').onclick = () => {
+  const rows = [['진입(KST)', '끝(KST)', '종목', '방향', '주문수', '랏합계', '첫진입가', '평단', '손절가', '보유(분)', '최대물림(P)', '최대수익(P)', '손익($)', '진단', '메모']]
+    .concat(sel().map(x => [kdt(x.t0), kdt(x.end), x.sym, x.dir > 0 ? '매수' : '매도', x.legs.length, x.lots, x.p0, x.avg.toFixed(2), x.sl ?? '', Math.round(x.holdM), x.mae == null ? '' : x.mae.toFixed(1), x.mfe == null ? '' : x.mfe.toFixed(1), x.pnl.toFixed(2), x.tags.filter(isBad).map(t => TAG[t.id][0]).join(' / '), NOTES[x.id] || '']));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')], { type:'text/csv' }));
+  a.download = `엣지로그_매매일지_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
+addEventListener('resize', () => { if (F.open) render(); });
+setInterval(() => { if (!document.hidden && !F.open) load(); }, 60000);
+load();
+})();
+</script>
+</body>
+</html>

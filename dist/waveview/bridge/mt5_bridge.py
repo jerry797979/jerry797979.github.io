@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 16
+VERSION = 17
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -315,6 +315,16 @@ def mt5_trades(since_ms):
         deals = mt5.history_deals_get(frm, to) or []
         pos = mt5.positions_get() or []
         acc = mt5.account_info()
+        try:
+            orders = mt5.history_orders_get(frm, to) or []
+        except Exception:  # noqa: BLE001
+            orders = []
+    # 포지션마다 처음 건 주문의 손절·익절 (매매 일지에서 '손절을 걸었나' 분석용)
+    osl = {}
+    for o in orders:
+        pid = getattr(o, "position_id", 0)
+        if pid and pid not in osl:
+            osl[pid] = (getattr(o, "sl", 0) or None, getattr(o, "tp", 0) or None)
     opens = {}
     for d in deals:
         if d.entry == 0:  # 진입
@@ -331,9 +341,11 @@ def mt5_trades(since_ms):
                        "open": o.price if o else None, "close": d.price,
                        "time": ((o.time_msc - server_offset * 1000) if o and getattr(o, "time_msc", 0) else t),
                        "ctime": t, "pnl": d.profit + d.commission + d.swap + (o.commission if o else 0),
-                       "why": "MT5 청산", "strat": None, "mt5": True})
+                       "why": "MT5 청산", "strat": None, "mt5": True, "pid": d.position_id,
+                       "sl": (osl.get(d.position_id) or (None, None))[0], "tp": (osl.get(d.position_id) or (None, None))[1],
+                       "olots": o.volume if o else None})
     openp = [{"id": f"m{p.ticket}", "sym": p.symbol, "dir": 1 if p.type == 0 else -1, "lots": p.volume, "open": p.price_open,
-              "sl": p.sl or None, "tp": p.tp or None, "time": (p.time - server_offset) * 1000, "strat": None, "mt5": True,
+              "sl": p.sl or None, "tp": p.tp or None, "time": (p.time - server_offset) * 1000, "strat": None, "mt5": True, "pid": p.ticket,
               "profit": p.profit + p.swap} for p in pos]
     return {"ok": True, "closed": closed, "pos": openp,
             "account": {"balance": acc.balance, "equity": acc.equity, "currency": acc.currency} if acc else None}
