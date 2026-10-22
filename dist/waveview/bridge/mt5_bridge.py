@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 18
+VERSION = 19
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -348,7 +348,8 @@ def mt5_trades(since_ms):
               "sl": p.sl or None, "tp": p.tp or None, "time": (p.time - server_offset) * 1000, "strat": None, "mt5": True, "pid": p.ticket,
               "profit": p.profit + p.swap} for p in pos]
     return {"ok": True, "closed": closed, "pos": openp,
-            "account": {"balance": acc.balance, "equity": acc.equity, "currency": acc.currency} if acc else None}
+            "account": {"balance": acc.balance, "equity": acc.equity, "currency": acc.currency,
+                        "login": getattr(acc, "login", None), "server": getattr(acc, "server", "")} if acc else None}
 
 
 # ---------- 웨이브뷰 계좌 (모의 거래 자동 전략) 24시간 ----------

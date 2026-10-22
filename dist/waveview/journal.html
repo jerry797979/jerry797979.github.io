@@ -136,7 +136,7 @@ async function load(){
   } catch (e){
     const c = get('jcache', null);
     if (!c){ $('#st').innerHTML = '<span class="dn">연결 프로그램에 연결되지 않습니다.</span> PC에서 웨이브뷰 연결 프로그램이 켜져 있는지 확인하세요.'; render(); return; }
-    RAW = c.raw; $('#st').innerHTML = `<span class="wa">연결 안 됨 · ${kdt(c.at / 1000)} 저장본으로 보는 중 (차트 진단 없음)</span>`;
+    RAW = { ...c.raw, pos:[] }; $('#st').innerHTML = `<span class="wa">연결 안 됨 · ${kdt(c.at / 1000)} 저장본으로 보는 중 (차트 진단 없음)</span>`;
   }
   try { NEWS = (await (await fetch('calendar.json?' + Math.floor(Date.now() / 3600e3), { cache:'no-store' })).json()).filter(e => e.impact === 'High').map(e => Date.parse(e.date) / 1000); } catch { NEWS = []; }
   const cnt = {}; for (const t of [...RAW.closed, ...RAW.pos]) cnt[t.sym] = (cnt[t.sym] || 0) + 1;

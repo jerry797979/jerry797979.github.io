@@ -3341,7 +3341,9 @@ setInterval(botSync, 2000);
 /* 사장님 계좌 = MT5 실거래: 연결 프로그램(v5 이상)이 MT5 체결 내역·보유 포지션을 읽어 준다 (읽기만, 주문은 안 냄) */
 S.mt5Me = false;
 async function mt5MeSync(){
-  if (!S.mt5ok){ S.mt5Me = false; return; }
+  // 연결이 끊기면 마지막으로 받은 MT5 포지션을 지운다 (이미 청산한 포지션이 '보유 중'으로 남지 않게)
+  const drop = () => { S.mt5Me = false; if (PT.pos.some(p => p.mt5)){ PT.pos = PT.pos.filter(p => !p.mt5); savePT(); } };
+  if (!S.mt5ok){ drop(); return; }
   try {
     const j = await mt5Get('/mt5/trades?since=' + (PT.mt5Since || 0)); if (!j.ok || !Array.isArray(j.closed)) throw new Error();
     if (!S.mt5Me) toast('사장님 계좌 = MT5 실거래', 'MT5에서 사고판 거래가 대결 점수와 통계에 자동으로 기록됩니다.');
@@ -3352,7 +3354,7 @@ async function mt5MeSync(){
     PT.pos = PT.pos.filter(p => !p.mt5).concat(j.pos);
     PT.me.bal = 1000 + PT.hist.filter(h => ptOwn(h) === 'me' && h.ctime >= (PT.race || 0)).reduce((a, h) => a + h.pnl, 0);
     savePT();
-  } catch { S.mt5Me = false; }
+  } catch { drop(); }
 }
 setInterval(mt5MeSync, 3000);
 setInterval(ptSignals, 10000);
@@ -3713,8 +3715,11 @@ function renderInfo(){
   if (typeof PT !== 'undefined'){ const a = ptEq('me'), b = ptEq('bot');
     out.push(`<section><h4>모의 거래 대결 ($1,000 시작) · ${S.botRemote ? '🤖 24시간 거래 중' : '🤖 창 켜졌을 때만'}</h4>${row(a >= 1000 ? '#22ab94' : '#f23645', S.mt5Me ? '🧑 사장님 (MT5 실거래)' : '🧑 사장님', '$' + a.toFixed(2))}${row(b >= 1000 ? '#22ab94' : '#f23645', '🤖 웨이브뷰', '$' + b.toFixed(2))}${S.botAi ? `<div style="color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:4px">🤖 ${S.botAi.note}</div>` : ''}</section>`); }
   if (typeof PT !== 'undefined' && PT.pos.length){
-    out.push(`<section><h4>보유 포지션</h4>${PT.pos.map(p => { const pl = ptPnl(p);
-      return row(pl >= 0 ? '#22ab94' : '#f23645', `${STRN(p)} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏`, money(pl)); }).join('')}</section>`); }
+    // 누구 포지션인지(🧑 사장님 = MT5 실거래 · 🤖 웨이브뷰 = 연습 계좌)와 진입가·MT5 계좌 번호를 같이 보여 준다
+    const ac = S.mt5Acct, accTxt = ac && ac.login ? ` · MT5 계좌 ${ac.login}${ac.server ? ' (' + ac.server + ')' : ''}` : '';
+    out.push(`<section><h4>보유 포지션</h4>${PT.pos.slice().sort((x, y) => (y.mt5 ? 1 : 0) - (x.mt5 ? 1 : 0)).map(p => { const pl = ptPnl(p);
+      return row(pl >= 0 ? '#22ab94' : '#f23645', `${p.mt5 ? '🧑' : '🤖'} ${STRN(p)} ${p.dir > 0 ? '매수' : '매도'} ${p.lots}랏 @${fmt(p.open)}`, money(pl)); }).join('')}
+      ${PT.pos.some(p => p.mt5) ? `<div style="color:var(--sub);font-size:11.5px;margin-top:4px">🧑 = MT5에서 읽은 실제 포지션${accTxt}</div>` : ''}</section>`); }
   const html = out.join(''); if (el._h !== html){ el._h = html; el.innerHTML = html; } // 바뀐 게 있을 때만 다시 그린다
   const sb = $('#stOpen'), lab = `📊 거래 기록 · 통계 (${PT.hist.length.toLocaleString()}건) ↗`; if (sb.textContent !== lab) sb.textContent = lab;
 }

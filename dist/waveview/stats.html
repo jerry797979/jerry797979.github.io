@@ -123,7 +123,8 @@ function render(force){
   const T = hist.filter(t => t.ctime >= from && (!F.who || own(t) === F.who)), A = stat(T);
   const kp = (k, v, c) => `<div class="kpi"><small>${k}</small><b class="${c || ''}">${v}</b></div>`;
   $('#kpis').innerHTML = kp('순손익', money(A.net), A.net >= 0 ? 'up' : 'dn') + kp('거래 수', A.n.toLocaleString() + '건') + kp('승률', A.win.toFixed(1) + '%') + kp('손익비 (PF)', pfs(A.pf))
-    + kp('평균 이익', money(A.aw), 'up') + kp('평균 손실', money(-A.al), 'dn') + kp('최대 낙폭', '−$' + A.mdd.toFixed(2), 'dn') + kp('보유 중', ((P.pos || []).length) + '건');
+    + kp('평균 이익', money(A.aw), 'up') + kp('평균 손실', money(-A.al), 'dn') + kp('최대 낙폭', '−$' + A.mdd.toFixed(2), 'dn') + kp('보유 중', (() => { const ps = P.pos || [], me = ps.filter(p => own(p) === 'me').length, bot = ps.length - me;
+      return F.who === 'me' ? me + '건' : F.who === 'bot' ? bot + '건' : `사장님 ${me} · 웨이브뷰 ${bot}`; })());
   if (!heavy) return;
   drawChart(T);
   // 탭 (보던 스크롤 위치는 지킨다)
