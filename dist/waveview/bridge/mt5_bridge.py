@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 17
+VERSION = 18
 DEFAULT_CONFIG = {
     "port": 8765,
     "telegram_token": "",
@@ -1349,7 +1349,7 @@ def ai_learn(sym):
         newok = sum(1 for x in board if x["ok"] and x["new"])
         hour = [h for h in paper["hist"] if h.get("strat") and h.get("ctime", 0) > (time.time() - 3600) * 1000]
         q = p_quote()
-        eqv = paper["bal"] + (sum(p_pnl(p, q) for p in paper["pos"]) if q else 0)
+        eqv = paper["bal"] + (sum(p_pnl(p, q) for p in list(paper["pos"])) if q else 0)
         top3 = "\n".join(f"{k + 1}. {'🆕 ' if x['new'] else ''}{x['name']}\n   한 달 환산 {usd(x['mon'])} · 학습 {x['full']['n']}번 · 승률 {x['full']['win']:.0f}% · 손익비 {x['full']['pf']:.2f} · 최근 3일 {usd(x['rec']['net'])}"
                           for k, x in enumerate([x for x in board if x["ok"]][:3]))
         p_log(f"AI 연구실 · 1시간 보고 ({k_now()})",
@@ -1507,12 +1507,24 @@ def ai_signal(q):
                   + ("" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
 
 
+def ai_learn_bg(sym):
+    try:
+        ai_learn(sym)
+    except Exception as e:  # noqa: BLE001
+        print("AI 연구 오류:", e)
+        ai["at"] = time.time() - 3000  # 10분 뒤 다시
+    finally:
+        ai["busy"] = False
+
+
 def p_signals(q):
     c = paper["cfg"]
     if paper["auto"].get("ai", True):
         ai["spread"] = ai.get("spread", 0.2) * 0.98 + max(0.0, q["ask"] - q["bid"]) * 0.02  # 실제 호가 차이 평균
-        if time.time() - ai["at"] > 3600:
-            ai_learn(q["sym"])
+        if time.time() - ai["at"] > 3600 and not ai.get("busy"):
+            # 연구(1시간마다, 수십 초 걸림)는 따로 돌린다: 그동안 웹 연결·모의 거래가 멈추지 않게
+            ai["busy"] = True
+            threading.Thread(target=ai_learn_bg, args=(q["sym"],), daemon=True).start()
         ai_signal(q)
         return
     for st in ("grid", "trail"):
