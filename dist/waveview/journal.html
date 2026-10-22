@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>엣지로그 매매 일지</title>
+<title>트레이더 노트</title>
 <style>
-/* 엣지로그: MT5 실거래를 '묶음(분할 진입 포함)' 단위로 모아 진입 자리·보유 시간·손절·분할 방식을 진단하고, 다른 분할 방식이었으면 어땠을지 같은 시세로 다시 돌려 본다 */
+/* 트레이더 노트: MT5 실거래를 '묶음(분할 진입 포함)' 단위로 모아 진입 자리·보유 시간·손절·분할 방식을 진단하고, 다른 분할 방식이었으면 어땠을지 같은 시세로 다시 돌려 본다 */
 :root{--bg:#131313;--panel:#1b1c20;--line:#2a2b31;--fg:#e0e3eb;--sub:#8b8e98;--acc:#2962ff;--up:#22ab94;--dn:#f23645;--warn:#f5a623;--hover:#24262c;
   --sans:-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
 *{box-sizing:border-box}
@@ -78,7 +78,7 @@ textarea{width:100%;min-height:54px;background:#131313;color:var(--fg);border:1p
 <body>
 <main>
   <header>
-    <div class="logo"><h1><em>Edge</em>Log</h1><span class="sub">엣지로그 · 통계로 찾는 내 매매의 강점과 약점</span></div>
+    <div class="logo"><h1><em>Trader</em> Note</h1><span class="sub">트레이더 노트 · 통계로 찾는 내 매매의 강점과 약점</span></div>
     <span class="sp"></span><span class="sub" id="st">불러오는 중…</span>
     <button class="btn" id="reload">다시 불러오기</button><button class="btn" id="csv">엑셀로 받기</button>
   </header>
@@ -498,7 +498,7 @@ $('#csv').onclick = () => {
   const rows = [['진입(KST)', '끝(KST)', '종목', '방향', '주문수', '랏합계', '첫진입가', '평단', '손절가', '보유(분)', '최대물림(P)', '최대수익(P)', '손익($)', '진단', '메모']]
     .concat(sel().map(x => [kdt(x.t0), kdt(x.end), x.sym, x.dir > 0 ? '매수' : '매도', x.legs.length, x.lots, x.p0, x.avg.toFixed(2), x.sl ?? '', Math.round(x.holdM), x.mae == null ? '' : x.mae.toFixed(1), x.mfe == null ? '' : x.mfe.toFixed(1), x.pnl.toFixed(2), x.tags.filter(isBad).map(t => TAG[t.id][0]).join(' / '), NOTES[x.id] || '']));
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')], { type:'text/csv' }));
-  a.download = `엣지로그_매매일지_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  a.download = `트레이더노트_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
 addEventListener('resize', () => { if (F.open) render(); });
 setInterval(() => { if (!document.hidden && !F.open) load(); }, 60000);
