@@ -566,7 +566,7 @@ svg{display:block}
     <form id="setForm">
       <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="setMt5">한텍 MT5 연결 (PC에서 브리지 실행 필요)</label>
       <p class="note">브리지 받기: <a href="https://jerry797979.github.io/waveview/waveview-mt5-bridge.zip" target="_blank" rel="noopener">waveview-mt5-bridge.zip</a> · 압축을 풀고 MT5 를 켠 상태에서 start_bridge.bat 을 더블클릭하세요.</p>
-      <div class="field"><label for="setMt5Url">MT5 브리지 주소</label><input class="inp" id="setMt5Url" autocomplete="off" placeholder="http://127.0.0.1:8765"></div>
+      <div class="field"><label for="setMt5Url">MT5 브리지 주소</label><input class="inp" id="setMt5Url" autocomplete="off" placeholder="http://127.0.0.1:18765"></div>
       <div class="field"><label for="setTd">Twelve Data API 키 (금·나스닥 실시간 시세)</label><input class="inp" id="setTd" autocomplete="off" placeholder="twelvedata.com 에서 무료 발급"></div>
       <div class="field"><label for="setPoll">시세 갱신 주기 (초)</label><input class="inp" id="setPoll" inputmode="numeric" placeholder="120"></div>
       <div class="field"><label for="setTg">텔레그램 봇 토큰 (붙여 넣으면 나머지는 자동)</label><input class="inp" id="setTg" autocomplete="off" placeholder="123456:ABC-..."></div>
@@ -784,7 +784,7 @@ const S = {
   show: Object.assign({ bb:true, ma:false, db:false, ses:true, us:true, low:true, ktr:true, gcb:true, news:true, vp:true, sr:true, di:true }, store.get('showv') === 2 ? store.get('show', {}) : {}),
   removed: store.get('removed', []).filter(k => store.get('restoreUsV1') || (k !== 'us' && k !== 'ses')),
   hlines: [], alerts: [], trends: [], draft: null, log: [], quotes: {}, timer: null, ws: null, live: false, loadId: 0,
-  cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:8765' }, store.get('cfg', {}), store.get('mt5onV1') ? {} : { mt5:true, mt5url:'http://127.0.0.1:8765' }), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
+  cfg: Object.assign({ td:'', poll:120, tg:'', chat:'', mt5:true, mt5url:'http://127.0.0.1:18765' }, store.get('cfg', {}), store.get('mt5onV1') ? {} : { mt5:true, mt5url:'http://127.0.0.1:18765' }), rp: null, qtimer: null, mt5ok: false, mt5retry: null, mt5warned: false,
 };
 
 /* ---------- 데이터 ---------- */
@@ -1912,10 +1912,21 @@ function iconFor(n){
   if (/US100|NAS|US30|US500|SPX|DJ/.test(n)) return '#2962ff';
   return '#9598a1';
 }
+// 연결 프로그램 찾기: 웨이브뷰 전용 번호(18765~18767) → 예전 번호(8765) 순서로, '웨이브뷰 연결 프로그램'이라고 답하는 곳만 쓴다
+// (8765 는 다른 웹 프로그램이 쓰고 있는 경우가 있다). 사장님이 설정에서 다른 주소를 직접 넣었으면 그대로 둔다
+const BRIDGE_PORTS = [18765, 18766, 18767, 8765];
+async function findBridge(){
+  const m = /^http:\/\/(127\.0\.0\.1|localhost):(\d+)$/.exec(S.cfg.mt5url || '');
+  if (!m || !BRIDGE_PORTS.includes(+m[2])) return;
+  const ok = async u => { try { const c = new AbortController(), t = setTimeout(() => c.abort(), 1500); const j = await (await fetch(u + '/', { signal:c.signal })).json(); clearTimeout(t); return j.service === 'waveview-mt5-bridge'; } catch { return false; } };
+  if (await ok(S.cfg.mt5url)) return;
+  for (const p of BRIDGE_PORTS){ const u = 'http://127.0.0.1:' + p; if (u !== S.cfg.mt5url && await ok(u)){ S.cfg.mt5url = u; store.set('cfg', S.cfg); return; } }
+}
 async function initMT5(){
   clearInterval(S.qtimer); S.qtimer = null; clearTimeout(S.mt5retry); S.mt5ok = false;
   if (!S.cfg.mt5) return false;
   try {
+    await findBridge();
     const j = await mt5Get('/symbols');
     if (!j.symbols.length) throw new Error('MT5 시장가 창에 종목이 없습니다');
     SYMS = j.symbols.map(x => ({ id:x.name, name:x.desc || x.name, ex:'HANTEC', dp:x.digits, feed:'mt5', icon:iconFor(x.name), base:1, dvol:.01 }));
@@ -3508,7 +3519,7 @@ async function sendTelegram(text){
   const j = await r.json(); if (!j.ok) throw new Error(j.description || 'send failed'); return true;
 }
 function fillSettings(){ $('#setMt5').checked = !!S.cfg.mt5; $('#setMt5Url').value = S.cfg.mt5url; $('#setTd').value = S.cfg.td; $('#setPoll').value = S.cfg.poll; $('#setTg').value = S.cfg.tg; $('#setChat').value = S.cfg.chat; }
-function readSettings(){ S.cfg = { mt5:$('#setMt5').checked, mt5url:($('#setMt5Url').value.trim() || 'http://127.0.0.1:8765').replace(/\/+$/, ''), td:$('#setTd').value.trim(), poll:Math.max(15, parseInt($('#setPoll').value, 10) || 120), tg:$('#setTg').value.trim(), chat:$('#setChat').value.trim() }; store.set('cfg', S.cfg); }
+function readSettings(){ S.cfg = { mt5:$('#setMt5').checked, mt5url:($('#setMt5Url').value.trim() || 'http://127.0.0.1:18765').replace(/\/+$/, ''), td:$('#setTd').value.trim(), poll:Math.max(15, parseInt($('#setPoll').value, 10) || 120), tg:$('#setTg').value.trim(), chat:$('#setChat').value.trim() }; store.set('cfg', S.cfg); }
 $('#setBtn').onclick = () => { fillSettings(); $('#setModal').hidden = false; tgAuto(); };
 $('#setForm').addEventListener('submit', () => setTimeout(tgState, 0));
 $('#setClose').onclick = () => { $('#setModal').hidden = true; };

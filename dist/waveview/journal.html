@@ -114,7 +114,7 @@ const kday = s => { const d = kd(s); return `${d.getUTCFullYear()}-${two(d.getUT
 const dur = m => m < 60 ? `${Math.round(m)}분` : m < 1440 ? `${Math.floor(m / 60)}시간 ${Math.round(m % 60)}분` : `${Math.floor(m / 1440)}일 ${Math.floor(m % 1440 / 60)}시간`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
-const CFG = get('cfg', {}), BASE = (CFG.mt5url || 'http://127.0.0.1:8765').replace(/\/+$/, '');
+const CFG = get('cfg', {}); let BASE = (CFG.mt5url || 'http://127.0.0.1:18765').replace(/\/+$/, '');
 const api = async p => { const r = await fetch(BASE + p); const j = await r.json(); if (j.error) throw new Error(j.error); return j; };
 
 // ---------- 지표 ----------
@@ -129,8 +129,14 @@ let RAW = null, M = {}, NEWS = [], BK = [], OPEN = [], KPT = 100;
 const F = { per:'month', sym:'', day:'', tab:'trades', open:null };
 const NOTES = get('jnote', {});
 
+async function findBridge(){
+  for (const p of [BASE.replace(/.*:/, ''), 18765, 18766, 18767, 8765]){
+    try { const u = 'http://127.0.0.1:' + p, j = await (await fetch(u + '/')).json(); if (j.service === 'waveview-mt5-bridge'){ BASE = u; return; } } catch {}
+  }
+}
 async function load(){
   $('#st').textContent = '연결 프로그램에서 MT5 거래를 읽는 중…';
+  await findBridge();
   try {
     RAW = await api('/mt5/trades?since=0'); put('jcache', { at:Date.now(), raw:RAW });
   } catch (e){

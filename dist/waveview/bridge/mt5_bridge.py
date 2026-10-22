@@ -37,9 +37,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 19
+VERSION = 20
 DEFAULT_CONFIG = {
-    "port": 8765,
+    "port": 18765,
     "telegram_token": "",
     "telegram_chat_id": "",
     "watch": [],
@@ -1648,21 +1648,31 @@ def already_running(port):
         return False
 
 
+# 8765 는 다른 프로그램(웹 개발 서버 등)이 자주 쓰는 번호라 웨이브뷰 전용 번호를 쓴다. 막혀 있으면 다음 번호로 (웹이 차례로 찾아낸다)
+PORTS = [18765, 18766, 18767]
+
+
 def main():
     load_config()
-    if "--restart" not in sys.argv and already_running(int(cfg["port"])):
+    if int(cfg.get("port", 0)) == 8765:  # 예전 설정 파일
+        cfg["port"] = 18765
+    if "--restart" not in sys.argv and any(already_running(p) for p in PORTS):
         print("이미 켜져 있습니다")
         return
     paper_load()
     # 웨이브뷰와의 연결 문을 먼저 연다 (MT5 가 아직 안 켜져도 웹이 '연결 대기'를 알 수 있고, 5분마다 도는 자동 실행이 중복으로 켜지지 않는다)
-    port = int(cfg["port"])
-    srv = None
+    srv, port = None, None
+    order = [int(cfg["port"])] + [p for p in PORTS if p != int(cfg["port"])]
     for _ in range(30):  # 다시 시작할 때 앞 프로그램이 포트를 놓을 때까지 기다린다
-        try:
-            srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+        for p in order:
+            try:
+                srv, port = ThreadingHTTPServer(("127.0.0.1", p), Handler), p
+                break
+            except OSError:
+                pass
+        if srv:
             break
-        except OSError:
-            time.sleep(2)
+        time.sleep(2)
     if srv is None:
         print("포트를 열지 못했습니다 (이미 켜져 있는 것 같습니다)")
         return
