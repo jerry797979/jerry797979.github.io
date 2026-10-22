@@ -1919,8 +1919,9 @@ async function findBridge(){
   const m = /^http:\/\/(127\.0\.0\.1|localhost):(\d+)$/.exec(S.cfg.mt5url || '');
   if (!m || !BRIDGE_PORTS.includes(+m[2])) return;
   const ok = async u => { try { const c = new AbortController(), t = setTimeout(() => c.abort(), 1500); const j = await (await fetch(u + '/', { signal:c.signal })).json(); clearTimeout(t); return j.service === 'waveview-mt5-bridge'; } catch { return false; } };
-  if (await ok(S.cfg.mt5url)) return;
-  for (const p of BRIDGE_PORTS){ const u = 'http://127.0.0.1:' + p; if (u !== S.cfg.mt5url && await ok(u)){ S.cfg.mt5url = u; store.set('cfg', S.cfg); return; } }
+  S.bridgeFound = false;
+  if (await ok(S.cfg.mt5url)){ S.bridgeFound = true; return; }
+  for (const p of BRIDGE_PORTS){ const u = 'http://127.0.0.1:' + p; if (u !== S.cfg.mt5url && await ok(u)){ S.cfg.mt5url = u; store.set('cfg', S.cfg); S.bridgeFound = true; return; } }
 }
 async function initMT5(){
   clearInterval(S.qtimer); S.qtimer = null; clearTimeout(S.mt5retry); S.mt5ok = false;
@@ -1948,10 +1949,10 @@ async function initMT5(){
     if (!(S.cfg.tg && S.cfg.chat) && !S.tgNudged){ S.tgNudged = true; setTimeout(() => toast('텔레그램 알림', '휴대폰으로 신호를 받으려면 텔레그램을 연결하세요. 2분이면 됩니다.', false, ['텔레그램 연결', () => $('#tgBtn').click()]), 4000); }
     return true;
   } catch (e) {
-    if (!S.mt5warned){
-      S.mt5warned = true;
-      toast('한텍 MT5 연결 대기 중', '한텍 가격으로 보려면 연결 프로그램을 한 번 설치하세요. 그 전까지는 참고 시세로 보여줍니다.', false, ['원클릭 설치', openGuide]);
-    }
+    // 무엇이 막혔는지 구분해서 알려 준다: 연결 프로그램이 없음 / 연결 프로그램은 켜졌는데 MT5 를 못 읽음
+    const why = S.bridgeFound ? `연결 프로그램(${S.cfg.mt5url.replace('http://', '')})은 켜져 있는데 MT5를 읽지 못합니다: ${e.message}. MT5를 켜고 계좌에 로그인해 두면 자동으로 연결됩니다.`
+      : '연결 프로그램이 켜져 있지 않습니다 (127.0.0.1:18765~18767에서 찾지 못함). 설치 파일을 다시 실행하거나, 크롬이 \'로컬 네트워크 접근\'을 물으면 [허용]을 눌러 주세요.';
+    if (S.mt5why !== why){ S.mt5why = why; S.mt5warned = true; toast('한텍 MT5 연결 대기 중', why + ' 그 전까지는 참고 시세로 보여줍니다.', false, ['원클릭 설치', openGuide]); }
     S.mt5retry = setTimeout(async () => { if (await initMT5()) load(); }, 10000);
     return false;
   }
@@ -2038,9 +2039,9 @@ async function load(){
   restoreDrawings(); resetHistory(); seedLowLine();
   if (live && sym.feed === 'mt5'){ setFeed(true, '한텍 MT5 · 실시간'); startMT5Poll(sym, tf, id); }
   else if (live === true && sym.feed === 'td'){ setFeed(true, `실시간 · ${Math.max(15, +S.cfg.poll || 120)}초 갱신`); startTDPoll(sym, tf, id); }
-  else if (live === 'paxg'){ setFeed(true, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 참고 시세(PAXG)' : '실시간 참고 시세(PAXG)'); openSocket(sym, tf, id); }
+  else if (live === 'paxg'){ setFeed(true, S.cfg.mt5 && !S.mt5ok ? (S.bridgeFound ? 'MT5 로그인 대기' : '연결 프로그램 꺼짐') + ' · 참고 시세(PAXG)' : '실시간 참고 시세(PAXG)'); openSocket(sym, tf, id); }
   else if (live){ setFeed(true); openSocket(sym, tf, id); }
-  else { setFeed(false, S.cfg.mt5 && !S.mt5ok ? 'MT5 연결 대기 · 시뮬레이션' : '시뮬레이션'); startSim(); }
+  else { setFeed(false, S.cfg.mt5 && !S.mt5ok ? (S.bridgeFound ? 'MT5 로그인 대기' : '연결 프로그램 꺼짐') + ' · 시뮬레이션' : '시뮬레이션'); startSim(); }
   setTimeout(() => autoOptimize(false), 4000);
 }
 
