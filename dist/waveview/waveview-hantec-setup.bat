@@ -33,7 +33,7 @@ echo  [2/4] MT5 연결 모듈을 설치하는 중입니다...
 
 rem 3) 연결 프로그램 받기
 echo  [3/4] 연결 프로그램을 받는 중입니다...
-curl -L -s -o "%WV%\mt5_bridge.py" "%SITE%/bridge/mt5_bridge.py"
+curl -L -s -H "Cache-Control: no-cache" -o "%WV%\mt5_bridge.py" "%SITE%/bridge/mt5_bridge.py?%RANDOM%%RANDOM%"
 if not exist "%WV%\mt5_bridge.py" (
   echo  연결 프로그램을 받지 못했습니다. 인터넷 연결을 확인하고 다시 실행해 주세요.
   pause & exit /b 1
