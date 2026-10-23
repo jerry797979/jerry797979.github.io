@@ -1286,8 +1286,18 @@ const hm = t => { const d = new Date((t + KST) * 1000); return `${String(d.getUT
 const md = t => { const d = new Date((t + KST) * 1000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${'일월화수목금토'[d.getUTCDay()]}`; };
 function newsTick(){
   const el = $('#newsPill'); if (!el) return;
+  const now = nowSec(), nx = newsEvents(now, now + 7 * 86400).find(e => e.imp >= 3);
+  // 발표 전 알림 (텔레그램 1번 + 가운데 창은 창(탭)마다 1번). 차트에 '경제지표 표시'를 꺼 두어도 알림은 울린다
+  if (nx){
+    const m = Math.ceil((nx.t - now) / 60), k = 'newsTg:' + nx.t;
+    if (m <= P.news.before && m > 0){
+      let seen = false; try { seen = sessionStorage.getItem('wvPop:' + nx.t) === '1'; } catch {}
+      if (!seen){ try { sessionStorage.setItem('wvPop:' + nx.t, '1'); } catch {} showNewsPop(nx.t, nx.ko, nx.fc, nx.pv, P.news.before, P.news.after); }
+      if (!store.get(k)){ store.set(k, 1); newsPop(nx); notify({ sym:'경제지표', name:`⚠ ${m}분 후 ${nx.ko} 발표 (${hm(nx.t)})`, msg:`발표 ${P.news.before}분 전부터 ${P.news.after}분 후까지는 큰 무빙이 나올 수 있어 거래 대기를 권합니다.${nx.fc ? `\n예상 ${nx.fc} · 이전 ${nx.pv}` : ''}`, tg:true, sound:true }); }
+    }
+  }
   if (!S.show.news){ el.hidden = true; return; } el.hidden = false;
-  const now = nowSec(), b = newsBlock(now), nx = newsEvents(now, now + 7 * 86400).find(e => e.imp >= 3);
+  const b = newsBlock(now);
   el.className = 'news';
   if (b){ el.classList.add('block'); el.textContent = `⛔ 거래 대기 · ${b.ko} ${hm(b.t)}`; }
   else if (nx){
@@ -1295,16 +1305,11 @@ function newsTick(){
     if (m <= 120) el.classList.add('soon');
     el.textContent = `📅 ${nx.ko} · ${m >= 1440 ? left : hm(nx.t) + ' (' + left + ')'}`;
   } else el.textContent = '📅 지표 일정 없음';
-  // 발표 전 알림 1번 (텔레그램 + 차트 가운데 창). '거래 대기' 구간에 들어가도 울리도록 알약 표시와 따로 확인한다
-  if (nx){
-    const m = Math.ceil((nx.t - now) / 60), k = 'newsTg:' + nx.t;
-    if (m <= P.news.before && m > 0 && !store.get(k)){ store.set(k, 1); newsPop(nx); notify({ sym:'경제지표', name:`⚠ ${m}분 후 ${nx.ko} 발표 (${hm(nx.t)})`, msg:`발표 ${P.news.before}분 전부터 ${P.news.after}분 후까지는 큰 무빙이 나올 수 있어 거래 대기를 권합니다.${nx.fc ? `\n예상 ${nx.fc} · 이전 ${nx.pv}` : ''}`, tg:true, sound:true }); }
-  }
 }
 // 지표 발표 전 알림: 텔레그램과 같은 때 차트 한가운데 창으로 띄운다 (닫기·Esc·바깥 누르면 닫힘). 열린 거래 기록·트레이더 노트 창에도 같이 뜬다
+// 다른 창(거래 기록·트레이더 노트)에 알림을 띄우라고 알린다. 이 창의 가운데 창은 newsTick 이 띄운다
 function newsPop(ev){
   store.set('newsPop', { t:ev.t, ko:ev.ko, fc:ev.fc || '', pv:ev.pv || '', before:P.news.before, after:P.news.after, at:Date.now() });
-  showNewsPop(ev.t, ev.ko, ev.fc, ev.pv, P.news.before, P.news.after);
 }
 function showNewsPop(t, ko, fc, pv, before, after){
   document.getElementById('newsPopM')?.remove();
