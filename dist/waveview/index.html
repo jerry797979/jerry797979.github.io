@@ -3086,8 +3086,10 @@ function drawPlan(pw){
   if (S.planMemo?.k !== mk) S.planMemo = { k:mk, o:backtest(S.bars, S.ind, st.cfg, Math.max(0, S.bars.length - 400)).open };
   const o = S.planMemo.o; if (!o) return;
   const c = st.cfg, lots = o.legs.reduce((a, x) => a + x.l, 0), avg = o.legs.reduce((a, x) => a + x.p * x.l, 0) / lots, d = o.dir;
-  const lines = [[avg, '#2962ff', `평균가 ${lots.toFixed(2)}랏`, [6, 4]], [avg + d * c.tp, '#22ab94', '익절', []], [avg - d * c.sl, '#f23645', '손절', []]];
-  c.adds.forEach((l, k) => { if (k >= o.k) lines.push([o.first - d * c.gap * (k + 1), '#ff9800', `추가 ${l}랏`, [2, 3]]); });
+  // 실제 주문이 아니라 '전략 테스트로 고른 규칙이면 지금 이렇게 들고 있을 것'이라는 가상선 → 이름에 '가상'과 방향을 꼭 붙인다
+  const side = d > 0 ? '매수' : '매도';
+  const lines = [[avg, '#2962ff', `전략 테스트 가상 ${side} ${lots.toFixed(2)}랏 평균가`, [6, 4]], [avg + d * c.tp, '#22ab94', `가상 ${side} 익절`, []], [avg - d * c.sl, '#f23645', `가상 ${side} 손절`, []]];
+  c.adds.forEach((l, k) => { if (k >= o.k) lines.push([o.first - d * c.gap * (k + 1), '#ff9800', `가상 추가 ${l}랏`, [2, 3]]); });
   for (const [pr, col, name, dash] of lines){
     const y = candle.priceToCoordinate(pr); if (y == null) continue;
     ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(pw, Math.round(y) + .5); ctx.stroke(); ctx.setLineDash([]);
