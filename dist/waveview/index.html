@@ -370,6 +370,11 @@ svg{display:block}
 .lightdlg{--chrome:#ffffff;--text:#131722;--sub:#4a4e59;--border:#d1d4dc;background:#fff!important;color:#131722!important;box-shadow:0 12px 48px rgba(0,0,0,.55)}
 .lightdlg b{color:#131722}
 .lightdlg .btn.sub{background:#f0f3fa;color:#131722;border-color:#d1d4dc}
+.lightdlg .sec{display:grid;gap:3px;border-top:1px solid #e3e6ec;padding-top:12px}
+.lightdlg .lname{font-size:15px;font-weight:700}
+.lightdlg .lsub{font-size:12.5px;color:#6a6e79}
+.lightdlg .easy{background:#f3f6fd;border-radius:8px;padding:10px 12px;font-size:13.5px;line-height:1.65;display:grid;gap:4px}
+.lightdlg .foot{margin-top:6px;padding-top:10px;border-top:1px solid #e3e6ec;font-size:12px;color:#6a6e79;line-height:1.55}
 .lk{background:none;border:0;padding:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;text-align:left}
 .lk:hover{text-decoration:underline}
 .posr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;background:none;border:0;border-radius:6px;padding:6px 4px;color:var(--text);font:inherit;font-size:12.5px;cursor:pointer;text-align:left}
@@ -3773,14 +3778,28 @@ function infoModal(title, html){
 }
 const kvs = rows => `<div class="kvm">${rows.filter(Boolean).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('')}</div>`;
 const rulesHtml = name => `<ol class="rules">${(name || '').split(' · ').map(x => `<li>${x.replace(/^\[(.+?)\]\s*/, '<b>$1</b> ')}</li>`).join('')}</ol>`;
+// 로직 신호를 쉬운 말로 (로직 이름 첫 부분으로 찾는다)
+const SIG_EASY = [
+  [/돌파 더블비 뒤 되돌림/, '돌파 더블비(DB)가 나와 한쪽으로 크게 밀린 뒤, 가격이 반대편 볼린저 1B 근처까지 되돌아오면 처음 DB 방향으로 다시 들어갑니다.<br>· 아래로 DB(↓DB)가 나온 뒤 위쪽 1B 근처까지 반등하면 → <b>매도</b><br>· 위로 DB(↑DB)가 나온 뒤 아래쪽 1B 근처까지 밀리면 → <b>매수</b><br>DB가 나온 뒤 36봉 안에 되돌림이 올 때만 들어가고, 손절은 그 1B 바깥쪽에 둡니다.'],
+  [/장기이평\(120\) 터치/, '20이평이 120이평 위(정배열)일 때 가격이 내려와 120이평에 닿으면 <b>매수</b>, 20이평이 120이평 아래(역배열)일 때 올라와 닿으면 <b>매도</b>합니다.'],
+  [/돌파 더블비 역추세/, '볼린저밴드를 위로 크게 뚫는 DB가 나오면 너무 올랐다고 보고 <b>매도</b>, 아래로 뚫으면 <b>매수</b>합니다.'],
+  [/돌파 더블비 추세/, 'DB가 나온 방향으로 따라 들어갑니다. 위로 뚫으면 <b>매수</b>, 아래로 뚫으면 <b>매도</b>.'],
+  [/골든·데드크로스/, '골든크로스 뒤 1B까지 눌리면 <b>매수</b>, 데드크로스 뒤 1B까지 반등하면 <b>매도</b>합니다.'],
+  [/미장 고점·저점 돌파 따라가기/, '지난 미국장 고점을 뚫으면 <b>매수</b>, 저점을 뚫으면 <b>매도</b>합니다.'],
+  [/미장 고점·저점 돌파 실패/, '지난 미국장 고점을 뚫었다가 다시 내려오면 <b>매도</b>, 저점을 뚫었다가 다시 올라오면 <b>매수</b>합니다.'],
+  [/매물대에서 돌파 더블비 반전/, '지지 매물대에서 아래로 DB가 나오면 <b>매수</b>, 저항 매물대에서 위로 DB가 나오면 <b>매도</b>합니다.'],
+  [/매물대 찍고 반등/, '지지 매물대를 찍고 양봉이 나오면 <b>매수</b>, 저항 매물대를 찍고 음봉이 나오면 <b>매도</b>합니다.'],
+];
+const sigEasy = name => { const f = SIG_EASY.find(([re]) => re.test(name || '')); return f ? `<div class="easy"><b>쉽게 말하면</b><div>${f[1]}</div></div>` : ''; };
 function showAiLogic(){
   const a = S.botAi; if (!a) return;
   const note = a.note || '', i = note.lastIndexOf(' (한 달 환산'), stats = i > 0 ? note.slice(i + 2, -1).split(' · ') : [];
   const tag = a.title || /장기이평\(120\) 터치.*구간 매매/.test(a.pick || '') ? '지킬이 알려 준 매매법' : note.includes('검증 미통과') ? '데이터 수집용 (검증 미통과)' : '검증 통과';
   infoModal('지금 쓰는 로직', `<div style="font-size:16px;font-weight:700">${aiShort(a.pick, note)}</div><div style="color:var(--sub)">${tag}</div>
+    ${sigEasy(a.pick)}
     <div><b>매매 규칙</b>${rulesHtml(a.pick)}</div>
     ${stats.length ? `<div><b>시험 성적</b> <span style="color:var(--sub);font-size:12px">(지난 약 한 달 시세로 돌려 본 결과)</span>${kvs(stats.map(x => { const m = /^(.*\S)\s+(\S+)$/.exec(x); return m ? [m[1], m[2]] : [x, '']; }))}</div>` : ''}
-    <div style="color:var(--sub);font-size:12px;line-height:1.55">웨이브뷰 AI가 연습 계좌($1,000)로 이 규칙대로 24시간 매매합니다. 사장님 MT5 계좌에는 주문을 내지 않습니다.${a.at ? ` · 마지막 연구 ${new Date((a.at + KST) * 1000).toISOString().slice(5, 16).replace('T', ' ')}` : ''}</div>`);
+    <div class="foot">웨이브뷰 AI가 연습 계좌($1,000)로 이 규칙대로 24시간 매매합니다. 사장님 MT5 계좌에는 주문을 내지 않습니다.${a.at ? ` · 마지막 연구 ${new Date((a.at + KST) * 1000).toISOString().slice(5, 16).replace('T', ' ')}` : ''}</div>`);
 }
 function showPos(id){
   const p = PT.pos.find(x => String(x.id) === String(id)); if (!p) return;
@@ -3792,7 +3811,11 @@ function showPos(id){
       z ? ['구간 매매', `${z.step}포인트마다 추가 · ${z.max}포인트까지 · 첫 진입가에서 ${z.stop}포인트 반대로 가면 손절`] : null,
       z ? ['청산', `추가 없으면 ${fmt(z.tp)}에서 익절 · 추가되면 첫 진입가로 돌아올 때 일괄 청산`] : null,
       p.basket ? ['분할 진입', '사장님식 분할 바스켓'] : null, p.news ? ['참고', '경제지표 발표 시간에 들어간 거래'] : null])}
-    ${p.mt5 ? '<div style="color:var(--sub);font-size:12px">MT5에서 읽은 실제 포지션입니다. 청산은 MT5에서 해 주세요.</div>' : `<div><b>이 거래를 낸 로직</b><div style="margin-top:4px">${aiShort(p.logic)}${p.rank ? ` <span style="color:var(--sub)">(${p.rank}등 로직${p.rank > 1 ? ' · 데이터 수집용' : ''})</span>` : ''}</div>${p.logic ? rulesHtml(p.logic) : ''}<div style="color:var(--sub);font-size:12px">웨이브뷰 AI 연습 계좌 거래입니다 (사장님 돈 아님).</div></div>`}`);
+    ${p.mt5 ? '<div class="foot">MT5에서 읽은 실제 포지션입니다. 청산은 MT5에서 해 주세요.</div>' : `<div class="sec"><b>이 주문을 낸 로직</b>
+      <div class="lname">${aiShort(p.logic)}</div>${p.rank ? `<div class="lsub">${p.rank}등 로직${p.rank > 1 ? ' · 데이터 수집용' : ''}</div>` : ''}</div>
+      ${sigEasy(p.logic)}
+      ${p.logic ? `<div><b>규칙</b>${rulesHtml(p.logic)}</div>` : ''}
+      <div class="foot">웨이브뷰 AI 연습 계좌 거래입니다 (사장님 돈 아님).</div>`}`);
 }
 $('#cinfo').addEventListener('click', e => { const a = e.target.closest('[data-ai]'), b = e.target.closest('[data-pos]'); if (a) showAiLogic(); else if (b) showPos(b.dataset.pos); });
 $('#stOpen').addEventListener('click', () => openStats());
