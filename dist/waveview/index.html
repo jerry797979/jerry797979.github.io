@@ -366,6 +366,11 @@ svg{display:block}
 .strip{grid-area:strip;background:var(--chrome);display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 
 /* 설정 창 */
+/* 가운데 창(로직·포지션·지표 알림)은 어두운 차트 위에서 잘 보이게 흰 바탕 · 진한 글씨 */
+.lightdlg{--chrome:#ffffff;--text:#131722;--sub:#4a4e59;--border:#d1d4dc;background:#fff!important;color:#131722!important;box-shadow:0 12px 48px rgba(0,0,0,.55)}
+.lightdlg b{color:#131722}
+.lightdlg .btn.sub{background:#f0f3fa;color:#131722;border-color:#d1d4dc}
+.lightdlg .rules li::marker{color:#2962ff;font-weight:700}
 .lk{background:none;border:0;padding:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;text-align:left}
 .lk:hover{text-decoration:underline}
 .posr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;background:none;border:0;border-radius:6px;padding:6px 4px;color:var(--text);font:inherit;font-size:12.5px;cursor:pointer;text-align:left}
@@ -1300,7 +1305,8 @@ function newsPop(ev){
 function showNewsPop(t, ko, fc, pv, before, after){
   document.getElementById('newsPopM')?.remove();
   const m = document.createElement('div'); m.id = 'newsPopM'; m.className = 'modal'; m.style.zIndex = 60;
-  m.innerHTML = `<div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="npT" style="max-width:420px;width:100%;padding:22px 24px;display:grid;gap:12px;border-top:4px solid #f23645;text-align:center">
+  m.style.background = 'rgba(0,0,0,.6)';
+  m.innerHTML = `<div class="dlg lightdlg" role="alertdialog" aria-modal="true" aria-labelledby="npT" style="max-width:420px;width:100%;padding:22px 24px;display:grid;gap:12px;border-top:4px solid #f23645;text-align:center">
     <div id="npT" style="font-size:15px;font-weight:700;color:#f23645">⚠ 중요 경제지표 발표 임박</div>
     <div style="font-size:20px;font-weight:700;line-height:1.4">${ko}</div>
     <div style="font-size:14px;color:var(--sub)">발표 ${hm(t)} (한국 시간)</div>
@@ -3757,7 +3763,8 @@ function aiShort(name, note){
 function infoModal(title, html){
   document.getElementById('infoM')?.remove();
   const m = document.createElement('div'); m.id = 'infoM'; m.className = 'modal'; m.style.zIndex = 55;
-  m.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="imT" style="width:min(560px,100%);padding:20px 22px;display:grid;gap:14px;overflow:auto">
+  m.style.background = 'rgba(0,0,0,.6)';
+  m.innerHTML = `<div class="dlg lightdlg" role="dialog" aria-modal="true" aria-labelledby="imT" style="width:min(560px,100%);padding:20px 22px;display:grid;gap:14px;overflow:auto">
     <div style="display:flex;align-items:center;gap:10px"><b id="imT" style="font-size:17px;flex:1">${title}</b><button class="btn sub" id="imX">닫기</button></div>${html}</div>`;
   document.body.appendChild(m);
   const close = () => { m.remove(); removeEventListener('keydown', esc); }, esc = e => { if (e.key === 'Escape') close(); };
