@@ -370,7 +370,6 @@ svg{display:block}
 .lightdlg{--chrome:#ffffff;--text:#131722;--sub:#4a4e59;--border:#d1d4dc;background:#fff!important;color:#131722!important;box-shadow:0 12px 48px rgba(0,0,0,.55)}
 .lightdlg b{color:#131722}
 .lightdlg .btn.sub{background:#f0f3fa;color:#131722;border-color:#d1d4dc}
-.lightdlg .rules li::marker{color:#2962ff;font-weight:700}
 .lk{background:none;border:0;padding:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;text-align:left}
 .lk:hover{text-decoration:underline}
 .posr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;background:none;border:0;border-radius:6px;padding:6px 4px;color:var(--text);font:inherit;font-size:12.5px;cursor:pointer;text-align:left}
@@ -3755,9 +3754,11 @@ function renderInfo(){
   const sb = $('#stOpen'), lab = `📊 거래 기록 · 통계 (${PT.hist.length.toLocaleString()}건) ↗`; if (sb.textContent !== lab) sb.textContent = lab;
 }
 setInterval(renderInfo, 1000);
-// 로직 이름 줄이기: 사장님 지정 블로그 매매는 그 이름으로, 나머지는 첫 부분(분봉 + 신호)만
+// 로직 이름 줄이기: 다른 사람이 알려 준 매매법은 그 이름으로, 나머지는 첫 부분(분봉 + 신호)만
+// 다른 사람이 알려 준 매매법은 '그 사람 이름 + 매매법'으로 부른다 (연결 프로그램이 title 로 알려 줌)
 function aiShort(name, note){
-  if ((note || '').includes('사장님 지정') || /장기이평\(120\) 터치.*구간 매매/.test(name || '')) return '블로그 3분봉 장기이평 매매';
+  if (S.botAi && S.botAi.title && (!name || name === S.botAi.pick)) return S.botAi.title;
+  if (/장기이평\(120\) 터치.*구간 매매/.test(name || '')) return '지킬의 3분봉 장기이평 매매';
   return (name || 'AI 판단').split(' · ')[0];
 }
 function infoModal(title, html){
@@ -3775,17 +3776,17 @@ const rulesHtml = name => `<ol class="rules">${(name || '').split(' · ').map(x 
 function showAiLogic(){
   const a = S.botAi; if (!a) return;
   const note = a.note || '', i = note.lastIndexOf(' (한 달 환산'), stats = i > 0 ? note.slice(i + 2, -1).split(' · ') : [];
-  const tag = note.includes('사장님 지정') ? '👑 사장님 지정 규칙' : note.includes('검증 미통과') ? '🧪 데이터 수집용 (검증 미통과)' : '✅ 검증 통과';
-  infoModal('🤖 지금 쓰는 로직', `<div style="font-size:16px;font-weight:700">${aiShort(a.pick, note)}</div><div style="color:var(--sub)">${tag}</div>
+  const tag = a.title || /장기이평\(120\) 터치.*구간 매매/.test(a.pick || '') ? '지킬이 알려 준 매매법' : note.includes('검증 미통과') ? '데이터 수집용 (검증 미통과)' : '검증 통과';
+  infoModal('지금 쓰는 로직', `<div style="font-size:16px;font-weight:700">${aiShort(a.pick, note)}</div><div style="color:var(--sub)">${tag}</div>
     <div><b>매매 규칙</b>${rulesHtml(a.pick)}</div>
-    ${stats.length ? `<div><b>시험 성적</b> <span style="color:var(--sub);font-size:12px">(지난 약 한 달 시세로 돌려 본 결과)</span>${kvs(stats.map(x => { const m = /^(.*?)\s([−+\-]?\$?[\d,.]+%?.*)$/.exec(x); return m ? [m[1], m[2]] : [x, '']; }))}</div>` : ''}
+    ${stats.length ? `<div><b>시험 성적</b> <span style="color:var(--sub);font-size:12px">(지난 약 한 달 시세로 돌려 본 결과)</span>${kvs(stats.map(x => { const m = /^(.*\S)\s+(\S+)$/.exec(x); return m ? [m[1], m[2]] : [x, '']; }))}</div>` : ''}
     <div style="color:var(--sub);font-size:12px;line-height:1.55">웨이브뷰 AI가 연습 계좌($1,000)로 이 규칙대로 24시간 매매합니다. 사장님 MT5 계좌에는 주문을 내지 않습니다.${a.at ? ` · 마지막 연구 ${new Date((a.at + KST) * 1000).toISOString().slice(5, 16).replace('T', ' ')}` : ''}</div>`);
 }
 function showPos(id){
   const p = PT.pos.find(x => String(x.id) === String(id)); if (!p) return;
   const q = S.bars[S.bars.length - 1].close, pl = ptPnl(p), d = p.dir, z = p.zone;
   const pts = ((q - p.open) * d).toFixed(1);
-  infoModal(`${p.mt5 ? '🧑 사장님 MT5 포지션' : '🤖 웨이브뷰 AI 포지션'}`, `<div style="display:flex;align-items:center;gap:10px"><span class="pd ${d > 0 ? 'b' : 's'}" style="font-size:15px;padding:4px 12px">${d > 0 ? '매수 BUY' : '매도 SELL'}</span><b style="font-size:20px;color:${pl >= 0 ? '#22ab94' : '#f23645'}">${money(pl)}</b><span style="color:var(--sub)">(${pts >= 0 ? '+' : ''}${pts}포인트)</span></div>
+  infoModal(`${p.mt5 ? '사장님 MT5 포지션' : '웨이브뷰 AI 포지션'}`, `<div style="display:flex;align-items:center;gap:10px"><span class="pd ${d > 0 ? 'b' : 's'}" style="font-size:15px;padding:4px 12px">${d > 0 ? '매수 BUY' : '매도 SELL'}</span><b style="font-size:20px;color:${pl >= 0 ? '#22ab94' : '#f23645'}">${money(pl)}</b><span style="color:var(--sub)">(${pts >= 0 ? '+' : ''}${pts}포인트)</span></div>
     ${kvs([['종목', p.sym], ['랏', p.lots + '랏'], ['진입가', fmt(p.open)], ['현재가', fmt(q)], ['진입 시각', new Date(p.time + KST * 1000).toISOString().slice(5, 16).replace('T', ' ') + ' (한국)'],
       p.sl != null ? ['손절가', fmt(p.sl)] : null, p.tp != null ? ['익절가', fmt(p.tp)] : null,
       z ? ['구간 매매', `${z.step}포인트마다 추가 · ${z.max}포인트까지 · 첫 진입가에서 ${z.stop}포인트 반대로 가면 손절`] : null,

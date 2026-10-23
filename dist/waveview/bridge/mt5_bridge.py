@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 20
+VERSION = 21
 DEFAULT_CONFIG = {
     "port": 18765,
     "telegram_token": "",
@@ -193,6 +193,7 @@ class Handler(BaseHTTPRequestHandler):
                     st = dict(paper)
                     st["hist"] = [h for h in paper.get("hist", []) if h.get("ctime", 0) > int(q.get("since", 0))][:1000]
                     st["ai"] = {"note": ai["note"], "at": ai["at"], "pick": ai["pick"]["name"] if ai["pick"] else None,
+                                "title": BLOG_TITLE if ai["pick"] and ai["pick"].get("boss") else None,
                                 "board": [{"name": x["name"], "ok": x["ok"], **{k: round(v, 2) for k, v in x["full"].items()}} for x in ai["board"]],
                                 "top": (ai.get("lab") or {}).get("top", []), "gen": (ai.get("lab") or {}).get("gen", 0)}
                 return self._send(200, {"ok": True, **st})
@@ -993,6 +994,8 @@ def ai_mk(**e):
 
 
 BLOG_RULE = None  # ai_mk 정의 뒤에 채운다
+# 다른 사람이 알려 준 매매법은 '그 사람 이름 + 매매법'으로 부른다 (사장님이 알려 주는 이름을 쓴다)
+BLOG_TITLE = "지킬의 3분봉 장기이평 매매"
 
 
 def ai_experts():
@@ -1342,7 +1345,7 @@ def ai_learn(sym):
             picks = (picks[:2] + [zb]) if len(picks) >= 3 else picks + [zb]
     ai["picks"] = picks
     ai.update(at=time.time(), pick=pick, board=board[:5], lab=lab,
-              note=(f"지금 쓰는 로직{' (사장님 지정 · 블로그 3분봉 장기이평 매매)' if pick.get('boss') else '' if pick['ok'] else ' (검증 미통과 · 데이터 수집용)'}: {pick['name']} (한 달 환산 {usd(pick.get('mon', 0))} · 학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
+              note=(f"지금 쓰는 로직{f' ({BLOG_TITLE})' if pick.get('boss') else '' if pick['ok'] else ' (검증 미통과 · 데이터 수집용)'}: {pick['name']} (한 달 환산 {usd(pick.get('mon', 0))} · 학습 기간 {pick['full']['n']}번 · 승률 {pick['full']['win']:.0f}% · 손익비 {pick['full']['pf']:.2f} · 최근 3일 검증 {usd(pick['rec']['net'])})"
                     if pick else "요즘 장에 잘 맞는 로직이 없어 쉬는 중"))
     # 1시간 보고 (장이 열려 있을 때만: 마지막 봉이 30분 안)
     if bars and time.time() - bars[-1]["t"] < 3600:
@@ -1448,7 +1451,7 @@ def ai_signal(q):
             if r == 0:
                 legs = zm // zs
                 worst = sum((zx - k * zs) * (k + 1 if e.get("zlot") == "up" else 1) for k in range(legs + 1)) * v
-                p_log(f"{side_ko(d)} 진입 · 0.01랏 · 장기이평 구간 매매",
+                p_log(f"{side_ko(d)} 진입 · 0.01랏 · {BLOG_TITLE if e.get('boss') else '장기이평 구간 매매'}",
                       f"종목: {p['sym']}\n진입가: {p['open']:,.2f}\n"
                       f"익절: {z['tp']:,.2f} ({'전고·전저' if hl is not None else f'+{tpp}포인트'}, 추가가 없을 때)\n"
                       f"구간 추가: {zs}포인트마다 {'0.02·0.03·0.04랏으로 늘려서' if e.get('zlot') == 'up' else '0.01랏'} ({p['open'] - d * zs * v:,.2f}부터 {p['open'] - d * zm * v:,.2f}까지 최대 {legs}번)\n"
@@ -1459,7 +1462,7 @@ def ai_signal(q):
                       f"손절: {p['open'] - d * zx * v:,.2f} ({zx}포인트 · 다 추가된 뒤 손절되면 약 −${worst:,.0f})\n"
                       f"시각: {k_now()} (한국){' · ⚠ 경제지표 발표 시간' if nb else ''}\n\n"
                       f"이유: {e['name']}\n학습 기간 성적: {e['full']['n']}번 · 승률 {e['full']['win']:.0f}% · 손익비 {e['full']['pf']:.2f}"
-                      + ("\n(사장님 지정 규칙 · 블로그 3분봉 장기이평 매매)" if e.get("boss") else "" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
+                      + (f"\n({BLOG_TITLE})" if e.get("boss") else "" if e.get("ok", True) else "\n(검증 미통과 로직 · 연습 계좌 데이터 수집용)"))
             continue
         if e.get("mode") == "basket":
             bk = {k: e[k] for k in ("a1", "a2", "l2", "btp", "bbe", "bstop")}
