@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(HERE, "mt5_bridge.json")
 PAPER_FILE = os.path.join(HERE, "paper_bot.json")
 SITE = "https://jerry797979.github.io/waveview"
-VERSION = 21
+VERSION = 22
 DEFAULT_CONFIG = {
     "port": 18765,
     "telegram_token": "",
@@ -406,7 +406,7 @@ def p_quote():
         return None
     with lock:
         t = mt5.symbol_info_tick(sym)
-    return {"sym": sym, "bid": t.bid, "ask": t.ask} if t and t.bid else None
+    return {"sym": sym, "bid": t.bid, "ask": t.ask, "t": t.time - server_offset} if t and t.bid else None
 
 
 def p_pnl(p, q):
@@ -1336,8 +1336,8 @@ def ai_learn(sym):
             bk = ai_key(BLOG_RULE)
             bx = next((x for x in board if ai_key(x) == bk), None)
             if bx:
-                changed = changed or (pick["name"] if pick else None) != bx["name"]
                 pick = bx = {**bx, "boss": True}
+                changed = bx["name"] != prev  # 실제로 쓰는 로직이 바뀌었을 때만 바꿈 알림
                 picks = [bx] + [y for y in picks if ai_key(y) != bk][:2]
         # 블로그 3분봉 장기이평 구간 매매는 성적과 상관없이 한 자리를 늘 줘서 실제 시세 기록을 모은다 (한 달 뒤 판단)
         zb = next((x for x in board if x.get("mode") == "zone" and x["sig"] == "lmt" and not x["benched"]), None)
@@ -1521,8 +1521,20 @@ def ai_learn_bg(sym):
         ai["busy"] = False
 
 
+def market_closed(q=None):
+    """금 시장 쉬는 때: 한국 시간 토요일 06:00 ~ 월요일 06:00 (사장님 기준), 또는 호가가 20분 넘게 멈춤(휴장·점검)."""
+    k = datetime.now(KST)
+    wd, h = k.isoweekday(), k.hour  # 월=1 … 일=7
+    if (wd == 6 and h >= 6) or wd == 7 or (wd == 1 and h < 6):
+        return True
+    t = (q or {}).get("t")
+    return bool(t) and time.time() - t > 1200
+
+
 def p_signals(q):
     c = paper["cfg"]
+    if market_closed(q):
+        return  # 장이 쉬는 동안은 연구·진입·알림을 하지 않는다 (월요일 06:00 에 다시 시작)
     if paper["auto"].get("ai", True):
         ai["spread"] = ai.get("spread", 0.2) * 0.98 + max(0.0, q["ask"] - q["bid"]) * 0.02  # 실제 호가 차이 평균
         if time.time() - ai["at"] > 3600 and not ai.get("busy"):
